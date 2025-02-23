@@ -1,5 +1,5 @@
 name: "Build binaries"
-on: ["push", "pull_request"]
+on: [ "push", "pull_request" ]
 env:
   OTP_GITHUB_URL: https://github.com/erlang/otp.git
   OTP_VERSION: OTP-24.3.4.15
@@ -24,7 +24,7 @@ jobs:
       with:
         path: "c:\\opt\\otp.exe"
         key: win32-wxwidgets-${{ env.WXWIDGETS_VERSION }}-otp-${{ env.OTP_VERSION }}
-  
+
     - uses: Vampire/setup-wsl@v2
       if: steps.win32-cache.outputs.cache-hit != 'true'
       with:
@@ -40,7 +40,7 @@ jobs:
       run: |
         choco install openssl --version=1.1.1.2100
         IF EXIST "c:\\Program Files\\OpenSSL-Win64" (move "c:\\Program Files\\OpenSSL-Win64" "c:\\OpenSSL-Win64") ELSE (move "c:\\Program Files\\OpenSSL" "c:\\OpenSSL-Win64")
- 
+
     - name: Download wxWidgets
       if: steps.win32-cache.outputs.cache-hit != 'true'
       run: |
@@ -97,7 +97,7 @@ jobs:
       with:
         path: "c:\\opt\\otp.exe"
         key: win32-wxwidgets-${{ env.WXWIDGETS_VERSION }}-otp-${{ env.OTP_VERSION }}
-  
+
     - name: Run Erlang installer
       shell: cmd
       run: C:\\opt\\otp.exe /S
@@ -105,9 +105,9 @@ jobs:
     - name: "Install msys2"
       uses: msys2/setup-msys2@v2
       with:
-          install: pacman-mirrors pkg-config base-devel mingw-w64-x86_64-toolchain mingw-w64-x86_64-go upx mingw-w64-x86_64-dlfcn unzip git tar mingw-w64-x86_64-nodejs mingw-w64-x86_64-imagemagick mingw-w64-x86_64-osslsigncode autoconf automake libtool gettext-devel gettext
-          update: false
-          release: false
+        install: pacman-mirrors pkg-config base-devel mingw-w64-x86_64-toolchain mingw-w64-x86_64-go upx mingw-w64-x86_64-dlfcn unzip git tar mingw-w64-x86_64-nodejs mingw-w64-x86_64-imagemagick mingw-w64-x86_64-osslsigncode autoconf automake libtool gettext-devel gettext
+        update: false
+        release: false
 
     - name: Locate Erlang
       shell: msys2 {0}
@@ -120,7 +120,7 @@ jobs:
       shell: msys2 {0}
       run: |
         echo export PATH=\"\$PATH:/c/Program\ Files\ \(x86\)/NSIS\" >> $HOME/.bashrc
-    
+
     - name: Install Elixir
       shell: msys2 {0}
       run: |
@@ -130,7 +130,7 @@ jobs:
         git checkout v${{ env.ELIXIR_VERSION }}
         make 
         echo export PATH=\"\$PATH:$HOME/elixir/bin\" >> $HOME/.bashrc
-    
+
     - uses: actions/checkout@v1
 
     - name: "Get dependencies"
@@ -148,7 +148,7 @@ jobs:
     - name: "Build Release"
       env:
         MAKE: make
-        REBAR_TARGET_ARCH_WORDSIZE: 64 
+        REBAR_TARGET_ARCH_WORDSIZE: 64
         REBAR_TARGET_ARCH: x86_64-w64-mingw32
         WIN32_KEY_PASS: ${{ secrets.WIN32_KEY_PASS }}
       shell: msys2 {0}
@@ -164,7 +164,8 @@ jobs:
           _build/prod/*.exe
 
   macos:
-    runs-on: macos-11
+    runs-on: macos-14
+    #macos-11
     steps:
     - name: macOS Cache
       uses: actions/cache@v3
@@ -172,12 +173,12 @@ jobs:
       with:
         path: /Users/runner/.asdf
         key: macos-wxwidgets-${{ env.WXWIDGETS_VERSION }}-otp-${{ env.OTP_VERSION }}
-      
+
     - name: "Install brew deps"
       if: steps.macos-cache.outputs.cache-hit != 'true'
       run: |
-            brew install binutils coreutils wget automake autoconf libtool
-  
+        brew install binutils coreutils wget automake autoconf libtool
+
     - name: "Installing wxWidgets"
       if: steps.macos-cache.outputs.cache-hit != 'true'
       run: |
@@ -235,7 +236,7 @@ jobs:
           _build/prod/*.dmg
 
   linux-x86:
-    permissions: write-all    
+    permissions: write-all
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v1
@@ -243,7 +244,7 @@ jobs:
       id: docker
       with:
         username: ${{ github.actor }}
-        password: "${{ secrets.GITHUB_TOKEN }}"  # you don't need to manually set this secret. GitHub does it on your behalf
+        password: "${{ secrets.GITHUB_TOKEN }}" # you don't need to manually set this secret. GitHub does it on your behalf
         registry: docker.pkg.github.com
         image_name: linux_installer
         dockerfile: scripts/Dockerfile
@@ -271,5 +272,3 @@ jobs:
         name: Linux-Installer
         path: |
           ./*.run
-
-  
