@@ -92,6 +92,12 @@ defmodule Todo.MixProject do
       {:gettext, "~> 0.23"},
       {:plug_cowboy, "~> 2.6"},
       {:jason, "~> 1.4"},
+      
+      {:rustler_btleplug, "~> 0.0.6-alpha"},
+      #{:rustler_btleplug,
+      #      path: "/Users/adrianibanez/Documents/projects/2024_sensor-platform/checkouts/rustler_btleplug",
+      #      },
+      {:rustler, "~> 0.36.1", optional: true},
 
       # Assets
       {:esbuild, "~> 0.8", runtime: Mix.env() == :dev},
