@@ -62,8 +62,17 @@ jobs:
             ${{ matrix.generic_platform }}-deps-
 
 
-      - name: "Install asdf"
-        uses: asdf-vm/actions/install@v3
+      - name: Setup asdf
+        uses: asdf-vm/actions/setup@v1
+
+      # - name: Cache asdf
+      #   uses: actions/cache@v2
+      #   with:
+      #     path: |
+      #       /home/runner/.asdf
+      #     key: ${{ runner.os }}-asdf-${{ hashFiles('**/.tool-versions') }}
+      #     restore-keys: |
+      #       ${{ runner.os }}-asdf-
 
       - name: "Prepare asdf"
         run: |
@@ -71,21 +80,23 @@ jobs:
           echo "elixir ${{ env.ELIXIR_VERSION }}${{ env.ELIXIR_VARIANT }}" >> .tool-versions
           echo "nodejs v18.7.0" >> .tool-versions
 
-      - name: macOS Install build tools
+      - name: "macOS erlang build opts"
         if: matrix.generic_platform == 'macos'
         shell: bash
         run: |
-          echo 'eval "$(asdf env)"' >> ~/.profile
-          source ~/.profile
-          . $HOME/.asdf/asdf.sh
+          # echo 'eval "$(asdf env)"' >> ~/.profile
+          # source ~/.profile
+          # . $HOME/.asdf/asdf.sh
           export KERL_CONFIGURE_OPTIONS="--enable-parallel-configure --with-wxdir=`echo ~/projects/wxWidgets` --disable-jit --without-javac --disable-debug CXX='gcc -std=c++11'"
-          asdf install
+
+      - name: "Install dependencies in .tool-versions"
+        uses: asdf-vm/actions/install@v1
       
-      - name: Install build tools
-        if: matrix.generic_platform != 'macos'
-        shell: bash
-        run: |
-          asdf install
+      # - name: Install build tools
+      #   if: matrix.generic_platform != 'macos'
+      #   shell: bash
+      #   run: |
+      #     asdf install
 
       - name: "Compile and lint"
         shell: bash
