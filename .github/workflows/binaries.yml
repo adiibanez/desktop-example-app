@@ -226,6 +226,8 @@ jobs:
     - name: "Compile and Lint"
       run: |
         . $HOME/.asdf/asdf.sh
+        # why?
+        asdf install
         mix local.hex --force
         mix local.rebar --force
         mix deps.get
