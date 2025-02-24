@@ -15,22 +15,15 @@ jobs:
     timeout-minutes: 90
     
     strategy:
-      fail-fast: true
+      fail-fast: false
       matrix:
         otp_version: [OTP-24.3.4.14]
         elixir:
           - { version: 1.16.3, variant: "-otp-24" }
         # https://github.com/actions/runner-images
-        platform: [ windows-2022] # ubuntu-latest,macos-14,
-        include:
-          #- platform: ubuntu-latest
-          #  generic_platform: linux-x86
-          #- platform: macos-14
-          #  generic_platform: macos
-          - platform: windows-2022
-            generic_platform: windows
+        platform: [ windows-2022, ubuntu-latest] # ubuntu-latest,macos-14,
 
-    name: Build Erlang/OTP ( ${{ matrix.generic_platform }} )
+    name: Build Erlang/OTP ( ${{ matrix.platform }} )
     env:
       OTP_VERSION: ${{ matrix.otp_version }}
       ELIXIR_VERSION: ${{ matrix.elixir.version }}
@@ -41,12 +34,12 @@ jobs:
 
       - name: Set platform output
         id: set-platform
-        run: echo "::set-output name=PLATFORM::${{ matrix.generic_platform }}"
+        run: echo "::set-output name=PLATFORM::${{ matrix.platform }}"
 
       - name: ASDF Cache Key
         id: asdf-cache-key
         shell: bash
-        run: echo "::set-output name=key::asdf-${{ matrix.generic_platform }}-${{ env.OTP_VERSION }}-${{ env.ELIXIR_VERSION }}-$(sha256sum ~/.asdf | awk '{print $1}')"
+        run: echo "::set-output name=key::asdf-${{ matrix.platform }}-${{ env.OTP_VERSION }}-${{ env.ELIXIR_VERSION }}-$(sha256sum ~/.asdf | awk '{print $1}')"
 
       - name: Print ASDF Cache Key
         run: |
@@ -84,12 +77,12 @@ jobs:
           key: ${{ steps.cache-name.outputs.cache_name }}
           restore-keys: |
             ${{ matrix.platform }}-deps-${{ env.WXWIDGETS_VERSION }}-otp-${{ env.OTP_VERSION }}-      
-            ${{ matrix.generic_platform }}-deps-${{ env.WXWIDGETS_VERSION }}-
-            ${{ matrix.generic_platform }}-deps-
+            ${{ matrix.platform }}-deps-${{ env.WXWIDGETS_VERSION }}-
+            ${{ matrix.platform }}-deps-
 
 
       # - name: Install ASDF (Linux)
-      #   if: matrix.generic_platform == 'linux-x86' && steps.asdf-cache-restore.outputs.cache-hit != 'true'
+      #   if: matrix.platform == 'linux-x86' && steps.asdf-cache-restore.outputs.cache-hit != 'true'
       #   shell: bash
       #   run: |
       #     sudo apt-get update
@@ -102,7 +95,7 @@ jobs:
       #     asdf --version
 
       # - name: Install ASDF (macOS)
-      #   if: matrix.generic_platform == 'macos' && steps.asdf-cache-restore.outputs.cache-hit != 'true'
+      #   if: matrix.platform == 'macos' && steps.asdf-cache-restore.outputs.cache-hit != 'true'
       #   shell: bash
       #   run: |
       #     brew install coreutils automake autoconf libtool git asdf
@@ -117,7 +110,7 @@ jobs:
       #     asdf --version
 
       # - name: Install ASDF (Windows)
-      #   if: matrix.generic_platform == 'windows' && steps.asdf-cache-restore.outputs.cache-hit != 'true'
+      #   if: matrix.platform == 'windows' && steps.asdf-cache-restore.outputs.cache-hit != 'true'
       #   shell: bash
       #   run: |
       #     # Assumes WSL is configured
@@ -131,7 +124,7 @@ jobs:
       #     asdf --version
 
       # - name: "Installing Erlang"
-      #   if: matrix.generic_platform == 'macos'
+      #   if: matrix.platform == 'macos'
       #   run: |
       #     export KERL_CONFIGURE_OPTIONS="--enable-parallel-configure --with-wxdir=`echo ~/projects/wxWidgets` --disable-jit --without-javac --disable-debug CXX='gcc -std=c++11'"
 
@@ -164,7 +157,7 @@ jobs:
       #     elixir-variant: ${{ env.ELIXIR_VARIANT }}
 
       - name: Windows Build Steps
-        if: matrix.generic_platform == 'windows'
+        if: matrix.platform == 'windows'
         uses: ./.github/actions/windows
         with:
           cache-hit: ${{ steps.deps-cache.outputs.cache-hit }}
@@ -176,7 +169,7 @@ jobs:
           win32-key-pass: ${{ secrets.WIN32_KEY_PASS }}
 
       - name: macOS Build Steps
-        if: matrix.generic_platform == 'macos'
+        if: matrix.platform == 'macos'
         uses: ./.github/actions/macos
         with:
           cache-hit: ${{ steps.deps-cache.outputs.cache-hit }}
@@ -188,7 +181,7 @@ jobs:
           macos-pem: ${{ secrets.MACOS_PEM }}
 
       - name: Linux Build Steps
-        if: matrix.generic_platform == 'linux-x86'
+        if: matrix.platform == 'linux-x86'
         uses: ./.github/actions/linux
         with:
           cache-hit: ${{ steps.deps-cache.outputs.cache-hit }}
@@ -201,15 +194,15 @@ jobs:
           github-actor: ${{ github.actor }}
 
       - name: Archive Installer
-        if: matrix.generic_platform != 'linux-x86'
+        if: matrix.platform != 'linux-x86'
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.generic_platform }}-Installer
+          name: ${{ matrix.platform }}-Installer
           path: |
-            _build/prod/*.${{ matrix.generic_platform == 'windows' && 'exe' || 'dmg' }}
+            _build/prod/*.${{ matrix.platform == 'windows' && 'exe' || 'dmg' }}
 
       - name: Archive Installer Linux
-        if: matrix.generic_platform == 'linux-x86'
+        if: matrix.platform == 'linux-x86'
         uses: actions/upload-artifact@v4
         with:
           name: Linux-Installer

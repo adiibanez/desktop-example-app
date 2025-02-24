@@ -48,7 +48,7 @@ runs:
     with:
       update: true
       #install: g++-mingw-w64-x86_64 gcc-mingw-w64-x86_64 make autoconf unzip
-      install: mingw-w64-x86_64-gcc mingw-w64-x86_64-make unzip
+      install: mingw-w64-x86_64-gcc mingw-w64-x86_64-make autotools unzip
       # mingw-w64-x86_64-autoconf
       platform: mingw64
 
