@@ -239,6 +239,17 @@ jobs:
     permissions: write-all
     runs-on: ubuntu-latest
     steps:
+
+    - name: Install Erlang Build Dependencies
+      if: runner.os == 'Linux'
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          openjdk-11-jdk \
+          xsltproc \
+          fop \
+          libxml2-utils
+
     - uses: actions/checkout@v1
     - uses: whoan/docker-build-with-cache-action@master
       id: docker
