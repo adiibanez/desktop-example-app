@@ -32,7 +32,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4 
-      - uses: asdf-vm/actions/install@v3
 
       - name: Set platform output
         id: set-platform
@@ -61,6 +60,10 @@ jobs:
             ${{ matrix.generic_platform }}-deps-${{ env.WXWIDGETS_VERSION }}-otp-${{ env.OTP_VERSION }}-
             ${{ matrix.generic_platform }}-deps-${{ env.WXWIDGETS_VERSION }}-
             ${{ matrix.generic_platform }}-deps-
+
+
+      - name: "Install asdf"
+        uses: asdf-vm/actions/install@v3
 
       - name: "Prepare asdf"
         run: |
