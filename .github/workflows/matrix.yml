@@ -96,7 +96,6 @@ jobs:
           source ~/.profile
 
           asdf --version
-          asdf list all elixir
           asdf plugin list all
 
       - name: Install ASDF (macOS)
@@ -112,7 +111,6 @@ jobs:
           source  ~/.profile
 
           asdf --version
-          asdf list all elixir
           asdf plugin list all
 
       - name: Install ASDF (Windows)
@@ -128,7 +126,6 @@ jobs:
           source ~/.profile
 
           asdf --version
-          asdf list all elixir
           asdf plugin list all
 
       - name: Set up build tools
