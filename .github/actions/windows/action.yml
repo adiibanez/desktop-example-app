@@ -42,7 +42,8 @@ runs:
     uses: msys2/setup-msys2@v2
     with:
       update: true
-      install: g++-mingw-w64-x86_64 gcc-mingw-w64-x86_64 make autoconf unzip
+      #install: g++-mingw-w64-x86_64 gcc-mingw-w64-x86_64 make autoconf unzip
+      install: mingw-w64-x86_64-gcc mingw-w64-x86_64-make mingw-w64-x86_64-autoconf unzip
       platform: mingw64
 
   - name: Install openssl (Windows)
