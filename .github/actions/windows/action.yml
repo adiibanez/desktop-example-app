@@ -91,7 +91,6 @@ runs:
     if: steps.wxwidgets-source-cache.outputs.cache-hit != 'true'
     shell: bash
     id: download-wx
-    if: steps.wxwidgets-source.outputs.cache-hit != 'true'
     run: |
       git clone ${{ inputs.wxwidgets-repo }} --branch v3.2.4-with-msvs2012-fix
       cd wxWidgets
@@ -120,7 +119,6 @@ runs:
   - name: Install WebView2 (Windows)
     shell: cmd
     if: steps.wxwidgets-source-cache.outputs.cache-hit != 'true'
-    if: steps.wxWidgets-cache.outputs.cache-hit != 'true'
     id: install-webview2
     if: ${{ inputs.cache-hit != 'true' }}
     run: |
