@@ -20,13 +20,13 @@ jobs:
         otp_version: [OTP-24.3.4.14]
         elixir:
           - { version: 1.16.3, variant: "-otp-24" }
-        platform: [ubuntu-latest, macos-14, windows-latest]
+        platform: [ubuntu-latest, macos-14, windows-2022]
         include:
           - platform: ubuntu-latest
             generic_platform: linux-x86
           - platform: macos-14
             generic_platform: macos
-          - platform: windows-latest
+          - platform: windows-2022
             generic_platform: windows
 
     name: Build Erlang/OTP ( ${{ matrix.generic_platform }} )
