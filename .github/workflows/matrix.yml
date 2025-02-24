@@ -54,17 +54,27 @@ jobs:
             assets/node_modules
             ${{ steps.set-platform.outputs.PLATFORM == 'windows' && 'c:\\opt\\otp.exe' || '' }}
             ${{ steps.set-platform.outputs.PLATFORM == 'windows' && 'c:\\opt\\local64\\pgm\\wxWidgets-3.x.x' || '' }}
-            ${{ steps.set-platform.outputs.PLATFORM == 'macos' && '~/.asdf' || '' }}
-            ${{ steps.set-platform.outputs.PLATFORM == 'macos' && '~/projects/wxWidgets' || '' }}
-            ${{ steps.set-platform.outputs.PLATFORM == 'macos' && '/usr/local/wxWidgets' || '' }}
           key: ${{ steps.cache-name.outputs.cache_name }}
           restore-keys: |
             ${{ matrix.generic_platform }}-deps-${{ env.WXWIDGETS_VERSION }}-otp-${{ env.OTP_VERSION }}-
             ${{ matrix.generic_platform }}-deps-${{ env.WXWIDGETS_VERSION }}-
             ${{ matrix.generic_platform }}-deps-
 
-      - name: Set up ASDF (Linux)
-        if: matrix.generic_platform == 'linux-x86'
+      - name: ASDF Cache Key
+        id: asdf-cache-key
+        shell: bash
+        run: |
+          echo "::set-output name=key::asdf-${{ matrix.generic_platform }}-${{ env.OTP_VERSION }}-${{ env.ELIXIR_VERSION }}-${{ hashFiles('~/.asdf') }}"
+
+      - name: Restore ASDF Cache
+        id: asdf-cache-restore
+        uses: actions/cache/restore@v3
+        with:
+          path: ~/.asdf
+          key: ${{ steps.asdf-cache-key.outputs.key }}
+
+      - name: Install ASDF (Linux)
+        if: matrix.generic_platform == 'linux-x86' && steps.asdf-cache-restore.outputs.cache-hit != 'true'
         shell: bash
         run: |
           sudo apt-get update
@@ -73,19 +83,19 @@ jobs:
           echo ". $HOME/.asdf/asdf.sh" >> ~/.profile
           source ~/.profile
 
-      - name: Set up ASDF (macOS)
-        if: matrix.generic_platform == 'macos'
+      - name: Install ASDF (macOS)
+        if: matrix.generic_platform == 'macos' && steps.asdf-cache-restore.outputs.cache-hit != 'true'
         shell: bash
         run: |
-          brew install binutils coreutils wget automake autoconf libtool
-          echo 'export PATH="/opt/homebrew/opt/libtool/libexec/gnubin:$PATH"' >> ~/.profile # Fix Brew prefix issue!
-          export PATH="/opt/homebrew/opt/libtool/libexec/gnubin:$PATH"  # For current session
+          brew install coreutils automake autoconf libtool
+          echo 'export PATH="/opt/homebrew/opt/libtool/libexec/gnubin:$PATH"' >> ~/.profile
+          export PATH="/opt/homebrew/opt/libtool/libexec/gnubin:$PATH" # For current session
           git clone https://github.com/asdf-vm/asdf.git ~/.asdf --branch v0.8.1
           echo ". $HOME/.asdf/asdf.sh" >> ~/.profile
           source ~/.profile
 
-      - name: Set up ASDF (Windows)
-        if: matrix.generic_platform == 'windows'
+      - name: Install ASDF (Windows)
+        if: matrix.generic_platform == 'windows' && steps.asdf-cache-restore.outputs.cache-hit != 'true'
         shell: bash
         run: |
           # Assumes WSL is configured
@@ -95,7 +105,7 @@ jobs:
           echo ". $HOME/.asdf/asdf.sh" >> ~/.profile
           source ~/.profile
 
-      - name: Install ASDF Build Tools
+      - name: Set up build tools
         shell: bash
         run: |
           . $HOME/.asdf/asdf.sh
@@ -183,7 +193,10 @@ jobs:
             assets/node_modules
             ${{ steps.set-platform.outputs.PLATFORM == 'windows' && 'c:\\opt\\otp.exe' || '' }}
             ${{ steps.set-platform.outputs.PLATFORM == 'windows' && 'c:\\opt\\local64\\pgm\\wxWidgets-3.x.x' || '' }}
-            ${{ steps.set-platform.outputs.PLATFORM == 'macos' && '~/.asdf' || '' }}
-            ${{ steps.set-platform.outputs.PLATFORM == 'macos' && '~/projects/wxWidgets' || '' }}
-            ${{ steps.set-platform.outputs.PLATFORM == 'macos' && '/usr/local/wxWidgets' || '' }}
-          key: ${{ steps.cache-name.outputs.cache_name }}
+        key: ${{ steps.cache-name.outputs.cache_name }}
+
+      - name: Save ASDF cache
+        uses: actions/cache/save@v3
+        with:
+          path: ~/.asdf
+          key: ${{ steps.asdf-cache-key.outputs.key }}
