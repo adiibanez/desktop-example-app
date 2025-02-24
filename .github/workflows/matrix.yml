@@ -92,7 +92,7 @@ jobs:
           sudo apt-get install -y git curl
           git clone https://github.com/asdf-vm/asdf.git ~/.asdf
           # --branch v0.8.1
-          cho ". $HOME/.asdf/asdf.sh" >> ~/.profile
+          echo ". $HOME/.asdf/asdf.sh" >> ~/.profile
           source ~/.profile
 
           asdf --version
@@ -108,8 +108,8 @@ jobs:
           #export PATH="/opt/homebrew/opt/libtool/libexec/gnubin:$PATH" # For current session
           #git clone https://github.com/asdf-vm/asdf.git ~/.asdf
           # --branch v0.8.1
-          #echo ". $HOME/.asdf/asdf.sh" >> ~/.profile
-          #source ~/.profile
+          echo ". $HOME/.asdf/asdf.sh" >> ~/.profile
+          source  ~/.profile
 
           asdf --version
           asdf list all elixir
