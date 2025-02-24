@@ -17,10 +17,12 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        otp_version: [OTP-24.3.4.14]
+        otp_version: [OTP-24.3.4.14, OTP-27.2.4]
         elixir:
           - { version: 1.16.3, variant: "-otp-24" }
-        # https://github.com/actions/runner-images
+          - { version: 1.18.1, variant: "-otp-27" }
+        
+          # https://github.com/actions/runner-images
         platform: [ windows-2022, ubuntu-latest, macos-14] # ubuntu-latest,macos-14,
 
     name: Build Erlang/OTP ( ${{ matrix.platform }} )
@@ -36,30 +38,24 @@ jobs:
         id: set-platform
         run: echo "::set-output name=PLATFORM::${{ matrix.platform }}"
 
-      - name: ASDF Cache Key
-        id: asdf-cache-key
-        shell: bash
-        run: echo "::set-output name=key::asdf-${{ matrix.platform }}-${{ env.OTP_VERSION }}-${{ env.ELIXIR_VERSION }}-$(sha256sum ~/.asdf | awk '{print $1}')"
-
-      - name: Print ASDF Cache Key
-        run: |
-          echo "ASDF Cache Key: ${{ steps.asdf-cache-key.outputs.key }}"
-
-      # - name: Restore ASDF Cache
-      #   id: asdf-cache-restore
-      #   uses: actions/cache/restore@v3
-      #   with:
-      #     path: ~/.asdf
-      #     key: ${{ steps.asdf-cache-key.outputs.key }}
-
       - name: Determine cache name
         id: cache-name
         run: |
           echo "::set-output name=cache_name::${{ matrix.platform }}-deps-${{ env.WXWIDGETS_VERSION }}-otp-${{ env.OTP_VERSION }}-${{ hashFiles('mix.lock', 'assets/package-lock.json') }}"
 
+      - name: Determine asdf cache name
+        id: asdf-cache-name
+        run: |
+          echo "::set-output name=cache_name::${{ matrix.platform }}-asdf-otp-${{ env.OTP_VERSION }}-${{ env.WXWIDGETS_VERSION }}"
+
       - name: Print Build Cache Key
         run: |
           echo "Build Cache Key: ${{ steps.cache-name.outputs.cache_name }}"
+
+      - name: Print Asdf Cache Key
+        run: |
+          echo "Asdf Cache Key: ${{ steps.asdf-cache-name.outputs.asdf-cache_name }}"
+
 
       - name: Restore Build Cache
         uses: actions/cache/restore@v3
@@ -69,24 +65,40 @@ jobs:
             deps
             _build
             assets/node_modules
-            ${{ steps.set-platform.outputs.PLATFORM == 'windows' && 'c:\\opt\\otp.exe' || '' }}
-            ${{ steps.set-platform.outputs.PLATFORM == 'windows' && 'c:\\opt\\local64\\pgm\\wxWidgets-3.x.x' || '' }}
-            ${{ steps.set-platform.outputs.PLATFORM == 'macos' && '~/projects/wxWidgets' || '' }}
-            ${{ steps.set-platform.outputs.PLATFORM == 'macos' && '/usr/local/wxWidgets' || '' }}
+            ~/.asdf
+            ${{ steps.set-platform.outputs.PLATFORM == 'windows-2022' && 'c:\\opt\\otp.exe' || '' }}
+            ${{ steps.set-platform.outputs.PLATFORM == 'windows-2022' && 'c:\\opt\\local64\\pgm\\wxWidgets-3.x.x' || '' }}
+            ${{ steps.set-platform.outputs.PLATFORM == 'macos-14' && '~/projects/wxWidgets' || '' }}
+            ${{ steps.set-platform.outputs.PLATFORM == 'macos-14' && '/usr/local/wxWidgets' || '' }}
+            /usr/local/Cellar # brew
+
           key: ${{ steps.cache-name.outputs.cache_name }}
           restore-keys: |
             ${{ matrix.platform }}-deps-${{ env.WXWIDGETS_VERSION }}-otp-${{ env.OTP_VERSION }}-      
             ${{ matrix.platform }}-deps-${{ env.WXWIDGETS_VERSION }}-
             ${{ matrix.platform }}-deps-
 
-      - name: "Prepare asdf"
-        shell: bash
-        run: |
-          echo "erlang ref:${{ env.OTP_VERSION }}" > .tool-versions
-          echo "elixir ${{ env.ELIXIR_VERSION }}${{ env.ELIXIR_VARIANT }}" >> .tool-versions
-          echo "nodejs v18.7.0" >> .tool-versions
-          cat .tool-versions
+      - name: Restore Asdf Cache
+        uses: actions/cache/restore@v3
+        id: asdf-cache
+        with:
+          path: |
+            ~/.asdf
+          key: ${{ steps.asdf-cache-name.outputs.asdf-cache-name }}
+          restore-keys: |
+            ${{ matrix.platform }}-asdf-otp-${{ env.OTP_VERSION }}-${{ env.WXWIDGETS_VERSION }}-      
+            ${{ matrix.platform }}-asdf-otp-${{ env.OTP_VERSION }}-
+            ${{ matrix.platform }}-asdf-
 
+
+      # - name: "Prepare asdf"
+      #   shell: bash
+      #   run: |
+      #     echo "erlang ref:${{ env.OTP_VERSION }}" > .tool-versions
+      #     echo "elixir ${{ env.ELIXIR_VERSION }}${{ env.ELIXIR_VARIANT }}" >> .tool-versions
+      #     echo "nodejs v18.7.0" >> .tool-versions
+      #     cat .tool-versions
+    
       - name: Windows Build Steps
         if: startsWith(matrix.platform, 'windows-')
         uses: ./.github/actions/windows
@@ -98,6 +110,7 @@ jobs:
           elixir-version: ${{ env.ELIXIR_VERSION }}
           elixir-variant: ${{ env.ELIXIR_VARIANT }}
           win32-key-pass: ${{ secrets.WIN32_KEY_PASS }}
+          cache-name: ${{ steps.cache-name.outputs.cache_name }}
 
       - name: macOS Build Steps
         if: startsWith(matrix.platform, 'macos-')
@@ -110,6 +123,7 @@ jobs:
           elixir-version: ${{ env.ELIXIR_VERSION }}
           elixir-variant: ${{ env.ELIXIR_VARIANT }}
           macos-pem: ${{ secrets.MACOS_PEM }}
+          cache-name: ${{ steps.cache-name.outputs.cache_name }}
 
       - name: Linux Build Steps
         if: startsWith(matrix.platform, 'ubuntu-')
@@ -123,6 +137,7 @@ jobs:
           elixir-variant: ${{ env.ELIXIR_VARIANT }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
           github-actor: ${{ github.actor }}
+          cache-name: ${{ steps.cache-name.outputs.cache_name }}
 
       - name: Archive Installer
         if: ${{ !startsWith(matrix.platform, 'ubuntu-') }}
@@ -140,6 +155,14 @@ jobs:
           path: |
             ./*.run
 
+      - name: Save asdf Cache
+        if: steps.asdf-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v3
+        with:
+          path: |
+            ~/.asdf
+          key: ${{ steps.asdf-cache-name.outputs.asdf-cache_name }}
+
       - name: Save Build Cache
         if: steps.deps-cache.outputs.cache-hit != 'true'
         uses: actions/cache/save@v3
@@ -148,14 +171,8 @@ jobs:
             deps
             _build
             assets/node_modules
-            ${{ steps.set-platform.outputs.PLATFORM == 'windows' && 'c:\\opt\\otp.exe' || '' }}
-            ${{ steps.set-platform.outputs.PLATFORM == 'windows' && 'c:\\opt\\local64\\pgm\\wxWidgets-3.x.x' || '' }}
-            ${{ steps.set-platform.outputs.PLATFORM == 'macos' && '~/projects/wxWidgets' || '' }}
-            ${{ steps.set-platform.outputs.PLATFORM == 'macos' && '/usr/local/wxWidgets' || '' }}
+            ${{ steps.set-platform.outputs.PLATFORM == 'windows-2022' && 'c:\\opt\\otp.exe' || '' }}
+            ${{ steps.set-platform.outputs.PLATFORM == 'windows-2022' && 'c:\\opt\\local64\\pgm\\wxWidgets-3.x.x' || '' }}
+            ${{ steps.set-platform.outputs.PLATFORM == 'macos-14' && '~/projects/wxWidgets' || '' }}
+            ${{ steps.set-platform.outputs.PLATFORM == 'macos-14' && '/usr/local/wxWidgets' || '' }}
           key: ${{ steps.cache-name.outputs.cache_name }}
-
-      # - name: Save ASDF cache
-      #   uses: actions/cache/save@v3
-      #   with:
-      #     path: ~/.asdf
-      #     key: ${{ steps.asdf-cache-key.outputs.key }}

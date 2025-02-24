@@ -22,16 +22,33 @@ inputs:
   macos-pem:
     description: "MACOS PEM"
     required: true
+  cache-name:
+    description: "Base cache name from matrix"
+    required: true
+  asdf-cache-key:
+    description: ""
+    required: true
 runs:
   using: "composite"
   steps:
   - name: "Install brew deps (macOS)"
     shell: bash
+    id: brew-deps
     if: ${{ inputs.cache-hit != 'true' }}
     run: brew install binutils coreutils wget automake autoconf libtool
 
+  - name: Save Brew Cache
+    if: steps.brew-deps.outcome == 'success' && inputs.cache-hit != 'true'
+    uses: actions/cache@v3
+    with:
+      path: /usr/local/Cellar #  This is usually the default brew install location
+      key: ${{ inputs.cache-name }}-brew-deps-${{ hashFiles('/usr/local/Homebrew/Library/Taps/homebrew/homebrew-core/Formula') }} # Homebrew formula
+      restore-keys: |
+        ${{ inputs.cache-name }}-brew-deps-
+
   - name: "Installing wxWidgets (macOS)"
     shell: bash
+    id: wxwidgets
     if: ${{ inputs.cache-hit != 'true' }}
     run: |
       mkdir ~/projects && cd ~/projects
@@ -42,14 +59,27 @@ runs:
       ./configure --prefix=/usr/local/wxWidgets --enable-webview --enable-compat30 --disable-shared
       make -j8
 
+  - name: Save wxWidgets Cache
+    if: steps.wxwidgets.outcome == 'success' && inputs.cache-hit != 'true'
+    uses: actions/cache@v3
+    with:
+      path: ~/projects/wxWidgets
+      key: ${{ inputs.cache-name }}-wxwidgets-${{ inputs.wxwidgets-version }}-${{ hashFiles('~/projects/wxWidgets/.git/modules') }}
+      restore-keys: |
+        ${{ inputs.cache-name }}-wxwidgets-
+
   - name: "Prepare Erlang (macOS)"
     shell: bash
-    if: ${{ inputs.cache-hit != 'true' }}
+    id: erlang-prep
     run: |
+      echo "Setting KERL_CONFIGURE_OPTIONS"
       export KERL_CONFIGURE_OPTIONS="--enable-parallel-configure --with-wxdir=`echo ~/projects/wxWidgets` --disable-jit --without-javac --disable-debug CXX='gcc -std=c++11'"
+      echo "KERL_CONFIGURE_OPTIONS is now $KERL_CONFIGURE_OPTIONS"
 
   - name: "Ensure asdf"
-    uses: asdf-vm/actions/install@v3
+    uses: asdf-vm/actions/setup@v3
+    env:
+      KERL_CONFIGURE_OPTIONS: ${{ steps.erlang-prep.outputs.KERL_CONFIGURE_OPTIONS }}
 
   - name: "Compile and Lint"
     shell: bash
@@ -60,21 +90,29 @@ runs:
       mix deps.get
       cd assets && npm install
 
+  - name: Save asdf Cache
+    if: steps.asdf-cache.outputs.cache-hit != 'true'
+    uses: actions/cache/save@v3
+    with:
+      path: |
+        ~/.asdf
+      key: ${{ inputs.asdf-cache-name }}
+
   - name: "Build Release"
     shell: bash
     env:
-      MACOS_PEM: ${{ inputs.macos-pem }}
+      # MACOS_PEM: ${{ inputs.macos-pem }}
       MAKE: make
     run: |
-      echo "$MACOS_PEM" | base64 --decode > certificate.p12
-      mix desktop.create_keychain maybe
-      export MACOS_KEYCHAIN="$HOME/Library/Keychains/macos-build.keychain"
+      # echo "$MACOS_PEM" | base64 --decode > certificate.p12
+      #mix desktop.create_keychain maybe
+      #export MACOS_KEYCHAIN="$HOME/Library/Keychains/macos-build.keychain"
       export LD_LIBRARY_PATH="$HOME/projects/wxWidgets/lib/"
-      security list-keychains -s $HOME/Library/Keychains/macos-build.keychain
-      security unlock-keychain -p actions $HOME/Library/Keychains/macos-build.keychain
-      security set-keychain-settings -t 3600 -u $HOME/Library/Keychains/macos-build.keychain
-      security import certificate.p12 -k "$MACOS_KEYCHAIN" -P "" -T /usr/bin/codesign
-      security find-identity -v -p codesigning
+      #security list-keychains -s $HOME/Library/Keychains/macos-build.keychain
+      #security unlock-keychain -p actions actions $HOME/Library/Keychains/macos-build.keychain
+      #security set-keychain-settings -t 3600 -u $HOME/Library/Keychains/macos-build.keychain
+      #security import certificate.p12 -k "$MACOS_KEYCHAIN" -P "" -T /usr/bin/codesign
+      #security find-identity -v -p codesigning
 
       mix assets.deploy
       mix desktop.installer
