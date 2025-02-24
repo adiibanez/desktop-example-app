@@ -92,9 +92,9 @@ jobs:
           sudo apt-get install -y git curl
           git clone https://github.com/asdf-vm/asdf.git ~/.asdf
           # --branch v0.8.1
-          echo ". $HOME/.asdf/asdf.sh" >> ~/.profile
-          #source ~/.profile
-          
+          cho ". $HOME/.asdf/asdf.sh" >> ~/.profile
+          source ~/.profile
+
           asdf --version
           asdf list all elixir
           asdf plugin list all
@@ -103,13 +103,13 @@ jobs:
         if: matrix.generic_platform == 'macos' && steps.asdf-cache-restore.outputs.cache-hit != 'true'
         shell: bash
         run: |
-          brew install coreutils automake autoconf libtool git
-          echo 'export PATH="/opt/homebrew/opt/libtool/libexec/gnubin:$PATH"' >> ~/.profile
-          export PATH="/opt/homebrew/opt/libtool/libexec/gnubin:$PATH" # For current session
-          git clone https://github.com/asdf-vm/asdf.git ~/.asdf
+          brew install coreutils automake autoconf libtool git asdf
+          #echo 'export PATH="/opt/homebrew/opt/libtool/libexec/gnubin:$PATH"' >> ~/.profile
+          #export PATH="/opt/homebrew/opt/libtool/libexec/gnubin:$PATH" # For current session
+          #git clone https://github.com/asdf-vm/asdf.git ~/.asdf
           # --branch v0.8.1
-          echo ". $HOME/.asdf/asdf.sh" >> ~/.profile
-          source ~/.profile
+          #echo ". $HOME/.asdf/asdf.sh" >> ~/.profile
+          #source ~/.profile
 
           asdf --version
           asdf list all elixir
@@ -125,7 +125,7 @@ jobs:
           git clone https://github.com/asdf-vm/asdf.git ~/.asdf
           # --branch v0.8.1
           echo ". $HOME/.asdf/asdf.sh" >> ~/.profile
-          # source ~/.profile
+          source ~/.profile
 
           asdf --version
           asdf list all elixir
@@ -134,7 +134,7 @@ jobs:
       - name: Set up build tools
         shell: bash
         run: |
-          . $HOME/.asdf/asdf.sh
+          # . $HOME/.asdf/asdf.sh
           asdf plugin add erlang
           asdf plugin add elixir
           asdf plugin add nodejs
@@ -150,7 +150,7 @@ jobs:
       - name: "Compile and Lint"
         shell: bash
         run: |
-          . $HOME/.asdf/asdf.sh
+          # . $HOME/.asdf/asdf.sh
           mix local.hex --force
           mix local.rebar --force
           mix deps.get
