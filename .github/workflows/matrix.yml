@@ -131,7 +131,7 @@ jobs:
       - name: Set up build tools
         shell: bash
         run: |
-          # . $HOME/.asdf/asdf.sh
+          . $HOME/.asdf/asdf.sh
           asdf plugin add erlang
           asdf plugin add elixir
           asdf plugin add nodejs
@@ -147,7 +147,7 @@ jobs:
       - name: "Compile and Lint"
         shell: bash
         run: |
-          # . $HOME/.asdf/asdf.sh
+          . $HOME/.asdf/asdf.sh
           mix local.hex --force
           mix local.rebar --force
           mix deps.get
