@@ -52,6 +52,7 @@ jobs:
             deps
             _build
             assets/node_modules
+            ~/.asdf
             ${{ startsWith(matrix.platform, 'windows-') && 'c:\\opt\\otp.exe' || '' }}
             ${{ startsWith(matrix.platform, 'windows-') && 'c:\\opt\\local64\\pgm\\wxWidgets-3.x.x' || '' }}
             ${{ startsWith(matrix.platform, 'macos-') && '~/projects/wxWidgets' || '' }}
@@ -143,6 +144,7 @@ jobs:
             deps
             _build
             assets/node_modules
+            ~/.asdf
             ${{ startsWith(matrix.platform, 'windows-') && 'c:\\opt\\otp.exe' || '' }}
             ${{ startsWith(matrix.platform, 'windows-') && 'c:\\opt\\local64\\pgm\\wxWidgets-3.x.x' || '' }}
             ${{ startsWith(matrix.platform, 'macos-') && '~/projects/wxWidgets' || '' }}

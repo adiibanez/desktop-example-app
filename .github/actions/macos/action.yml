@@ -94,13 +94,10 @@ runs:
     uses: actions/cache@v3
     with:
       path: |
-        ~/.asdf/installs/elixir/
-        ~/.asdf/installs/erlang/
-        ~/.asdf/shims/
-        ~/.asdf/plugins/
-      key: ${{ inputs.cache-name }}-asdf-${{ inputs.erlang-version }}-${{ hashFiles('~/.asdf/installs/erlang/') }}
+        ~/.asdf
+      key: ${{ inputs.cache-name }}-asdf-${{ hashFiles('~/.asdf/installs/erlang/') }}
       restore-keys: |
-        ${{ inputs.cache-name }}-asdf-${{ inputs.erlang-version }}-
+        ${{ inputs.cache-name }}-asdf-
 
   - name: "Compile and lint"
     shell: bash
