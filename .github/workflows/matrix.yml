@@ -40,6 +40,22 @@ jobs:
         id: set-platform
         run: echo "::set-output name=PLATFORM::${{ matrix.generic_platform }}"
 
+      - name: ASDF Cache Key
+        id: asdf-cache-key
+        shell: bash
+        run: echo "::set-output name=key::asdf-${{ matrix.generic_platform }}-${{ env.OTP_VERSION }}-${{ env.ELIXIR_VERSION }}-$(sha256sum ~/.asdf | awk '{print $1}')"
+
+      - name: Print ASDF Cache Key
+        run: |
+          echo "ASDF Cache Key: ${{ steps.asdf-cache-key.outputs.key }}"
+
+      - name: Restore ASDF Cache
+        id: asdf-cache-restore
+        uses: actions/cache/restore@v3
+        with:
+          path: ~/.asdf
+          key: ${{ steps.asdf-cache-key.outputs.key }}
+
       - name: Determine cache name
         id: cache-name
         run: |
@@ -67,22 +83,6 @@ jobs:
             ${{ matrix.generic_platform }}-deps-${{ env.WXWIDGETS_VERSION }}-otp-${{ env.OTP_VERSION }}-
             ${{ matrix.generic_platform }}-deps-${{ env.WXWIDGETS_VERSION }}-
             ${{ matrix.generic_platform }}-deps-
-
-      - name: ASDF Cache Key
-        id: asdf-cache-key
-        shell: bash
-        run: echo "::set-output name=key::asdf-${{ matrix.generic_platform }}-${{ env.OTP_VERSION }}-${{ env.ELIXIR_VERSION }}-$(sha256sum ~/.asdf | awk '{print $1}')"
-
-      - name: Print ASDF Cache Key
-        run: |
-          echo "ASDF Cache Key: ${{ steps.asdf-cache-key.outputs.key }}"
-
-      - name: Restore ASDF Cache
-        id: asdf-cache-restore
-        uses: actions/cache/restore@v3
-        with:
-          path: ~/.asdf
-          key: ${{ steps.asdf-cache-key.outputs.key }}
 
       - name: Install ASDF (Linux)
         if: matrix.generic_platform == 'linux-x86' && steps.asdf-cache-restore.outputs.cache-hit != 'true'
