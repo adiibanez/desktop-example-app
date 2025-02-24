@@ -136,7 +136,7 @@ jobs:
         make 
         echo export PATH=\"\$PATH:$HOME/elixir/bin\" >> $HOME/.bashrc
 
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v4
 
     - name: "Get dependencies"
       shell: msys2 {0}
@@ -219,7 +219,7 @@ jobs:
         export KERL_CONFIGURE_OPTIONS="--enable-parallel-configure --with-wxdir=`echo ~/projects/wxWidgets` --disable-jit --without-javac --disable-debug CXX='gcc -std=c++11'"
         asdf install
 
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v4
     - name: "Compile and Lint"
       run: |
         mix local.hex --force
@@ -264,7 +264,7 @@ jobs:
           fop \
           libxml2-utils
 
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v4
     - uses: whoan/docker-build-with-cache-action@master
       id: docker
       with:
