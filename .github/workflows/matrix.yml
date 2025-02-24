@@ -90,7 +90,7 @@ jobs:
           fi
       # if: steps.check_asdf.outputs.exists == 'false'
       - name: "Install asdf"  
-        uses: asdf-vm/actions/setup@v3
+        uses: asdf-vm/actions/install@v3
       #- name: "Install plugins"
       #  uses: asdf-vm/actions/plugins-add@v3
 
@@ -102,9 +102,9 @@ jobs:
           echo "nodejs v18.7.0" >> .tool-versions
           cat .tool-versions
 
-      #if: startsWith(matrix.platform, 'ubuntu-') && steps.check_asdf.outputs.exists == 'false'
-      - name: "Install asdf for linux edgecase"
-        uses: asdf-vm/actions/install@v3
+      # #if: startsWith(matrix.platform, 'ubuntu-') && steps.check_asdf.outputs.exists == 'false'
+      # - name: "Install asdf for linux edgecase"
+      #   uses: asdf-vm/actions/install@v3
 
       - name: Set up asdf build tools
         shell: bash

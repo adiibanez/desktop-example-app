@@ -132,14 +132,14 @@ runs:
       make
       echo export PATH=\"\$PATH:$HOME/elixir/bin\" >> $HOME/.bashrc
 
-  - name: "Compile and Lint"
-    shell: bash
-    run: |
-      asdf install
-      mix local.hex --force
-      mix local.rebar --force
-      mix deps.get
-      cd assets && npm install
+  # - name: "Compile and Lint"
+  #   shell: bash
+  #   run: |
+  #     asdf install
+  #     mix local.hex --force
+  #     mix local.rebar --force
+  #     mix deps.get
+  #     cd assets && npm install
 
   - name: "Build Release"
     shell: msys2 {0}
