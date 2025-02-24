@@ -38,7 +38,7 @@ jobs:
       - name: Determine cache name
         id: cache-name
         run: |
-          echo "::set-output name=cache_name::${{ matrix.platform }}-deps-${{ env.WXWIDGETS_VERSION }}-otp-${{ env.OTP_VERSION }}-${{ hashFiles('mix.lock', 'assets/package-lock.json') }}"
+          echo "::set-output name=cache_name::${{ matrix.platform }}-deps-${{ env.WXWIDGETS_VERSION }}-otp-${{ env.OTP_VERSION }}"
       
       - name: Print Build Cache Key
         run: |
@@ -50,8 +50,6 @@ jobs:
         with:
           path: |
             deps
-            _build
-            assets/node_modules
             ~/.asdf
             ${{ startsWith(matrix.platform, 'ubuntu-') && '/tmp/.buildx-cache' || '' }}
             ${{ startsWith(matrix.platform, 'windows-') && 'c:\\opt\\otp.exe' || '' }}
@@ -146,8 +144,6 @@ jobs:
         with:
           path: |
             deps
-            _build
-            assets/node_modules
             ~/.asdf
             ${{ startsWith(matrix.platform, 'ubuntu-') && '/tmp/.buildx-cache' || '' }}
             ${{ startsWith(matrix.platform, 'windows-') && 'c:\\opt\\otp.exe' || '' }}
