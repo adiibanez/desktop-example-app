@@ -23,7 +23,7 @@ jobs:
           #- { version: 1.18.1, variant: "-otp-27" }
         
           # https://github.com/actions/runner-images
-        platform: [ ubuntu-latest, macos-14] # ubuntu-latest,macos-14,
+        platform: [ windows-2022, ubuntu-latest, macos-14] # ubuntu-latest,macos-14,
         # windows-2022,
 
     name: Build Erlang/OTP ( ${{ matrix.platform }} )
