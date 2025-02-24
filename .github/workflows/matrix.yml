@@ -90,7 +90,8 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y git curl
-          git clone https://github.com/asdf-vm/asdf.git ~/.asdf --branch v0.8.1
+          git clone https://github.com/asdf-vm/asdf.git ~/.asdf
+          # --branch v0.8.1
           echo ". $HOME/.asdf/asdf.sh" >> ~/.profile
           source ~/.profile
 
@@ -98,10 +99,11 @@ jobs:
         if: matrix.generic_platform == 'macos' && steps.asdf-cache-restore.outputs.cache-hit != 'true'
         shell: bash
         run: |
-          brew install coreutils automake autoconf libtool
+          brew install coreutils automake autoconf libtool git
           echo 'export PATH="/opt/homebrew/opt/libtool/libexec/gnubin:$PATH"' >> ~/.profile
           export PATH="/opt/homebrew/opt/libtool/libexec/gnubin:$PATH" # For current session
-          git clone https://github.com/asdf-vm/asdf.git ~/.asdf --branch v0.8.1
+          git clone https://github.com/asdf-vm/asdf.git ~/.asdf
+          # --branch v0.8.1
           echo ". $HOME/.asdf/asdf.sh" >> ~/.profile
           source ~/.profile
 
@@ -112,7 +114,8 @@ jobs:
           # Assumes WSL is configured
           apt-get update
           apt-get install -y git curl
-          git clone https://github.com/asdf-vm/asdf.git ~/.asdf --branch v0.8.1
+          git clone https://github.com/asdf-vm/asdf.git ~/.asdf
+          # --branch v0.8.1
           echo ". $HOME/.asdf/asdf.sh" >> ~/.profile
           source ~/.profile
 
