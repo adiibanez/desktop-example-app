@@ -5,9 +5,6 @@ inputs:
   cache-hit:
     description: "Was the cache hit?"
     required: true
-  cache-name:
-    description: "Cache name"
-    required: true
   otp-version:
     description: "OTP Version"
     required: true
