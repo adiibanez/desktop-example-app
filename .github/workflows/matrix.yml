@@ -84,56 +84,76 @@ jobs:
             ${{ matrix.generic_platform }}-deps-${{ env.WXWIDGETS_VERSION }}-
             ${{ matrix.generic_platform }}-deps-
 
-      - name: Install ASDF (Linux)
-        if: matrix.generic_platform == 'linux-x86' && steps.asdf-cache-restore.outputs.cache-hit != 'true'
-        shell: bash
+
+      
+
+      # - name: Install ASDF (Linux)
+      #   if: matrix.generic_platform == 'linux-x86' && steps.asdf-cache-restore.outputs.cache-hit != 'true'
+      #   shell: bash
+      #   run: |
+      #     sudo apt-get update
+      #     sudo apt-get install -y git curl
+      #     git clone https://github.com/asdf-vm/asdf.git ~/.asdf
+      #     # --branch v0.8.1
+      #     echo ". $HOME/.asdf/asdf.sh" >> ~/.profile
+      #     source ~/.profile
+
+      #     asdf --version
+
+      # - name: Install ASDF (macOS)
+      #   if: matrix.generic_platform == 'macos' && steps.asdf-cache-restore.outputs.cache-hit != 'true'
+      #   shell: bash
+      #   run: |
+      #     brew install coreutils automake autoconf libtool git asdf
+      #     #echo 'export PATH="/opt/homebrew/opt/libtool/libexec/gnubin:$PATH"' >> ~/.profile
+      #     #export PATH="/opt/homebrew/opt/libtool/libexec/gnubin:$PATH" # For current session
+      #     #git clone https://github.com/asdf-vm/asdf.git ~/.asdf
+      #     # --branch v0.8.1
+      #     echo ". $HOME/.asdf/asdf.sh" >> ~/.profile
+      #     echo ". /opt/homebrew/opt/asdf/libexec/asdf.sh" ~/.profile
+      #     source  ~/.profile
+
+      #     asdf --version
+
+      # - name: Install ASDF (Windows)
+      #   if: matrix.generic_platform == 'windows' && steps.asdf-cache-restore.outputs.cache-hit != 'true'
+      #   shell: bash
+      #   run: |
+      #     # Assumes WSL is configured
+      #     apt-get update
+      #     apt-get install -y git curl
+      #     git clone https://github.com/asdf-vm/asdf.git ~/.asdf
+      #     # --branch v0.8.1
+      #     echo ". $HOME/.asdf/asdf.sh" >> ~/.profile
+      #     source ~/.profile
+
+      #     asdf --version
+
+      - name: "Prepare asdf"
         run: |
-          sudo apt-get update
-          sudo apt-get install -y git curl
-          git clone https://github.com/asdf-vm/asdf.git ~/.asdf
-          # --branch v0.8.1
-          echo ". $HOME/.asdf/asdf.sh" >> ~/.profile
-          source ~/.profile
+          echo "erlang ref:${{ env.OTP_VERSION }}" >> .tool-versions
+          echo "elixir ${{ env.ELIXIR_VERSION }}${{ env.ELIXIR_VARIANT }}" >> .tool-versions
+          echo "nodejs v18.7.0" >> .tool-versions
 
-          asdf --version
-
-      - name: Install ASDF (macOS)
-        if: matrix.generic_platform == 'macos' && steps.asdf-cache-restore.outputs.cache-hit != 'true'
-        shell: bash
+      - name: "Installing Erlang"
+        if: matrix.generic_platform == 'macos'
         run: |
-          brew install coreutils automake autoconf libtool git asdf
-          #echo 'export PATH="/opt/homebrew/opt/libtool/libexec/gnubin:$PATH"' >> ~/.profile
-          #export PATH="/opt/homebrew/opt/libtool/libexec/gnubin:$PATH" # For current session
-          #git clone https://github.com/asdf-vm/asdf.git ~/.asdf
-          # --branch v0.8.1
-          echo ". $HOME/.asdf/asdf.sh" >> ~/.profile
-          echo ". /opt/homebrew/opt/asdf/libexec/asdf.sh" ~/.profile
-          source  ~/.profile
+          export KERL_CONFIGURE_OPTIONS="--enable-parallel-configure --with-wxdir=`echo ~/projects/wxWidgets` --disable-jit --without-javac --disable-debug CXX='gcc -std=c++11'"
 
-          asdf --version
+      - name: "Install asdf"
+        uses: asdf-vm/actions/install@v3
+      - name: "Install plugins"
+        uses: asdf-vm/actions/plugins-add@v3"
 
-      - name: Install ASDF (Windows)
-        if: matrix.generic_platform == 'windows' && steps.asdf-cache-restore.outputs.cache-hit != 'true'
-        shell: bash
-        run: |
-          # Assumes WSL is configured
-          apt-get update
-          apt-get install -y git curl
-          git clone https://github.com/asdf-vm/asdf.git ~/.asdf
-          # --branch v0.8.1
-          echo ". $HOME/.asdf/asdf.sh" >> ~/.profile
-          source ~/.profile
 
-          asdf --version
-
-      - name: Set up build tools
-        shell: bash
-        run: |
-          . $HOME/.asdf/asdf.sh
-          asdf plugin add erlang
-          asdf plugin add elixir
-          asdf plugin add nodejs
-          asdf install
+      # - name: Set up build tools
+      #   shell: bash
+      #   run: |
+      #     . $HOME/.asdf/asdf.sh
+      #     asdf plugin add erlang
+      #     asdf plugin add elixir
+      #     asdf plugin add nodejs
+      #     asdf install
 
       - name: Common Build Steps
         uses: ./.github/actions/common
