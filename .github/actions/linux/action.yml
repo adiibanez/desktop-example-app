@@ -1,0 +1,108 @@
+name: "Linux Build Steps"
+description: "Build steps specific to Linux"
+inputs:
+  cache-hit:
+    description: "Was the cache hit?"
+    required: true
+  otp-version:
+    description: "OTP Version"
+    required: true
+  wxwidgets-version:
+    description: "wxWidgets Version"
+    required: true
+  wxwidgets-repo:
+    description: "wxWidgets Repo"
+    required: true
+  elixir-version:
+    description: "Elixir Version"
+    required: true
+  elixir-variant:
+    description: "Elixir Variant"
+    required: true
+  github-token:
+    description: "Github Token"
+    required: true
+  github-actor:
+    description: "Github Actor"
+    required: true
+runs:
+  using: "composite"
+  steps:
+  - name: Install wxWidgets Dependencies (Linux)
+    if: ${{ inputs.cache-hit != 'true' }}
+    run: |
+      sudo apt-get update
+      sudo apt-get install -y \
+        libgtk-3-dev \
+        libwebkit2gtk-4.1-dev \
+        libjpeg-dev \
+        libtiff-dev \
+        libpng-dev \
+        libsdl2-dev \
+        libgstreamer1.0-dev \
+        libgstreamer-plugins-base1.0-dev
+
+  - name: Install Erlang Build Dependencies (Linux)
+    if: ${{ inputs.cache-hit != 'true' }}
+    run: |
+      . $HOME/.asdf/asdf.sh
+      sudo apt-get update
+      sudo apt-get install -y \
+        openjdk-11-jdk \
+        xsltproc \
+        fop \
+        libxml2-utils
+
+  - name: "Prepare asdf (Linux)"
+    if: ${{ inputs.cache-hit != 'true' }}
+    run: |
+      echo "erlang ref:${{ inputs.otp-version }}" >> .tool-versions
+      echo "elixir ${{ inputs.elixir-version }}${{ inputs.elixir-variant }}" >> .tool-versions
+      echo "nodejs v18.7.0" >> .tool-versions
+
+  - name: "Install asdf & tools (Linux)"
+    if: ${{ inputs.cache-hit != 'true' }}
+    uses: asdf-vm/actions/install@v3
+
+  - name: "Install asdf plugins (Linux)"
+    if: ${{ inputs.cache-hit != 'true' }}
+    run: |
+      . $HOME/.asdf/asdf.sh
+      asdf plugin add erlang
+      asdf plugin add elixir
+      asdf plugin add nodejs
+
+  - name: Linux Docker Build
+    uses: whoan/docker-build-with-cache-action@master
+    id: docker
+    with:
+      username: ${{ inputs.github-actor }}
+      password: "${{ inputs.github-token }}"
+      registry: docker.pkg.github.com
+      image_name: linux_installer
+      dockerfile: scripts/Dockerfile
+      build_extra_args: |
+        --build-arg=BASE_IMAGE=ubuntu:18.04
+        --platform=linux/amd64
+        --build-arg=PLATFORM=amd64
+        --build-arg=WXWIDGETS_REPO=${{ inputs.wxwidgets-repo }}
+        --build-arg=WXWIDGETS_VERSION=${{ inputs.wxwidgets-version }}
+        --build-arg=OTP_VERSION=${{ inputs.otp-version }}
+        --build-arg=OTP_GITHUB_URL=${{ env.OTP_GITHUB_URL }}
+        --build-arg=ELIXIR_VERSION=${{ inputs.elixir-version }}
+        --build-arg=ELIXIR_VARIANT=${{ inputs.elixir-variant }}
+      cache_from: type=local,src=/tmp/.buildx-cache
+      cache_to: type=local,dest=/tmp/.buildx-cache-new,mode=max
+
+  - name: Move Docker Cache
+    run: |
+      rm -rf /tmp/.buildx-cache
+      mv /tmp/.buildx-cache-new /tmp/.buildx-cache
+
+  - name: Extract runfile Linux
+    run: |
+      . $HOME/.asdf/asdf.sh
+      NAME=$(docker run --platform=linux/amd64 -i ${{steps.docker.outputs.FULL_IMAGE_NAME}} bash -c 'basename `ls /app/_build/prod/*.run`')
+      NAME=`echo $NAME | tr -d '\n\r'`
+      docker run --platform=linux/amd64 -i ${{steps.docker.outputs.FULL_IMAGE_NAME}} bash -c 'xxd /app/_build/prod/*.run' | xxd -r > $NAME
+      chmod +x $NAME

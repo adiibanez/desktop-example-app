@@ -1,0 +1,140 @@
+name: "Windows Build Steps"
+description: "Build steps specific to Windows"
+inputs:
+  cache-hit:
+    description: "Was the cache hit?"
+    required: true
+  otp-version:
+    description: "OTP Version"
+    required: true
+  wxwidgets-version:
+    description: "wxWidgets Version"
+    required: true
+  wxwidgets-repo:
+    description: "wxWidgets Repo"
+    required: true
+  elixir-version:
+    description: "Elixir Version"
+    required: true
+  elixir-variant:
+    description: "Elixir Variant"
+    required: true
+  win32-key-pass:
+    description: "WIN32 Key Pass"
+    required: true
+runs:
+  using: "composite"
+  steps:
+  - name: Install WSL dependencies (Windows)
+    if: ${{ inputs.cache-hit != 'true' }}
+    shell: wsl-bash {0}
+    run: apt update && apt install -y g++-mingw-w64 gcc-mingw-w64 make autoconf unzip
+
+  - name: Install openssl (Windows)
+    if: ${{ inputs.cache-hit != 'true' }}
+    shell: cmd
+    run: |
+      choco install openssl --version=1.1.1.2100
+      IF EXIST "c:\\Program Files\\OpenSSL-Win64" (move "c:\\Program Files\\OpenSSL-Win64" "c:\\OpenSSL-Win64") ELSE (move "c:\\Program Files\\OpenSSL" "c:\\OpenSSL-Win64")
+
+  - name: Download wxWidgets (Windows)
+    if: ${{ inputs.cache-hit != 'true' }}
+    shell: wsl-bash {0}
+    run: |
+      git clone ${{ inputs.wxwidgets-repo }}
+      cd wxWidgets
+      git checkout ${{ inputs.wxwidgets-version }}
+      git submodule update --init
+      sed -i -r -e 's/wxUSE_POSTSCRIPT +0/wxUSE_POSTSCRIPT 1/' include/wx/msw/setup.h
+      sed -i -r -e 's/wxUSE_WEBVIEW_EDGE +0/wxUSE_WEBVIEW_EDGE 1/' include/wx/msw/setup.h
+      sed -i -r -e 's/WXWIN_COMPATIBILITY_3_0 +0/WXWIN_COMPATIBILITY_3_0 1/' include/wx/msw/setup.h
+
+  - name: Install WebView2 (Windows)
+    if: ${{ inputs.cache-hit != 'true' }}
+    shell: cmd
+    run: |
+      cd wxWidgets\\3rdparty
+      nuget install Microsoft.Web.WebView2 -Version 1.0.864.35 -Source https://api.nuget.org/v3/index.json
+      rename Microsoft.Web.WebView2.1.0.864.35 webview2
+
+  - name: Build wxWidgets (Windows)
+    if: ${{ inputs.cache-hit != 'true' }}
+    shell: cmd
+    run: |
+      cd wxWidgets\\build\\msw
+      call "C:\\Program Files\\Microsoft Visual Studio\\2022\\Enterprise\\VC\Auxiliary\\Build\\vcvars64.bat"
+      nmake TARGET_CPU=amd64 BUILD=release SHARED=0 DIR_SUFFIX_CPU= -f makefile.vc
+
+  - name: Copy wxWidgets (Windows)
+    if: ${{ inputs.cache-hit != 'true' }}
+    shell: wsl-bash {0}
+    run: |
+      mkdir -p /mnt/c/opt/local64/pgm/
+      cp -R wxWidgets /mnt/c/opt/local64/pgm/wxWidgets-3.x.x
+
+  - name: Compile Erlang (Windows)
+    if: ${{ inputs.cache-hit != 'true' }}
+    shell: wsl-bash {0}
+    run: |
+      git clone ${{ env.OTP_GITHUB_URL }}
+      cd otp
+      git checkout ${{ inputs.otp-version }}
+      export ERL_TOP=`pwd`
+      export MAKEFLAGS=-j$(($(nproc) + 2))
+      export ERLC_USE_SERVER=true
+      export ERTS_SKIP_DEPEND=true
+      eval `./otp_build env_win32 x64`
+      ./otp_build all -a
+      cp /mnt/c/opt/local64/pgm/wxWidgets-3.x.x/3rdparty/webview2/runtimes/win-x64/native/WebView2Loader.dll $ERL_TOP/release/win32/erts-*/bin/
+      ./otp_build installer_win32
+      export NAME=`ls release/win32/otp*.exe`
+      cp $NAME /mnt/c/opt/otp.exe
+
+  - name: Run Erlang installer (Windows)
+    if: ${{ inputs.cache-hit != 'true' }}
+    shell: cmd
+    run: C:\\opt\\otp.exe /S
+
+  - name: "Install msys2 (Windows)"
+    if: ${{ inputs.cache-hit != 'true' }}
+    uses: msys2/setup-msys2@v2
+    with:
+      install: pacman-mirrors pkg-config base-devel mingw-w64-x86_64-toolchain mingw-w64-x86_64-go upx mingw-w64-x86_64-dlfcn unzip git tar mingw-w64-x86_64-nodejs mingw-w64-x86_64-imagemagick mingw-w64-x86_64-osslsigncode autoconf automake libtool gettext-devel gettext
+      update: false
+      release: false
+
+  - name: Locate Erlang (Windows)
+    if: ${{ inputs.cache-hit != 'true' }}
+    shell: msys2 {0}
+    run: |
+      ERTS=`find /c/Program\ Files/[Ee]rl* -type d -name "erts-*" -not -path "*lib*"`
+      echo $ERTS
+      echo export PATH=\"\$PATH:$ERTS/bin\" > $HOME/.bashrc
+
+  - name: Locate NSIS (Windows)
+    if: ${{ inputs.cache-hit != 'true' }}
+    shell: msys2 {0}
+    run: |
+      echo export PATH=\"\$PATH:/c/Program\ Files\ \(x86\)/NSIS\" >> $HOME/.bashrc
+
+  - name: Install Elixir (Windows)
+    if: ${{ inputs.cache-hit != 'true' }}
+    shell: msys2 {0}
+    run: |
+      cd $HOME
+      git clone https://github.com/elixir-lang/elixir.git
+      cd elixir
+      git checkout v${{ inputs.elixir-version }}
+      make
+      echo export PATH=\"\$PATH:$HOME/elixir/bin\" >> $HOME/.bashrc
+
+  - name: "Build Release"
+    env:
+      MAKE: make
+      REBAR_TARGET_ARCH_WORDSIZE: "64"
+      REBAR_TARGET_ARCH: x86_64-w64-mingw32
+      WIN32_KEY_PASS: ${{ inputs.win32-key-pass }}
+    shell: msys2 {0}
+    run: |
+      mix assets.deploy
+      mix desktop.installer

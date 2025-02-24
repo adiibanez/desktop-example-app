@@ -1,0 +1,87 @@
+name: "macOS Build Steps"
+description: "Build steps specific to macOS"
+inputs:
+  cache-hit:
+    description: "Was the cache hit?"
+    required: true
+  otp-version:
+    description: "OTP Version"
+    required: true
+  wxwidgets-version:
+    description: "wxWidgets Version"
+    required: true
+  wxwidgets-repo:
+    description: "wxWidgets Repo"
+    required: true
+  elixir-version:
+    description: "Elixir Version"
+    required: true
+  elixir-variant:
+    description: "Elixir Variant"
+    required: true
+  macos-pem:
+    description: "MACOS PEM"
+    required: true
+runs:
+  using: "composite"
+  steps:
+  - name: "Install brew deps (macOS)"
+    if: ${{ inputs.cache-hit != 'true' }}
+    run: brew install binutils coreutils wget automake autoconf libtool
+
+  - name: "Prepare asdf (macOS)"
+    if: ${{ inputs.cache-hit != 'true' }}
+    run: |
+      echo "erlang ref:${{ inputs.otp-version }}" >> .tool-versions
+      echo "elixir ${{ inputs.elixir-version }}${{ inputs.elixir-variant }}" >> .tool-versions
+      echo "nodejs v18.7.0" >> .tool-versions
+
+  - name: "Install asdf & tools (macOS)"
+    if: ${{ inputs.cache-hit != 'true' }}
+    uses: asdf-vm/actions/install@v3
+
+  - name: "Install asdf plugins (macOS)"
+    if: ${{ inputs.cache-hit != 'true' }}
+    run: |
+      . $HOME/.asdf/asdf.sh
+      asdf plugin add erlang
+      asdf plugin add elixir
+      asdf plugin add nodejs
+
+  - name: "Installing wxWidgets (macOS)"
+    if: ${{ inputs.cache-hit != 'true' }}
+    run: |
+      . $HOME/.asdf/asdf.sh
+      mkdir ~/projects && cd ~/projects
+      git clone ${{ inputs.wxwidgets-repo }}
+      cd wxWidgets;
+      git checkout ${{ inputs.wxwidgets-version }}
+      git submodule update --init
+      ./configure --prefix=/usr/local/wxWidgets --enable-webview --enable-compat30 --disable-shared
+      make -j8
+
+  - name: "Installing Erlang (macOS)"
+    if: ${{ inputs.cache-hit != 'true' }}
+    run: |
+      . $HOME/.asdf/asdf.sh
+      export KERL_CONFIGURE_OPTIONS="--enable-parallel-configure --with-wxdir=`echo ~/projects/wxWidgets` --disable-jit --without-javac --disable-debug CXX='gcc -std=c++11'"
+      asdf install
+
+  - name: "Build Release"
+    env:
+      MACOS_PEM: ${{ inputs.macos-pem }}
+      MAKE: make
+    run: |
+      . $HOME/.asdf/asdf.sh
+      echo "$MACOS_PEM" | base64 --decode > certificate.p12
+      mix desktop.create_keychain maybe
+      export MACOS_KEYCHAIN="$HOME/Library/Keychains/macos-build.keychain"
+      export LD_LIBRARY_PATH="$HOME/projects/wxWidgets/lib/"
+      security list-keychains -s $HOME/Library/Keychains/macos-build.keychain
+      security unlock-keychain -p actions $HOME/Library/Keychains/macos-build.keychain
+      security set-keychain-settings -t 3600 -u $HOME/Library/Keychains/macos-build.keychain
+      security import certificate.p12 -k "$MACOS_KEYCHAIN" -P "" -T /usr/bin/codesign
+      security find-identity -v -p codesigning
+
+      mix assets.deploy
+      mix desktop.installer
