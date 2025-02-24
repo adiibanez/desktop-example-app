@@ -94,6 +94,10 @@ jobs:
           # --branch v0.8.1
           echo ". $HOME/.asdf/asdf.sh" >> ~/.profile
           #source ~/.profile
+          
+          asdf --version
+          asdf list all elixir
+          asdf plugin list all
 
       - name: Install ASDF (macOS)
         if: matrix.generic_platform == 'macos' && steps.asdf-cache-restore.outputs.cache-hit != 'true'
@@ -105,7 +109,11 @@ jobs:
           git clone https://github.com/asdf-vm/asdf.git ~/.asdf
           # --branch v0.8.1
           echo ". $HOME/.asdf/asdf.sh" >> ~/.profile
-          #source ~/.profile
+          source ~/.profile
+
+          asdf --version
+          asdf list all elixir
+          asdf plugin list all
 
       - name: Install ASDF (Windows)
         if: matrix.generic_platform == 'windows' && steps.asdf-cache-restore.outputs.cache-hit != 'true'
@@ -118,6 +126,10 @@ jobs:
           # --branch v0.8.1
           echo ". $HOME/.asdf/asdf.sh" >> ~/.profile
           # source ~/.profile
+
+          asdf --version
+          asdf list all elixir
+          asdf plugin list all
 
       - name: Set up build tools
         shell: bash
