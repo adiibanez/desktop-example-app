@@ -34,9 +34,9 @@ runs:
     uses: actions/cache@v3
     with:
       path: C:\msys64
-      key: ${{ inputs.cache-name }}-msys
+      key: ${{ inputs.cache-name }}-msys-
       restore-keys: |
-        ${{ inputs.cache-name }}-msys
+        ${{ inputs.cache-name }}-msys-
 
   - name: "Install msys2 (Windows)"
     uses: msys2/setup-msys2@v2
@@ -59,9 +59,9 @@ runs:
     uses: actions/cache@v3
     with:
       path: 'C:\\Program Files\\OpenSSL-Win64'
-      key: ${{ inputs.cache-name }}-openssl
+      key: ${{ inputs.cache-name }}-openssl-
       restore-keys: |
-        ${{ inputs.cache-name }}-openssl
+        ${{ inputs.cache-name }}-openssl-
 
   - name: Install openssl (Windows)
     shell: cmd
@@ -76,14 +76,14 @@ runs:
     uses: actions/cache/save@v3
     with:
       path: 'C:\\Program Files\\OpenSSL-Win64'
-      key: ${{ inputs.cache-name }}-openssl
+      key: ${{ inputs.cache-name }}-openssl-
 
   - name: Load wxwidgets source
     id: wxwidgets-source-cache
     uses: actions/cache@v3
     with:
       path: wxWidgets
-      key: ${{ inputs.cache-name }}-wxsource-${{ inputs.wxwidgets-version }}
+      key: ${{ inputs.cache-name }}-wxsource-${{ inputs.wxwidgets-version }}-
       restore-keys: |
         ${{ inputs.cache-name }}-wxsource-
 
@@ -105,7 +105,7 @@ runs:
     uses: actions/cache/save@v3
     with:
       path: wxWidgets
-      key: ${{ inputs.cache-name }}-wxsource-${{ inputs.wxwidgets-version }}
+      key: ${{ inputs.cache-name }}-wxsource-${{ inputs.wxwidgets-version }}-
 
   - name: Compile wxWidgets and WebView2 Cache
     id: wxWidgets-cache

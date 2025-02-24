@@ -42,7 +42,7 @@ runs:
     uses: actions/cache/save@v3
     with:
       path: /usr/local/Cellar
-      key: ${{ inputs.cache-name }}-brew-deps-${{ hashFiles('/usr/local/Homebrew/Library/Taps/homebrew/homebrew-core/Formula') }}
+      key: ${{ inputs.cache-name }}-brew-deps-
       restore-keys: |
         ${{ inputs.cache-name }}-brew-deps-
 
@@ -77,7 +77,7 @@ runs:
       path: |
         ~/projects/wxWidgets
         /usr/local/wxWidgets
-      key: ${{ inputs.cache-name }}-wxwidgets-${{ inputs.wxwidgets-version }}-${{ hashFiles('~/projects/wxWidgets/.git/modules') }}
+      key: ${{ inputs.cache-name }}-wxwidgets-${{ inputs.wxwidgets-version }}-
       restore-keys: |
         ${{ inputs.cache-name }}-wxwidgets-
 
@@ -87,7 +87,7 @@ runs:
     with:
       path: |
         ~/asdf
-      key: ${{ inputs.cache-name }}-asdf-${{ hashFiles('~/.asdf') }}
+      key: ${{ inputs.cache-name }}-asdf-
       restore-keys: |
         ${{ inputs.cache-name }}-asdf-
 
@@ -123,7 +123,7 @@ runs:
     with:
       path: |
         ~/.asdf
-      key: ${{ inputs.cache-name }}-asdf-${{ hashFiles('~/.asdf') }}
+      key: ${{ inputs.cache-name }}-asdf-
       restore-keys: |
         ${{ inputs.cache-name }}-asdf-
 
