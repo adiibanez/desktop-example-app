@@ -40,6 +40,12 @@ config :phoenix, :json_library, Jason
 config :todo_app,
   ecto_repos: [TodoApp.Repo]
 
+
+#config :rustler_precompiled, force_build_all: false,
+
+
+
+
 # We're defining this at runtime
 # config :todo_app, TodoApp.Repo, database: "~/.config/todo/database.sq3"
 
