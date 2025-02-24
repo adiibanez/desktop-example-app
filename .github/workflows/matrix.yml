@@ -34,6 +34,8 @@ jobs:
       ELIXIR_VARIANT: ${{ matrix.elixir.variant }}
 
     steps:
+      - uses: actions/checkout@v4 # MUST be before ANY local actions and cache restores
+
       - name: Set platform output
         id: set-platform
         run: echo "::set-output name=PLATFORM::${{ matrix.generic_platform }}"
@@ -62,7 +64,13 @@ jobs:
             ${{ matrix.generic_platform }}-deps-${{ env.WXWIDGETS_VERSION }}-
             ${{ matrix.generic_platform }}-deps-
 
-      - uses: actions/checkout@v4 # MUST be before ANY local actions
+      - name: "Fix macos ASDF issue"
+        if: matrix.generic_platform == 'macos'
+        shell: bash
+        run: |
+          echo 'eval "$(asdf env)"' >> ~/.profile
+          source ~/.profile
+          asdf --version
 
       - name: Common Build Steps
         uses: ./.github/actions/common
