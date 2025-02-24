@@ -39,7 +39,7 @@ runs:
 
   - name: Save Brew Cache
     if: steps.brew-deps.outcome == 'success' && inputs.cache-hit != 'true'
-    uses: actions/cache@v3
+    uses: actions/cache/save@v3
     with:
       path: /usr/local/Cellar
       key: ${{ inputs.cache-name }}-brew-deps-${{ hashFiles('/usr/local/Homebrew/Library/Taps/homebrew/homebrew-core/Formula') }}
@@ -61,7 +61,7 @@ runs:
 
   - name: Save wxWidgets Cache
     if: steps.wxwidgets.outcome == 'success' && inputs.cache-hit != 'true'
-    uses: actions/cache@v3
+    uses: actions/cache/save@v3
     with:
       path: |
         ~/projects/wxWidgets
@@ -96,7 +96,7 @@ runs:
 
   - name: Save asdf erlang cache
     if: steps.erlang-elixir-install.outcome == 'success' && inputs.cache-hit != 'true'
-    uses: actions/cache@v3
+    uses: actions/cache/save@v3
     with:
       path: |
         ~/.asdf
