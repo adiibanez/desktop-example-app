@@ -167,6 +167,7 @@ jobs:
         shell: bash
         run: |
           . $HOME/.asdf/asdf.sh
+          asdf reshim elixir
           mix local.hex --force
           mix local.rebar --force
           mix deps.get
