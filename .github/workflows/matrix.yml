@@ -31,7 +31,8 @@ jobs:
       ELIXIR_VARIANT: ${{ matrix.elixir.variant }}
 
     steps:
-      - uses: actions/checkout@v4 # MUST be before ANY local actions and cache restores
+      - uses: actions/checkout@v4 
+      - uses: asdf-vm/actions/install@v3
 
       - name: Set platform output
         id: set-platform
@@ -61,14 +62,29 @@ jobs:
             ${{ matrix.generic_platform }}-deps-${{ env.WXWIDGETS_VERSION }}-
             ${{ matrix.generic_platform }}-deps-
 
-      - name: macOS Set Environment File
+      - name: "Prepare asdf"
+        run: |
+          echo "erlang ref:${{ env.OTP_VERSION }}" >> .tool-versions
+          echo "elixir ${{ env.ELIXIR_VERSION }}${{ env.ELIXIR_VARIANT }}" >> .tool-versions
+          echo "nodejs v18.7.0" >> .tool-versions
+
+      - name: macOS Install build tools
         if: matrix.generic_platform == 'macos'
         shell: bash
         run: |
           echo 'eval "$(asdf env)"' >> ~/.profile
           source ~/.profile
+          . $HOME/.asdf/asdf.sh
+          export KERL_CONFIGURE_OPTIONS="--enable-parallel-configure --with-wxdir=`echo ~/projects/wxWidgets` --disable-jit --without-javac --disable-debug CXX='gcc -std=c++11'"
+          asdf install
+      
+      - name: Install build tools
+        if: matrix.generic_platform != 'macos'
+        shell: bash
+        run: |
+          asdf install
 
-      - name: "Install build tools"
+      - name: "Compile and lint"
         shell: bash
         run: |
           . $HOME/.asdf/asdf.sh
