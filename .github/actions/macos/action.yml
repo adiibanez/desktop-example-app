@@ -42,15 +42,14 @@ runs:
       ./configure --prefix=/usr/local/wxWidgets --enable-webview --enable-compat30 --disable-shared
       make -j8
 
-  - name: "Installing Erlang (macOS)"
+  - name: "Prepare Erlang (macOS)"
     shell: bash
     if: ${{ inputs.cache-hit != 'true' }}
     run: |
       export KERL_CONFIGURE_OPTIONS="--enable-parallel-configure --with-wxdir=`echo ~/projects/wxWidgets` --disable-jit --without-javac --disable-debug CXX='gcc -std=c++11'"
-      asdf install
 
   - name: "Ensure asdf"
-    uses: asdf-vm/actions/setup@v3
+    uses: asdf-vm/actions/install@v3
 
   - name: "Compile and Lint"
     shell: bash
