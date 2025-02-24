@@ -27,10 +27,12 @@ runs:
   steps:
   - name: "Install brew deps (macOS)"
     if: ${{ inputs.cache-hit != 'true' }}
+    shell: bash
     run: brew install binutils coreutils wget automake autoconf libtool
 
   - name: "Prepare asdf (macOS)"
     if: ${{ inputs.cache-hit != 'true' }}
+    shell: bash
     run: |
       echo "erlang ref:${{ inputs.otp-version }}" >> .tool-versions
       echo "elixir ${{ inputs.elixir-version }}${{ inputs.elixir-variant }}" >> .tool-versions
@@ -42,6 +44,7 @@ runs:
 
   - name: "Install asdf plugins (macOS)"
     if: ${{ inputs.cache-hit != 'true' }}
+    shell: bash
     run: |
       . $HOME/.asdf/asdf.sh
       asdf plugin add erlang
@@ -50,6 +53,7 @@ runs:
 
   - name: "Installing wxWidgets (macOS)"
     if: ${{ inputs.cache-hit != 'true' }}
+    shell: bash
     run: |
       . $HOME/.asdf/asdf.sh
       mkdir ~/projects && cd ~/projects
@@ -62,6 +66,7 @@ runs:
 
   - name: "Installing Erlang (macOS)"
     if: ${{ inputs.cache-hit != 'true' }}
+    shell: bash
     run: |
       . $HOME/.asdf/asdf.sh
       export KERL_CONFIGURE_OPTIONS="--enable-parallel-configure --with-wxdir=`echo ~/projects/wxWidgets` --disable-jit --without-javac --disable-debug CXX='gcc -std=c++11'"
@@ -71,6 +76,7 @@ runs:
     env:
       MACOS_PEM: ${{ inputs.macos-pem }}
       MAKE: make
+    shell: bash
     run: |
       . $HOME/.asdf/asdf.sh
       echo "$MACOS_PEM" | base64 --decode > certificate.p12

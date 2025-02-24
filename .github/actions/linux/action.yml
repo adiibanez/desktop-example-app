@@ -30,6 +30,7 @@ runs:
   steps:
   - name: Install wxWidgets Dependencies (Linux)
     if: ${{ inputs.cache-hit != 'true' }}
+    shell: bash
     run: |
       sudo apt-get update
       sudo apt-get install -y \
@@ -44,6 +45,7 @@ runs:
 
   - name: Install Erlang Build Dependencies (Linux)
     if: ${{ inputs.cache-hit != 'true' }}
+    shell: bash
     run: |
       . $HOME/.asdf/asdf.sh
       sudo apt-get update
@@ -53,26 +55,8 @@ runs:
         fop \
         libxml2-utils
 
-  - name: "Prepare asdf (Linux)"
-    if: ${{ inputs.cache-hit != 'true' }}
-    run: |
-      echo "erlang ref:${{ inputs.otp-version }}" >> .tool-versions
-      echo "elixir ${{ inputs.elixir-version }}${{ inputs.elixir-variant }}" >> .tool-versions
-      echo "nodejs v18.7.0" >> .tool-versions
-
-  - name: "Install asdf & tools (Linux)"
-    if: ${{ inputs.cache-hit != 'true' }}
-    uses: asdf-vm/actions/install@v3
-
-  - name: "Install asdf plugins (Linux)"
-    if: ${{ inputs.cache-hit != 'true' }}
-    run: |
-      . $HOME/.asdf/asdf.sh
-      asdf plugin add erlang
-      asdf plugin add elixir
-      asdf plugin add nodejs
-
   - name: Linux Docker Build
+    shell: bash
     uses: whoan/docker-build-with-cache-action@master
     id: docker
     with:
@@ -95,11 +79,13 @@ runs:
       cache_to: type=local,dest=/tmp/.buildx-cache-new,mode=max
 
   - name: Move Docker Cache
+    shell: bash
     run: |
       rm -rf /tmp/.buildx-cache
       mv /tmp/.buildx-cache-new /tmp/.buildx-cache
 
   - name: Extract runfile Linux
+    shell: bash
     run: |
       . $HOME/.asdf/asdf.sh
       NAME=$(docker run --platform=linux/amd64 -i ${{steps.docker.outputs.FULL_IMAGE_NAME}} bash -c 'basename `ls /app/_build/prod/*.run`')
