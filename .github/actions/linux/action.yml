@@ -29,6 +29,9 @@ runs:
   using: "composite"
   steps:
 
+  - name: "Ensure asdf"
+    uses: asdf-vm/actions/setup@v3
+
   - name: "Debug"
     shell: bash
     run: |

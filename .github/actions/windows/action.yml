@@ -26,6 +26,9 @@ runs:
   using: "composite"
   steps:
 
+  - name: "Ensure asdf"
+    uses: asdf-vm/actions/setup@v3
+
   - name: Ensure WSL env
     uses: vedantmgoyal9/setup-wsl2@main
     if: ${{ inputs.cache-hit != 'true' }}
@@ -132,14 +135,14 @@ runs:
       make
       echo export PATH=\"\$PATH:$HOME/elixir/bin\" >> $HOME/.bashrc
 
-  # - name: "Compile and Lint"
-  #   shell: bash
-  #   run: |
-  #     asdf install
-  #     mix local.hex --force
-  #     mix local.rebar --force
-  #     mix deps.get
-  #     cd assets && npm install
+  - name: "Compile and Lint"
+    shell: bash
+    run: |
+      asdf install
+      mix local.hex --force
+      mix local.rebar --force
+      mix deps.get
+      cd assets && npm install
 
   - name: "Build Release"
     shell: msys2 {0}

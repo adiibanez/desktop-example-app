@@ -90,7 +90,7 @@ jobs:
           fi
       # if: steps.check_asdf.outputs.exists == 'false'
       - name: "Install asdf"  
-        uses: asdf-vm/actions/install@v3
+        uses: asdf-vm/actions/setup@v3
       #- name: "Install plugins"
       #  uses: asdf-vm/actions/plugins-add@v3
 
@@ -113,6 +113,8 @@ jobs:
           asdf plugin add elixir
           asdf plugin add nodejs
           asdf plugin list
+
+          ls -lah ~/.asdf/downloads/
 
       # - name: Common Build Steps
       #   uses: ./.github/actions/common

@@ -49,6 +49,9 @@ runs:
       export KERL_CONFIGURE_OPTIONS="--enable-parallel-configure --with-wxdir=`echo ~/projects/wxWidgets` --disable-jit --without-javac --disable-debug CXX='gcc -std=c++11'"
       asdf install
 
+  - name: "Ensure asdf"
+    uses: asdf-vm/actions/setup@v3
+
   - name: "Compile and Lint"
     shell: bash
     run: |
