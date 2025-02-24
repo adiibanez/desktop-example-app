@@ -49,7 +49,7 @@ runs:
 
   - name: Save msys
     if: steps.msys2.outcome == 'success'
-    uses: actions/cache@v3
+    uses: actions/cache/save@v3
     with:
       path: C:\msys64
       key: ${{ inputs.cache-name }}-msys
@@ -73,7 +73,7 @@ runs:
 
   - name: Save openssl
     if: steps.install-openssl.outcome == 'success'
-    uses: actions/cache@v3
+    uses: actions/cache/save@v3
     with:
       path: 'C:\\Program Files\\OpenSSL-Win64'
       key: ${{ inputs.cache-name }}-openssl
@@ -102,7 +102,7 @@ runs:
 
   - name: Save wxwidgets source Cache
     if: steps.download-wx.outcome == 'success'
-    uses: actions/cache@v3
+    uses: actions/cache/save@v3
     with:
       path: wxWidgets
       key: ${{ inputs.cache-name }}-wxsource-${{ inputs.wxwidgets-version }}
@@ -127,7 +127,7 @@ runs:
 
   - name: Save WebView2 Cache
     if: steps.wxWidgets-cache.outputs.cache-hit != 'true' && steps.install-webview2.outcome == 'success'
-    uses: actions/cache@v3
+    uses: actions/cache/save@v3
     with:
       path: wxWidgets\\3rdparty
       key: ${{ inputs.cache-name }}-webview2-${{ inputs.wxwidgets-version }}
@@ -151,7 +151,7 @@ runs:
 
   - name: Save wxwidgets and webview Cache
     if: steps.copy-wx.outcome == 'success'
-    uses: actions/cache@v3
+    uses: actions/cache/save@v3
     with:
       path: /mnt/c/opt/local64/pgm/wxWidgets-3.x.x
       key: ${{ inputs.cache-name }}-wxWidgets-${{ inputs.wxwidgets-version }}
@@ -187,7 +187,7 @@ runs:
 
   - name: Save Erlang Cache
     if: steps.compile-erlang.outcome == 'success'
-    uses: actions/cache@v3
+    uses: actions/cache/save@v3
     with:
       path: /mnt/c/opt/otp.exe
       key: ${{ inputs.cache-name }}-erlang-${{ inputs.otp-version }}
@@ -195,13 +195,11 @@ runs:
   - name: Run Erlang installer (Windows)
     shell: cmd
     id: run-erlang
-    if: ${{ inputs.cache-hit != 'true' }}
     run: C:\\opt\\otp.exe /S
 
   - name: Locate Erlang (Windows)
     shell: msys2 {0}
     id: locate-erlang
-    if: ${{ inputs.cache-hit != 'true' }}
     run: |
       ERTS=`find /c/Program\ Files/[Ee]rl* -type d -name "erts-*" -not -path "*lib*"`
       echo $ERTS
@@ -242,7 +240,7 @@ runs:
 
   - name: Save Elixir Cache
     if: steps.install-elixir.outcome == 'success'
-    uses: actions/cache@v3
+    uses: actions/cache/save@v3
     with:
       path: $HOME/elixir
       key: ${{ inputs.cache-name }}-elixir-${{ inputs.elixir-version }}
