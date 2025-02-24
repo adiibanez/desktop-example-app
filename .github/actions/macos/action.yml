@@ -118,7 +118,7 @@ runs:
       asdf install
 
   - name: Save asdf erlang cache
-    if: steps.erlang-elixir-install.outcome == 'success' && if: steps.wxwidgets.outcome == 'success' && steps.erlang-cache.outputs.cache-hit != 'true'
+    if: steps.erlang-elixir-install.outcome == 'success' && steps.erlang-cache.outputs.cache-hit != 'true'
     uses: actions/cache/save@v3
     with:
       path: |
