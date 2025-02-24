@@ -28,10 +28,9 @@ inputs:
 runs:
   using: "composite"
   steps:
-
   # - name: Install wxWidgets Dependencies (Linux)
-  #   if: ${{ inputs.cache-hit != 'true' }}
   #   shell: bash
+  #   if: ${{ inputs.cache-hit != 'true' }}
   #   run: |
   #     sudo apt-get update
   #     sudo apt-get install -y \
@@ -45,8 +44,8 @@ runs:
   #       libgstreamer-plugins-base1.0-dev
 
   # - name: Install Erlang Build Dependencies (Linux)
-  #   if: ${{ inputs.cache-hit != 'true' }}
   #   shell: bash
+  #   if: ${{ inputs.cache-hit != 'true' }}
   #   run: |
   #     . $HOME/.asdf/asdf.sh
   #     sudo apt-get update
@@ -57,9 +56,7 @@ runs:
   #       libxml2-utils
 
   - name: Linux Docker Build
-    shell: bash
     uses: whoan/docker-build-with-cache-action@master
-    id: docker
     with:
       username: ${{ inputs.github-actor }}
       password: "${{ inputs.github-token }}"
@@ -93,11 +90,3 @@ runs:
       NAME=`echo $NAME | tr -d '\n\r'`
       docker run --platform=linux/amd64 -i ${{steps.docker.outputs.FULL_IMAGE_NAME}} bash -c 'xxd /app/_build/prod/*.run' | xxd -r > $NAME
       chmod +x $NAME
-
-  # Archive Installer
-  - name: Archive Installer
-    uses: actions/upload-artifact@v4
-    with:
-      name: Linux-Installer
-      path: |
-        ./*.run

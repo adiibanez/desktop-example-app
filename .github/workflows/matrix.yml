@@ -1,7 +1,5 @@
 name: "Build binaries matrix"
-
 on: [ "push", "pull_request" ]
-
 env:
   OTP_GITHUB_URL: https://github.com/erlang/otp.git
   WXWIDGETS_REPO: https://github.com/wxWidgets/wxWidgets.git
@@ -14,10 +12,9 @@ jobs:
     timeout-minutes: 90
     strategy:
       matrix:
-        otp_version: [OTP-24.3.4.14] #, OTP-27.2.4]
+        otp_version: [OTP-24.3.4.14]
         elixir:
           - { version: 1.16.3, variant: "-otp-24" }
-          #- { version: 1.18.1, variant: "-otp-27" }
         platform: [ubuntu-latest, macos-14, windows-latest]
         include:
           - platform: ubuntu-latest
@@ -64,36 +61,22 @@ jobs:
             ${{ matrix.generic_platform }}-deps-${{ env.WXWIDGETS_VERSION }}-
             ${{ matrix.generic_platform }}-deps-
 
-      - name: "Fix macos ASDF issue"
+      - name: macOS Set Environment File
         if: matrix.generic_platform == 'macos'
         shell: bash
         run: |
           echo 'eval "$(asdf env)"' >> ~/.profile
           source ~/.profile
-          asdf --version
 
-      - name: Common Build Steps
-        uses: ./.github/actions/common
-        with:
-          otp-version: ${{ env.OTP_VERSION }}
-          elixir-version: ${{ env.ELIXIR_VERSION }}
-          elixir-variant: ${{ env.ELIXIR_VARIANT }}
-
-      - name: "Installing Erlang and other asdf packages (macOS)"
-        if: matrix.generic_platform == 'macos' && steps.deps-cache.outputs.cache-hit != 'true'
-        shell: bash
-        env:
-          KERL_CONFIGURE_OPTIONS: "--enable-parallel-configure --with-wxdir=`echo ~/projects/wxWidgets` --disable-jit --without-javac --disable-debug CXX='gcc -std=c++11'"
-        run: |
-          . $HOME/.asdf/asdf.sh
-          asdf install
-
-      - name: "Installing Erlang and other asdf packages (All other platforms)"
-        if: matrix.generic_platform != 'macos' && steps.deps-cache.outputs.cache-hit != 'true'
+      - name: "Install build tools"
         shell: bash
         run: |
           . $HOME/.asdf/asdf.sh
           asdf install
+          mix local.hex --force
+          mix local.rebar --force
+          mix deps.get
+          cd assets && npm install
 
       - name: Windows Build Steps
         if: matrix.generic_platform == 'windows'

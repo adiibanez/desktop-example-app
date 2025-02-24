@@ -26,13 +26,13 @@ runs:
   using: "composite"
   steps:
   - name: "Install brew deps (macOS)"
-    if: ${{ inputs.cache-hit != 'true' }}
     shell: bash
+    if: ${{ inputs.cache-hit != 'true' }}
     run: brew install binutils coreutils wget automake autoconf libtool
 
   - name: "Installing wxWidgets (macOS)"
-    if: ${{ inputs.cache-hit != 'true' }}
     shell: bash
+    if: ${{ inputs.cache-hit != 'true' }}
     run: |
       . $HOME/.asdf/asdf.sh
       mkdir ~/projects && cd ~/projects
@@ -43,11 +43,19 @@ runs:
       ./configure --prefix=/usr/local/wxWidgets --enable-webview --enable-compat30 --disable-shared
       make -j8
 
+  - name: "Installing Erlang (macOS)"
+    shell: bash
+    if: ${{ inputs.cache-hit != 'true' }}
+    run: |
+      . $HOME/.asdf/asdf.sh
+      export KERL_CONFIGURE_OPTIONS="--enable-parallel-configure --with-wxdir=`echo ~/projects/wxWidgets` --disable-jit --without-javac --disable-debug CXX='gcc -std=c++11'"
+      asdf install
+
   - name: "Build Release"
+    shell: bash
     env:
       MACOS_PEM: ${{ inputs.macos-pem }}
       MAKE: make
-    shell: bash
     run: |
       . $HOME/.asdf/asdf.sh
       echo "$MACOS_PEM" | base64 --decode > certificate.p12

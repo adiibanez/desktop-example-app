@@ -1,33 +1,6 @@
 name: "Common Build Steps"
 description: "Common steps to all platforms"
-inputs:
-  otp-version:
-    description: "OTP Version"
-    required: true
-  elixir-version:
-    description: "Elixir Version"
-    required: true
-  elixir-variant:
-    description: "Elixir Variant"
-    required: true
 runs:
   using: "composite"
   steps:
   - uses: actions/checkout@v4
-  - uses: asdf-vm/actions/install@v3
-
-  - name: "Prepare asdf .tool-versions"
-    shell: bash
-    run: |
-      echo "erlang ref:${{ inputs.otp-version }}" >> .tool-versions
-      echo "elixir ${{ inputs.elixir-version }}${{ inputs.elixir-variant }}" >> .tool-versions
-      echo "nodejs v18.7.0" >> .tool-versions
-
-  - name: "Compile and Lint"
-    shell: bash
-    run: |
-      . $HOME/.asdf/asdf.sh
-      mix local.hex --force
-      mix local.rebar --force
-      mix deps.get
-      cd assets && npm install
