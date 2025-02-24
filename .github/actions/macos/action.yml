@@ -41,8 +41,8 @@ runs:
     if: steps.brew-deps.outcome == 'success' && inputs.cache-hit != 'true'
     uses: actions/cache@v3
     with:
-      path: /usr/local/Cellar #  This is usually the default brew install location
-      key: ${{ inputs.cache-name }}-brew-deps-${{ hashFiles('/usr/local/Homebrew/Library/Taps/homebrew/homebrew-core/Formula') }} # Homebrew formula
+      path: /usr/local/Cellar
+      key: ${{ inputs.cache-name }}-brew-deps-${{ hashFiles('/usr/local/Homebrew/Library/Taps/homebrew/homebrew-core/Formula') }}
       restore-keys: |
         ${{ inputs.cache-name }}-brew-deps-
 
@@ -63,7 +63,9 @@ runs:
     if: steps.wxwidgets.outcome == 'success' && inputs.cache-hit != 'true'
     uses: actions/cache@v3
     with:
-      path: ~/projects/wxWidgets
+      path: |
+        ~/projects/wxWidgets
+        /usr/local/wxWidgets
       key: ${{ inputs.cache-name }}-wxwidgets-${{ inputs.wxwidgets-version }}-${{ hashFiles('~/projects/wxWidgets/.git/modules') }}
       restore-keys: |
         ${{ inputs.cache-name }}-wxwidgets-
@@ -81,8 +83,9 @@ runs:
     env:
       KERL_CONFIGURE_OPTIONS: ${{ steps.erlang-prep.outputs.KERL_CONFIGURE_OPTIONS }}
 
-  - name: "Compile and Lint"
+  - name: "Install erlang elixir"
     shell: bash
+    id: erlang-elixir-install
     run: |
       asdf install
       mix local.hex --force
@@ -90,13 +93,26 @@ runs:
       mix deps.get
       cd assets && npm install
 
-  - name: Save asdf Cache
-    if: steps.asdf-cache.outputs.cache-hit != 'true'
-    uses: actions/cache/save@v3
+  - name: Save asdf erlang cache
+    if: steps.erlang-elixir-install.outcome == 'success' && inputs.cache-hit != 'true'
+    uses: actions/cache@v3
     with:
       path: |
-        ~/.asdf
-      key: ${{ inputs.asdf-cache-name }}
+        ~/.asdf/installs/elixir/
+        ~/.asdf/installs/erlang/
+        ~/.asdf/shims/
+        ~/.asdf/plugins/
+      key: ${{ inputs.cache-name }}-asdf-${{ inputs.erlang-version }}-${{ hashFiles('~/.asdf/installs/erlang/') }}
+      restore-keys: |
+        ${{ inputs.cache-name }}-asdf-${{ inputs.erlang-version }}-
+
+  - name: "Compile and lint"
+    shell: bash
+    run: |
+      mix local.hex --force
+      mix local.rebar --force
+      mix deps.get
+      cd assets && npm install
 
   - name: "Build Release"
     shell: bash
