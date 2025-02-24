@@ -37,6 +37,11 @@ runs:
   #   run: |
   #     wsl.exe apt update && wsl.exe apt install -y g++-mingw-w64 gcc-mingw-w64 make autoconf unzip
 
+  - name: Search for autoconf package
+    shell: bash
+    run: |
+      pacman -Ss autoconf
+
   - name: Set up MSYS2 environment
     if: ${{ inputs.cache-hit != 'true' }}
     uses: msys2/setup-msys2@v2
