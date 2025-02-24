@@ -50,6 +50,7 @@ runs:
       asdf install
 
   - name: "Compile and Lint"
+    shell: bash
     run: |
       asdf install
       mix local.hex --force
