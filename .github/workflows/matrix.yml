@@ -1,0 +1,360 @@
+name: "Build binaries"
+
+on: [ "push", "pull_request" ]
+
+env:
+  OTP_GITHUB_URL: https://github.com/erlang/otp.git
+  WXWIDGETS_REPO: https://github.com/wxWidgets/wxWidgets.git
+  WXWIDGETS_VERSION: master
+  DOCKER_BUILDKIT: 0
+
+jobs:
+  build:
+    runs-on: ${{ matrix.platform }}  # Use the platform matrix value for runner selection
+    timeout-minutes: 90
+    strategy:
+      matrix:
+        otp_version: [OTP-24.3.4.14] #, OTP-27.2.4]
+        elixir:
+          - { version: 1.16.3, variant: "-otp-24" }
+          #- { version: 1.18.1, variant: "-otp-27" }
+        platform: [ubuntu-latest, macos-14, windows-latest]  # Define platforms
+        include:
+          - platform: ubuntu-latest
+            detailed_platform: linux-x86 #used in name and for any additional linux specific tasks that need to be run on this particular ubuntu runner
+
+          - platform: macos-14
+            detailed_platform: macos #used in name and for any additional macos specific tasks that need to be run on this particular macos runner
+          - platform: windows-latest
+            detailed_platform: windows #used in name and for any additional windows specific tasks that need to be run on this particular windows runner
+
+    name: Build Erlang/OTP ( ${{ matrix.detailed_platform }} )
+    env:
+      OTP_VERSION: ${{ matrix.otp_version }}
+      ELIXIR_VERSION: ${{ matrix.elixir.version }}
+      ELIXIR_VARIANT: ${{ matrix.elixir.variant }}
+
+    defaults:
+      run:
+        shell: bash # Setting a default for Linux and macOS
+
+    steps:
+      - name: Set platform output
+        id: set-platform
+        run: echo "::set-output name=PLATFORM::${{ matrix.detailed_platform }}"
+
+      - name: Determine cache name
+        id: cache-name
+        run: |
+          echo "::set-output name=cache_name::${{ matrix.detailed_platform }}-deps-${{ env.WXWIDGETS_VERSION }}-otp-${{ env.OTP_VERSION }}-${{ hashFiles('mix.lock', 'assets/package-lock.json') }}"
+
+      - name: Restore Build Cache
+        uses: actions/cache/restore@v3
+        id: deps-cache
+        with:
+          path: |
+            deps
+            _build
+            assets/node_modules
+            ${{ steps.set-platform.outputs.PLATFORM == 'windows' && 'c:\\opt\\otp.exe' || '' }}
+            ${{ steps.set-platform.outputs.PLATFORM == 'windows' && 'c:\\opt\\local64\\pgm\\wxWidgets-3.x.x' || '' }}
+            ${{ steps.set-platform.outputs.PLATFORM == 'macos' && '~/.asdf' || '' }}
+            ${{ steps.set-platform.outputs.PLATFORM == 'macos' && '~/projects/wxWidgets' || '' }}
+            ${{ steps.set-platform.outputs.PLATFORM == 'macos' && '/usr/local/wxWidgets' || '' }}
+          key: ${{ steps.cache-name.outputs.cache_name }}
+          restore-keys: |
+            ${{ matrix.detailed_platform }}-deps-${{ env.WXWIDGETS_VERSION }}-otp-${{ env.OTP_VERSION }}-
+            ${{ matrix.detailed_platform }}-deps-${{ env.WXWIDGETS_VERSION }}-
+            ${{ matrix.detailed_platform }}-deps-
+
+      # ==================== Windows Specific Steps ====================
+      - name: Install WSL dependencies (Windows)
+        if: matrix.detailed_platform == 'windows' && steps.deps-cache.outputs.cache-hit != 'true'
+        shell: wsl-bash {0}
+        run: apt update && apt install -y g++-mingw-w64 gcc-mingw-w64 make autoconf unzip
+
+      - name: Install openssl (Windows)
+        if: matrix.detailed_platform == 'windows' && steps.deps-cache.outputs.cache-hit != 'true'
+        shell: cmd
+        run: |
+          choco install openssl --version=1.1.1.2100
+          IF EXIST "c:\\Program Files\\OpenSSL-Win64" (move "c:\\Program Files\\OpenSSL-Win64" "c:\\OpenSSL-Win64") ELSE (move "c:\\Program Files\\OpenSSL" "c:\\OpenSSL-Win64")
+
+      - name: Download wxWidgets (Windows)
+        if: matrix.detailed_platform == 'windows' && steps.deps-cache.outputs.cache-hit != 'true'
+        shell: wsl-bash {0}
+        run: |
+          git clone ${{ env.WXWIDGETS_REPO }}
+          cd wxWidgets
+          git checkout ${{ env.WXWIDGETS_VERSION }}
+          git submodule update --init
+          sed -i -r -e 's/wxUSE_POSTSCRIPT +0/wxUSE_POSTSCRIPT 1/' include/wx/msw/setup.h
+          sed -i -r -e 's/wxUSE_WEBVIEW_EDGE +0/wxUSE_WEBVIEW_EDGE 1/' include/wx/msw/setup.h
+          sed -i -r -e 's/WXWIN_COMPATIBILITY_3_0 +0/WXWIN_COMPATIBILITY_3_0 1/' include/wx/msw/setup.h
+
+      - name: Install WebView2 (Windows)
+        if: matrix.detailed_platform == 'windows' && steps.deps-cache.outputs.cache-hit != 'true'
+        shell: cmd
+        run: |
+          cd wxWidgets\\3rdparty
+          nuget install Microsoft.Web.WebView2 -Version 1.0.864.35 -Source https://api.nuget.org/v3/index.json
+          rename Microsoft.Web.WebView2.1.0.864.35 webview2
+
+      - name: Build wxWidgets (Windows)
+        if: matrix.detailed_platform == 'windows' && steps.deps-cache.outputs.cache-hit != 'true'
+        shell: cmd
+        run: |
+          cd wxWidgets\\build\\msw
+          call "C:\\Program Files\\Microsoft Visual Studio\\2022\\Enterprise\\VC\Auxiliary\\Build\\vcvars64.bat"
+          nmake TARGET_CPU=amd64 BUILD=release SHARED=0 DIR_SUFFIX_CPU= -f makefile.vc
+
+      - name: Copy wxWidgets (Windows)
+        if: matrix.detailed_platform == 'windows' && steps.deps-cache.outputs.cache-hit != 'true'
+        shell: wsl-bash {0}
+        run: |
+          mkdir -p /mnt/c/opt/local64/pgm/
+          cp -R wxWidgets /mnt/c/opt/local64/pgm/wxWidgets-3.x.x
+
+      - name: Compile Erlang (Windows)
+        if: matrix.detailed_platform == 'windows' && steps.deps-cache.outputs.cache-hit != 'true'
+        shell: wsl-bash {0}
+        run: |
+          git clone ${{ env.OTP_GITHUB_URL }}
+          cd otp
+          git checkout ${{ env.OTP_VERSION }}
+          export ERL_TOP=`pwd`
+          export MAKEFLAGS=-j$(($(nproc) + 2))
+          export ERLC_USE_SERVER=true
+          export ERTS_SKIP_DEPEND=true
+          eval `./otp_build env_win32 x64`
+          ./otp_build all -a
+          cp /mnt/c/opt/local64/pgm/wxWidgets-3.x.x/3rdparty/webview2/runtimes/win-x64/native/WebView2Loader.dll $ERL_TOP/release/win32/erts-*/bin/
+          ./otp_build installer_win32
+          export NAME=`ls release/win32/otp*.exe`
+          cp $NAME /mnt/c/opt/otp.exe
+
+      - name: Run Erlang installer (Windows)
+        if: matrix.detailed_platform == 'windows'
+        shell: cmd
+        run: C:\\opt\\otp.exe /S
+
+      - name: "Install msys2 (Windows)"
+        if: matrix.detailed_platform == 'windows' && steps.deps-cache.outputs.cache-hit != 'true'
+        uses: msys2/setup-msys2@v2
+        with:
+          install: pacman-mirrors pkg-config base-devel mingw-w64-x86_64-toolchain mingw-w64-x86_64-go upx mingw-w64-x86_64-dlfcn unzip git tar mingw-w64-x86_64-nodejs mingw-w64-x86_64-imagemagick mingw-w64-x86_64-osslsigncode autoconf automake libtool gettext-devel gettext
+          update: false
+          release: false
+
+      - name: Locate Erlang (Windows)
+        if: matrix.detailed_platform == 'windows'
+        shell: msys2 {0}
+        run: |
+          ERTS=`find /c/Program\ Files/[Ee]rl* -type d -name "erts-*" -not -path "*lib*"`
+          echo $ERTS
+          echo export PATH=\"\$PATH:$ERTS/bin\" > $HOME/.bashrc
+
+      - name: Locate NSIS (Windows)
+        if: matrix.detailed_platform == 'windows'
+        shell: msys2 {0}
+        run: |
+          echo export PATH=\"\$PATH:/c/Program\ Files\ \(x86\)/NSIS\" >> $HOME/.bashrc
+
+      - name: Install Elixir (Windows)
+        if: matrix.detailed_platform == 'windows' && steps.deps-cache.outputs.cache-hit != 'true'
+        shell: msys2 {0}
+        run: |
+          cd $HOME
+          git clone https://github.com/elixir-lang/elixir.git
+          cd elixir
+          git checkout v${{ env.ELIXIR_VERSION }}
+          make
+          echo export PATH=\"\$PATH:$HOME/elixir/bin\" >> $HOME/.bashrc
+
+      # ==================== macOS Specific Steps ====================
+
+      - name: "Install brew deps (macOS)"
+        if: matrix.detailed_platform == 'macos' && steps.deps-cache.outputs.cache-hit != 'true'
+        run: |
+          brew install binutils coreutils wget automake autoconf libtool
+
+      - name: "Prepare asdf (macOS)"
+        if: matrix.detailed_platform == 'macos' && steps.deps-cache.outputs.cache-hit != 'true'
+        run: |
+          echo "erlang ref:${{ env.OTP_VERSION }}" >> .tool-versions
+          echo "elixir ${{ env.ELIXIR_VERSION }}${{ env.ELIXIR_VARIANT }}" >> .tool-versions
+          echo "nodejs v18.7.0" >> .tool-versions
+
+      - name: "Install asdf & tools (macOS)"
+        if: matrix.detailed_platform == 'macos' && steps.deps-cache.outputs.cache-hit != 'true'
+        uses: asdf-vm/actions/install@v3
+
+      - name: "Install asdf plugins (macOS)"
+        if: matrix.detailed_platform == 'macos' && steps.deps-cache.outputs.cache-hit != 'true'
+        run: |
+          . $HOME/.asdf/asdf.sh
+          asdf plugin add erlang
+          asdf plugin add elixir
+          asdf plugin add nodejs
+
+      - name: "Installing wxWidgets (macOS)"
+        if: matrix.detailed_platform == 'macos' && steps.deps-cache.outputs.cache-hit != 'true'
+        run: |
+          . $HOME/.asdf/asdf.sh
+          mkdir ~/projects && cd ~/projects
+          git clone ${{ env.WXWIDGETS_REPO }}
+          cd wxWidgets;
+          git checkout ${{ env.WXWIDGETS_VERSION }}
+          git submodule update --init
+          ./configure --prefix=/usr/local/wxWidgets --enable-webview --enable-compat30 --disable-shared
+          make -j8
+
+      - name: "Installing Erlang (macOS)"
+        if: matrix.detailed_platform == 'macos' && steps.deps-cache.outputs.cache-hit != 'true'
+        run: |
+          . $HOME/.asdf/asdf.sh
+          export KERL_CONFIGURE_OPTIONS="--enable-parallel-configure --with-wxdir=`echo ~/projects/wxWidgets` --disable-jit --without-javac --disable-debug CXX='gcc -std=c++11'"
+          asdf install
+
+      # ==================== Linux Specific Steps ====================
+
+      - name: Install Erlang Build Dependencies (Linux)
+        if: matrix.detailed_platform == 'linux-x86' && steps.deps-cache.outputs.cache-hit != 'true'
+        run: |
+          . $HOME/.asdf/asdf.sh
+          sudo apt-get update
+          sudo apt-get install -y \
+            openjdk-11-jdk \
+            xsltproc \
+            fop \
+            libxml2-utils
+
+      # Existing asdf setup with cache condition (Linux)
+      - name: "Prepare asdf (Linux)"
+        if: matrix.detailed_platform == 'linux-x86' && steps.deps-cache.outputs.cache-hit != 'true'
+        run: |
+          echo "erlang ref:${{ env.OTP_VERSION }}" >> .tool-versions
+          echo "elixir ${{ env.ELIXIR_VERSION }}${{ env.ELIXIR_VARIANT }}" >> .tool-versions
+          echo "nodejs v18.7.0" >> .tool-versions
+
+      # Install asdf & tools (Linux)
+      - name: "Install asdf & tools (Linux)"
+        if: matrix.detailed_platform == 'linux-x86' && steps.deps-cache.outputs.cache-hit != 'true'
+        uses: asdf-vm/actions/install@v3
+
+      # Install asdf plugins (Linux)
+      - name: "Install asdf plugins (Linux)"
+        if: matrix.detailed_platform == 'linux-x86' && steps.deps-cache.outputs.cache-hit != 'true'
+        run: |
+          . $HOME/.asdf/asdf.sh
+          asdf plugin add erlang
+          asdf plugin add elixir
+          asdf plugin add nodejs
+
+      # ==================== Common Steps ====================
+
+      - uses: actions/checkout@v4
+
+      - name: "Compile and Lint"
+        run: |
+          . $HOME/.asdf/asdf.sh
+          # why?
+          asdf install
+          mix local.hex --force
+          mix local.rebar --force
+          mix deps.get
+          cd assets && npm install
+
+      - name: "Build Release"
+        env:
+          MACOS_PEM: ${{ secrets.MACOS_PEM }}
+          MAKE: make
+          REBAR_TARGET_ARCH_WORDSIZE: 64
+          REBAR_TARGET_ARCH: x86_64-w64-mingw32
+          WIN32_KEY_PASS: ${{ secrets.WIN32_KEY_PASS }}
+        run: |
+          . $HOME/.asdf/asdf.sh
+          ${{ matrix.detailed_platform == 'macos' && 'echo "$MACOS_PEM" | base64 --decode > certificate.p12' || '' }}
+          ${{ matrix.detailed_platform == 'macos' && 'mix desktop.create_keychain maybe' || '' }}
+          ${{ matrix.detailed_platform == 'macos' && 'export MACOS_KEYCHAIN="$HOME/Library/Keychains/macos-build.keychain"' || '' }}
+          ${{ matrix.detailed_platform == 'macos' && 'export LD_LIBRARY_PATH="$HOME/projects/wxWidgets/lib/"' || '' }}
+          ${{ matrix.detailed_platform == 'macos' && 'security list-keychains -s $HOME/Library/Keychains/macos-build.keychain"' || '' }}
+          ${{ matrix.detailed_platform == 'macos' && 'security unlock-keychain -p actions $HOME/Library/Keychains/macos-build.keychain"' || '' }}
+          ${{ matrix.detailed_platform == 'macos' && 'security set-keychain-settings -t 3600 -u $HOME/Library/Keychains/macos-build.keychain"' || '' }}
+          ${{ matrix.detailed_platform == 'macos' && 'security import certificate.p12 -k "$MACOS_KEYCHAIN" -P "" -T /usr/bin/codesign' || '' }}
+          ${{ matrix.detailed_platform == 'macos' && 'security find-identity -v -p codesigning' || '' }}
+
+          mix assets.deploy
+          mix desktop.installer
+
+      # Update Docker build to use cache
+      - name: Linux Docker Build
+        if: matrix.detailed_platform == 'linux-x86'
+        uses: whoan/docker-build-with-cache-action@master
+        id: docker
+        with:
+          username: ${{ github.actor }}
+          password: "${{ secrets.GITHUB_TOKEN }}"
+          registry: docker.pkg.github.com
+          image_name: linux_installer
+          dockerfile: scripts/Dockerfile
+          build_extra_args: |
+            --build-arg=BASE_IMAGE=ubuntu:18.04
+            --platform=linux/amd64
+            --build-arg=PLATFORM=amd64
+            --build-arg=WXWIDGETS_REPO=${{ env.WXWIDGETS_REPO }}
+            --build-arg=WXWIDGETS_VERSION=${{ env.WXWIDGETS_VERSION }}
+            --build-arg=OTP_VERSION=${{ env.OTP_VERSION }}
+            --build-arg=OTP_GITHUB_URL=${{ env.OTP_GITHUB_URL }}
+            --build-arg=ELIXIR_VERSION=${{ env.ELIXIR_VERSION }}
+            --build-arg=ELIXIR_VARIANT=${{ env.ELIXIR_VARIANT }}
+          cache_from: type=local,src=/tmp/.buildx-cache
+          cache_to: type=local,dest=/tmp/.buildx-cache-new,mode=max
+
+      # Move Docker cache
+      - name: Move Docker Cache
+        if: matrix.detailed_platform == 'linux-x86'
+        run: |
+          rm -rf /tmp/.buildx-cache
+          mv /tmp/.buildx-cache-new /tmp/.buildx-cache
+
+      # Extract runfile
+      - name: Extract runfile Linux
+        if: matrix.detailed_platform == 'linux-x86'
+        run: |
+          . $HOME/.asdf/asdf.sh
+          NAME=$(docker run --platform=linux/amd64 -i ${{steps.docker.outputs.FULL_IMAGE_NAME}} bash -c 'basename `ls /app/_build/prod/*.run`')
+          NAME=`echo $NAME | tr -d '\n\r'`
+          docker run --platform=linux/amd64 -i ${{steps.docker.outputs.FULL_IMAGE_NAME}} bash -c 'xxd /app/_build/prod/*.run' | xxd -r > $NAME
+          chmod +x $NAME
+
+      - name: Archive Installer
+        if: matrix.detailed_platform != 'linux-x86'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.detailed_platform }}-Installer
+          path: |
+            _build/prod/*.${{ matrix.detailed_platform == 'windows' && 'exe' || 'dmg' }}
+
+      - name: Archive Installer Linux
+        if: matrix.detailed_platform == 'linux-x86'
+        uses: actions/upload-artifact@v4
+        with:
+          name: Linux-Installer
+          path: |
+            ./*.run
+
+      - name: Save Build Cache
+        if: steps.deps-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v3
+        with:
+          path: |
+            deps
+            _build
+            assets/node_modules
+            ${{ steps.set-platform.outputs.PLATFORM == 'windows' && 'c:\\opt\\otp.exe' || '' }}
+            ${{ steps.set-platform.outputs.PLATFORM == 'windows' && 'c:\\opt\\local64\\pgm\\wxWidgets-3.x.x' || '' }}
+            ${{ steps.set-platform.outputs.PLATFORM == 'macos' && '~/.asdf' || '' }}
+            ${{ steps.set-platform.outputs.PLATFORM == 'macos' && '~/projects/wxWidgets' || '' }}
+            ${{ steps.set-platform.outputs.PLATFORM == 'macos' && '/usr/local/wxWidgets' || '' }}
+          key: ${{ steps.cache-name.outputs.cache_name }}
