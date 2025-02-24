@@ -62,6 +62,8 @@ jobs:
             ${{ matrix.generic_platform }}-deps-${{ env.WXWIDGETS_VERSION }}-
             ${{ matrix.generic_platform }}-deps-
 
+      - uses: actions/checkout@v4 # MUST be before ANY local actions
+
       - name: Common Build Steps
         uses: ./.github/actions/common
         with:
