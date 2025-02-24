@@ -144,14 +144,12 @@ jobs:
       - name: "Install asdf"
         #uses: asdf-vm/actions/install@v3
         uses: asdf-vm/actions/setup@v3
-      - name: "Install plugins"
-        uses: asdf-vm/actions/plugins-add@v3
-
+      #- name: "Install plugins"
+      #  uses: asdf-vm/actions/plugins-add@v3
 
       - name: Set up build tools
         shell: bash
         run: |
-          . $HOME/.asdf/asdf.sh
           asdf plugin add erlang
           asdf plugin add elixir
           asdf plugin add nodejs
@@ -168,7 +166,6 @@ jobs:
       - name: "Compile and Lint"
         shell: bash
         run: |
-          # source $HOME/.asdf/asdf.sh
           asdf install
           mix local.hex --force
           mix local.rebar --force

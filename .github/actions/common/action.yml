@@ -3,4 +3,7 @@ description: "Common steps to all platforms"
 runs:
   using: "composite"
   steps:
-  - uses: actions/checkout@v4
+  - name: "Hello commons"
+    shell: bash
+    if: ${{ inputs.cache-hit != 'true' }}
+    run: echo "Cache miss"

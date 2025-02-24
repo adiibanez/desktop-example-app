@@ -34,7 +34,6 @@ runs:
     shell: bash
     if: ${{ inputs.cache-hit != 'true' }}
     run: |
-      . $HOME/.asdf/asdf.sh
       mkdir ~/projects && cd ~/projects
       git clone ${{ inputs.wxwidgets-repo }}
       cd wxWidgets;
@@ -47,7 +46,6 @@ runs:
     shell: bash
     if: ${{ inputs.cache-hit != 'true' }}
     run: |
-      . $HOME/.asdf/asdf.sh
       export KERL_CONFIGURE_OPTIONS="--enable-parallel-configure --with-wxdir=`echo ~/projects/wxWidgets` --disable-jit --without-javac --disable-debug CXX='gcc -std=c++11'"
       asdf install
 
@@ -57,7 +55,6 @@ runs:
       MACOS_PEM: ${{ inputs.macos-pem }}
       MAKE: make
     run: |
-      . $HOME/.asdf/asdf.sh
       echo "$MACOS_PEM" | base64 --decode > certificate.p12
       mix desktop.create_keychain maybe
       export MACOS_KEYCHAIN="$HOME/Library/Keychains/macos-build.keychain"

@@ -85,7 +85,6 @@ runs:
   - name: Extract runfile Linux
     shell: bash
     run: |
-      . $HOME/.asdf/asdf.sh
       NAME=$(docker run --platform=linux/amd64 -i ${{steps.docker.outputs.FULL_IMAGE_NAME}} bash -c 'basename `ls /app/_build/prod/*.run`')
       NAME=`echo $NAME | tr -d '\n\r'`
       docker run --platform=linux/amd64 -i ${{steps.docker.outputs.FULL_IMAGE_NAME}} bash -c 'xxd /app/_build/prod/*.run' | xxd -r > $NAME
