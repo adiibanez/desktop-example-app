@@ -75,7 +75,12 @@ runs:
     id: erlang-prep
     run: |
       echo "Setting KERL_CONFIGURE_OPTIONS"
+      ls -lah /opt/homebrew/Cellar/libtiff/
+      find /opt/homebrew/Cellar/libtiff/ -name libtiff.h
       export KERL_CONFIGURE_OPTIONS="--enable-parallel-configure --with-wxdir=`echo ~/projects/wxWidgets` --disable-jit --without-javac --disable-debug CXX='gcc -std=c++11'"
+      export CFLAGS: -I/opt/homebrew/Cellar/libtiff/4.6.0/include
+      export CXXFLAGS: -I/opt/homebrew/Cellar/libtiff/4.6.0/include
+      LDFLAGS: -L/opt/homebrew/Cellar/libtiff/4.6.0/lib
       echo "KERL_CONFIGURE_OPTIONS is now $KERL_CONFIGURE_OPTIONS"
 
   - name: "Ensure asdf"

@@ -78,8 +78,8 @@ runs:
       path: 'C:\\Program Files\\OpenSSL-Win64'
       key: ${{ inputs.cache-name }}-openssl
 
-  - name: Load wxwidgets
-    id: wxwidgets-source
+  - name: Load wxwidgets source
+    id: wxwidgets-source-cache
     uses: actions/cache@v3
     with:
       path: wxWidgets
@@ -88,12 +88,12 @@ runs:
         ${{ inputs.cache-name }}-wxsource-
 
   - name: Download wxWidgets (Windows)
-    #shell: wsl-bash {0}
+    if: steps.wxwidgets-source-cache.outputs.cache-hit != 'true'
     shell: bash
     id: download-wx
     if: steps.wxwidgets-source.outputs.cache-hit != 'true'
     run: |
-      git clone ${{ inputs.wxwidgets-repo }}
+      git clone ${{ inputs.wxwidgets-repo }} --branch v3.2.4-with-msvs2012-fix
       cd wxWidgets
       git checkout ${{ inputs.wxwidgets-version }}
       git submodule update --init
@@ -101,15 +101,26 @@ runs:
       sed -i -r -e 's/wxUSE_WEBVIEW_EDGE +0/wxUSE_WEBVIEW_EDGE 1/' include/wx/msw/setup.h
       sed -i -r -e 's/WXWIN_COMPATIBILITY_3_0 +0/WXWIN_COMPATIBILITY_3_0 1/' include/wx/msw/setup.h
 
-  - name: Save wxwidgets
+  - name: Save wxwidgets source Cache
     if: steps.download-wx.outcome == 'success'
     uses: actions/cache@v3
     with:
       path: wxWidgets
       key: ${{ inputs.cache-name }}-wxsource-${{ inputs.wxwidgets-version }}
 
+  - name: Compile wxWidgets and WebView2 Cache
+    id: wxWidgets-cache
+    uses: actions/cache@v3
+    with:
+      path: /mnt/c/opt/local64/pgm/wxWidgets-3.x.x
+      key: ${{ inputs.cache-name }}-wxWidgets-${{ inputs.wxwidgets-version }}
+      restore-keys: |
+        ${{ inputs.cache-name }}-wxWidgets-
+
   - name: Install WebView2 (Windows)
     shell: cmd
+    if: steps.wxwidgets-source-cache.outputs.cache-hit != 'true'
+    if: steps.wxWidgets-cache.outputs.cache-hit != 'true'
     id: install-webview2
     if: ${{ inputs.cache-hit != 'true' }}
     run: |
@@ -117,10 +128,17 @@ runs:
       nuget install Microsoft.Web.WebView2 -Version 1.0.864.35 -Source https://api.nuget.org/v3/index.json
       rename Microsoft.Web.WebView2.1.0.864.35 webview2
 
+  - name: Save WebView2 Cache
+    if: steps.wxWidgets-cache.outputs.cache-hit != 'true' && steps.install-webview2.outcome == 'success'
+    uses: actions/cache@v3
+    with:
+      path: wxWidgets\\3rdparty
+      key: ${{ inputs.cache-name }}-webview2-${{ inputs.wxwidgets-version }}
+
   - name: Build wxWidgets (Windows)
     shell: cmd
+    if: steps.wxWidgets-cache.outputs.cache-hit != 'true'
     id: build-wx
-    if: ${{ inputs.cache-hit != 'true' }}
     run: |
       cd wxWidgets\\build\\msw
       call "C:\\Program Files\\Microsoft Visual Studio\\2022\\Enterprise\\VC\Auxiliary\\Build\\vcvars64.bat"
@@ -129,15 +147,32 @@ runs:
   - name: Copy wxWidgets (Windows)
     shell: bash
     id: copy-wx
-    if: steps.build-wx.outcome == 'success'
+    if: steps.wxWidgets-cache.outputs.cache-hit != 'true' && steps.build-wx.outcome == 'success'
     run: |
       mkdir -p /mnt/c/opt/local64/pgm/
       cp -R wxWidgets /mnt/c/opt/local64/pgm/wxWidgets-3.x.x
 
+  - name: Save wxwidgets and webview Cache
+    if: steps.copy-wx.outcome == 'success'
+    uses: actions/cache@v3
+    with:
+      path: /mnt/c/opt/local64/pgm/wxWidgets-3.x.x
+      key: ${{ inputs.cache-name }}-wxWidgets-${{ inputs.wxwidgets-version }}
+
+  - name: Compile Erlang Cache
+    id: erlang-cache
+    uses: actions/cache@v3
+    with:
+      path: /mnt/c/opt/otp.exe
+      key: ${{ inputs.cache-name }}-erlang-${{ inputs.otp-version  }}
+      restore-keys: |
+        ${{ inputs.cache-name }}-erlang-${{ inputs.otp-version  }}
+        ${{ inputs.cache-name }}-erlang-
+
   - name: Compile Erlang (Windows)
     shell: bash
     id: compile-erlang
-    if: ${{ inputs.cache-hit != 'true' }}
+    if: steps.erlang-cache.outputs.cache-hit != 'true'
     run: |
       git clone ${{ env.OTP_GITHUB_URL }}
       cd otp
@@ -152,6 +187,13 @@ runs:
       ./otp_build installer_win32
       export NAME=`ls release/win32/otp*.exe`
       cp $NAME /mnt/c/opt/otp.exe
+
+  - name: Save Erlang Cache
+    if: steps.compile-erlang.outcome == 'success'
+    uses: actions/cache@v3
+    with:
+      path: /mnt/c/opt/otp.exe
+      key: ${{ inputs.cache-name }}-erlang-${{ inputs.otp-version }}
 
   - name: Run Erlang installer (Windows)
     shell: cmd
@@ -175,6 +217,20 @@ runs:
     run: |
       echo export PATH=\"\$PATH:/c/Program\ Files\ \(x86\)/NSIS\" >> $HOME/.bashrc
 
+  - name: Compile Elixir Cache
+    id: elixir-cache
+    uses: actions/cache@v3
+    with:
+      path: $HOME/elixir/
+      key: ${{ inputs.cache-name }}-erlang-${{ inputs.otp-version  }}
+      restore-keys: |
+        ${{ inputs.cache-name }}-elixir-${{ inputs.elixir-version  }}
+        ${{ inputs.cache-name }}-elixir-
+
+  - name: Print HOME directory
+    shell: bash
+    run: echo "HOME directory $HOME"
+
   - name: Install Elixir (Windows)
     shell: msys2 {0}
     id: install-elixir
@@ -186,6 +242,13 @@ runs:
       git checkout v${{ inputs.elixir-version }}
       make
       echo export PATH=\"\$PATH:$HOME/elixir/bin\" >> $HOME/.bashrc
+
+  - name: Save Elixir Cache
+    if: steps.install-elixir.outcome == 'success'
+    uses: actions/cache@v3
+    with:
+      path: $HOME/elixir
+      key: ${{ inputs.cache-name }}-elixir-${{ inputs.elixir-version }}
 
   - name: "Compile and Lint"
     shell: bash

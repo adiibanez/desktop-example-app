@@ -5,7 +5,7 @@ on: [ "push", "pull_request" ]
 env:
   OTP_GITHUB_URL: https://github.com/erlang/otp.git
   WXWIDGETS_REPO: https://github.com/wxWidgets/wxWidgets.git
-  WXWIDGETS_VERSION: v3.2.4-with-msvs2012-fix # master
+  WXWIDGETS_VERSION: master
   DOCKER_BUILDKIT: 0
   ACTIONS_STEP_DEBUG: true
 
@@ -55,6 +55,9 @@ jobs:
             ~/.asdf
             ${{ startsWith(matrix.platform, 'windows-') && 'c:\\opt\\otp.exe' || '' }}
             ${{ startsWith(matrix.platform, 'windows-') && 'c:\\opt\\local64\\pgm\\wxWidgets-3.x.x' || '' }}
+            ${{ startsWith(matrix.platform, 'windows-') && 'c:\\Program Files\\OpenSSL-Win64' || '' }}
+            ${{ startsWith(matrix.platform, 'windows-') && '$HOME/elixir' || '' }}
+            
             ${{ startsWith(matrix.platform, 'macos-') && '~/projects/wxWidgets' || '' }}
             ${{ startsWith(matrix.platform, 'macos-') && '/usr/local/wxWidgets' || '' }}
             ${{ startsWith(matrix.platform, 'macos-') && '/usr/local/Cellar' || '' }}
@@ -147,6 +150,7 @@ jobs:
             ~/.asdf
             ${{ startsWith(matrix.platform, 'windows-') && 'c:\\opt\\otp.exe' || '' }}
             ${{ startsWith(matrix.platform, 'windows-') && 'c:\\opt\\local64\\pgm\\wxWidgets-3.x.x' || '' }}
+            ${{ startsWith(matrix.platform, 'windows-') && 'c:\\Program Files\\OpenSSL-Win64' || '' }}
             ${{ startsWith(matrix.platform, 'macos-') && '~/projects/wxWidgets' || '' }}
             ${{ startsWith(matrix.platform, 'macos-') && '/usr/local/wxWidgets' || '' }}
             ${{ startsWith(matrix.platform, 'macos-') && '/usr/local/Cellar' || '' }}
