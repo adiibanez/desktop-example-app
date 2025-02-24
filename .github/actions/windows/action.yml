@@ -25,6 +25,12 @@ inputs:
 runs:
   using: "composite"
   steps:
+
+  - name: Ensure WSL
+    uses: vedantmgoyal9/setup-wsl2@main
+    if: ${{ inputs.cache-hit != 'true' }}
+    run: apt update && apt install -y g++-mingw-w64 gcc-mingw-w64 make autoconf unzip
+
   # - name: Install WSL dependencies (Windows)
   #   shell: wsl-bash {0}
   #   #shell: bash
@@ -42,15 +48,15 @@ runs:
   #   run: |
   #     pacman -Ss autoconf
 
-  - name: Set up MSYS2 environment
-    if: ${{ inputs.cache-hit != 'true' }}
-    uses: msys2/setup-msys2@v2
-    with:
-      update: true
-      #install: g++-mingw-w64-x86_64 gcc-mingw-w64-x86_64 make autoconf unzip
-      install: mingw-w64-x86_64-gcc mingw-w64-x86_64-make autotools unzip
-      # mingw-w64-x86_64-autoconf
-      platform: mingw64
+  # - name: Set up MSYS2 environment
+  #   if: ${{ inputs.cache-hit != 'true' }}
+  #   uses: msys2/setup-msys2@v2
+  #   with:
+  #     update: true
+  #     #install: g++-mingw-w64-x86_64 gcc-mingw-w64-x86_64 make autoconf unzip
+  #     install: mingw-w64-x86_64-gcc mingw-w64-x86_64-make autotools unzip
+  #     # mingw-w64-x86_64-autoconf
+  #     platform: mingw64
 
   - name: Install openssl (Windows)
     shell: cmd
