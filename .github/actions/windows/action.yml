@@ -37,10 +37,10 @@ runs:
   #   run: |
   #     wsl.exe apt update && wsl.exe apt install -y g++-mingw-w64 gcc-mingw-w64 make autoconf unzip
 
-  - name: Search for autoconf package
-    shell: bash
-    run: |
-      pacman -Ss autoconf
+  # - name: Search for autoconf package
+  #   shell: bash
+  #   run: |
+  #     pacman -Ss autoconf
 
   - name: Set up MSYS2 environment
     if: ${{ inputs.cache-hit != 'true' }}
@@ -48,7 +48,8 @@ runs:
     with:
       update: true
       #install: g++-mingw-w64-x86_64 gcc-mingw-w64-x86_64 make autoconf unzip
-      install: mingw-w64-x86_64-gcc mingw-w64-x86_64-make mingw-w64-x86_64-autoconf unzip
+      install: mingw-w64-x86_64-gcc mingw-w64-x86_64-make unzip
+      # mingw-w64-x86_64-autoconf
       platform: mingw64
 
   - name: Install openssl (Windows)
