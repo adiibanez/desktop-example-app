@@ -128,23 +128,22 @@ runs:
       git checkout v${{ inputs.elixir-version }}
       make
       echo export PATH=\"\$PATH:$HOME/elixir/bin\" >> $HOME/.bashrc
+  # - name: "Compile and Lint"
+  #   shell: bash
+  #   run: |
+  #     asdf install
+  #     mix local.hex --force
+  #     mix local.rebar --force
+  #     mix deps.get
+  #     cd assets && npm install
 
-  - name: "Compile and Lint"
-    shell: bash
-    run: |
-      asdf install
-      mix local.hex --force
-      mix local.rebar --force
-      mix deps.get
-      cd assets && npm install
-
-  - name: "Build Release"
-    shell: msys2 {0}
-    env:
-      MAKE: make
-      REBAR_TARGET_ARCH_WORDSIZE: "64"
-      REBAR_TARGET_ARCH: x86_64-w64-mingw32
-      WIN32_KEY_PASS: ${{ inputs.win32-key-pass }}
-    run: |
-      mix assets.deploy
-      mix desktop.installer
+  # - name: "Build Release"
+  #   shell: msys2 {0}
+  #   env:
+  #     MAKE: make
+  #     REBAR_TARGET_ARCH_WORDSIZE: "64"
+  #     REBAR_TARGET_ARCH: x86_64-w64-mingw32
+  #     WIN32_KEY_PASS: ${{ inputs.win32-key-pass }}
+  #   run: |
+  #     mix assets.deploy
+  #     mix desktop.installer
