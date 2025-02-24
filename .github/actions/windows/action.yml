@@ -129,7 +129,7 @@ runs:
       echo export PATH=\"\$PATH:$HOME/elixir/bin\" >> $HOME/.bashrc
 
   - name: "Compile and Lint"
-    shell: wsl-bash
+    shell: bash
     run: |
       asdf install
       mix local.hex --force

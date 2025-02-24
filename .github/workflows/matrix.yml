@@ -82,10 +82,9 @@ jobs:
             ${{ steps.set-platform.outputs.PLATFORM == 'macos' && '/usr/local/wxWidgets' || '' }}
           key: ${{ steps.cache-name.outputs.cache_name }}
           restore-keys: |
-            ${{ matrix.platform }}-deps-${{ env.WXWIDGETS_VERSION }}-otp-${{ env.OTP_VERSION }}-
-                  
-      # ${{ matrix.generic_platform }}-deps-${{ env.WXWIDGETS_VERSION }}-
-      # ${{ matrix.generic_platform }}-deps-
+            ${{ matrix.platform }}-deps-${{ env.WXWIDGETS_VERSION }}-otp-${{ env.OTP_VERSION }}-      
+            ${{ matrix.generic_platform }}-deps-${{ env.WXWIDGETS_VERSION }}-
+            ${{ matrix.generic_platform }}-deps-
 
 
       # - name: Install ASDF (Linux)
