@@ -13,7 +13,9 @@ jobs:
   build:
     runs-on: ${{ matrix.platform }}
     timeout-minutes: 90
+    
     strategy:
+      fail-fast: false
       matrix:
         otp_version: [OTP-24.3.4.14]
         elixir:
