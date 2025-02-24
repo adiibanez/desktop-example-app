@@ -62,17 +62,41 @@ jobs:
             ${{ matrix.generic_platform }}-deps-
 
 
-      - name: Setup asdf
-        uses: asdf-vm/actions/setup@v1
+      # - name: Setup asdf
+      #   uses: asdf-vm/actions/setup@v1
 
-      # - name: Cache asdf
-      #   uses: actions/cache@v2
-      #   with:
-      #     path: |
-      #       /home/runner/.asdf
-      #     key: ${{ runner.os }}-asdf-${{ hashFiles('**/.tool-versions') }}
-      #     restore-keys: |
-      #       ${{ runner.os }}-asdf-
+      - name: Install ASDF (Linux)
+        if: matrix.generic_platform == 'linux-x86'
+        shell: bash
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y git curl
+          git clone https://github.com/asdf-vm/asdf.git ~/.asdf --branch v0.8.1  # Use a stable version
+          echo ". $HOME/.asdf/asdf.sh" >> ~/.profile
+          echo "export ASDF_DIR=$HOME/.asdf" >> ~/.profile
+          source ~/.profile
+
+      - name: Install ASDF (macOS)
+        if: matrix.generic_platform == 'macos'
+        shell: bash
+        run: |
+          brew install coreutils automake autoconf libtool
+          git clone https://github.com/asdf-vm/asdf.git ~/.asdf --branch v0.8.1 # Use a stable version
+          echo ". $HOME/.asdf/asdf.sh" >> ~/.profile
+          echo "export ASDF_DIR=$HOME/.asdf" >> ~/.profile
+          source ~/.profile
+
+      - name: Install ASDF (Windows)
+        if: matrix.generic_platform == 'windows'
+        shell: bash
+        run: |
+          # Assumes WSL is configured.  Adjust as needed for other environments.
+          sudo apt-get update
+          sudo apt-get install -y git curl
+          git clone https://github.com/asdf-vm/asdf.git ~/.asdf --branch v0.8.1 # Use a stable version
+          echo ". $HOME/.asdf/asdf.sh" >> ~/.profile
+          echo "export ASDF_DIR=$HOME/.asdf" >> ~/.profile
+          source ~/.profile
 
       - name: "Prepare asdf"
         run: |
@@ -89,8 +113,18 @@ jobs:
           # . $HOME/.asdf/asdf.sh
           export KERL_CONFIGURE_OPTIONS="--enable-parallel-configure --with-wxdir=`echo ~/projects/wxWidgets` --disable-jit --without-javac --disable-debug CXX='gcc -std=c++11'"
 
-      - name: "Install dependencies in .tool-versions"
-        uses: asdf-vm/actions/install@v1
+
+      - name: "Install asdf dependencies"
+        shell: bash
+        run: |
+         . $HOME/.asdf/asdf.sh
+          asdf plugin add erlang
+          asdf plugin add elixir
+          asdf plugin add nodejs
+          asdf install
+
+      # - name: "Install dependencies in .tool-versions"
+      #   uses: asdf-vm/actions/install@v1
       
       # - name: Install build tools
       #   if: matrix.generic_platform != 'macos'
