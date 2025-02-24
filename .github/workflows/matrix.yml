@@ -131,9 +131,10 @@ jobs:
 
       - name: "Prepare asdf"
         run: |
-          echo "erlang ref:${{ env.OTP_VERSION }}" >> .tool-versions
-          echo "elixir ${{ env.ELIXIR_VERSION }}${{ env.ELIXIR_VARIANT }}" >> .tool-versions
-          echo "nodejs v18.7.0" >> .tool-versions
+          echo "erlang ref:${{ env.OTP_VERSION }}" >> ~/.tool-versions
+          echo "elixir ${{ env.ELIXIR_VERSION }}${{ env.ELIXIR_VARIANT }}" >> ~/.tool-versions
+          echo "nodejs v18.7.0" >> ~/.tool-versions
+          cat ~/.tool-versions
 
       - name: "Installing Erlang"
         if: matrix.generic_platform == 'macos'
