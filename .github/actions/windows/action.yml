@@ -26,9 +26,10 @@ runs:
   using: "composite"
   steps:
   - name: Install WSL dependencies (Windows)
-    shell: wsl-bash {0}
+    #shell: wsl-bash {0}
+    shell: bash
     if: ${{ inputs.cache-hit != 'true' }}
-    run: apt update && apt install -y g++-mingw-w64 gcc-mingw-w64 make autoconf unzip
+    run: wsl apt update && apt install -y g++-mingw-w64 gcc-mingw-w64 make autoconf unzip
 
   - name: Install openssl (Windows)
     shell: cmd
