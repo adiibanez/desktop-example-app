@@ -148,14 +148,14 @@ jobs:
         uses: asdf-vm/actions/plugins-add@v3
 
 
-      # - name: Set up build tools
-      #   shell: bash
-      #   run: |
-      #     . $HOME/.asdf/asdf.sh
-      #     asdf plugin add erlang
-      #     asdf plugin add elixir
-      #     asdf plugin add nodejs
-      #     asdf install
+      - name: Set up build tools
+        shell: bash
+        run: |
+          . $HOME/.asdf/asdf.sh
+          asdf plugin add erlang
+          asdf plugin add elixir
+          asdf plugin add nodejs
+          asdf install
 
       - name: Common Build Steps
         uses: ./.github/actions/common
