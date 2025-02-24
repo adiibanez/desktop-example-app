@@ -31,33 +31,6 @@ runs:
     if: ${{ inputs.cache-hit != 'true' }}
     run: apt update && apt install -y g++-mingw-w64 gcc-mingw-w64 make autoconf unzip
 
-  # - name: Install WSL dependencies (Windows)
-  #   shell: wsl-bash {0}
-  #   #shell: bash
-  #   if: ${{ inputs.cache-hit != 'true' }}
-  #   run: apt update && apt install -y g++-mingw-w64 gcc-mingw-w64 make autoconf unzip
-
-  # - name: Install WSL dependencies (Windows)
-  #   if: ${{ inputs.cache-hit != 'true' }}
-  #   shell: pwsh
-  #   run: |
-  #     wsl.exe apt update && wsl.exe apt install -y g++-mingw-w64 gcc-mingw-w64 make autoconf unzip
-
-  # - name: Search for autoconf package
-  #   shell: bash
-  #   run: |
-  #     pacman -Ss autoconf
-
-  # - name: Set up MSYS2 environment
-  #   if: ${{ inputs.cache-hit != 'true' }}
-  #   uses: msys2/setup-msys2@v2
-  #   with:
-  #     update: true
-  #     #install: g++-mingw-w64-x86_64 gcc-mingw-w64-x86_64 make autoconf unzip
-  #     install: mingw-w64-x86_64-gcc mingw-w64-x86_64-make autotools unzip
-  #     # mingw-w64-x86_64-autoconf
-  #     platform: mingw64
-
   - name: Install openssl (Windows)
     shell: cmd
     if: ${{ inputs.cache-hit != 'true' }}
@@ -155,22 +128,23 @@ runs:
       git checkout v${{ inputs.elixir-version }}
       make
       echo export PATH=\"\$PATH:$HOME/elixir/bin\" >> $HOME/.bashrc
-  # - name: "Compile and Lint"
-  #   shell: bash
-  #   run: |
-  #     asdf install
-  #     mix local.hex --force
-  #     mix local.rebar --force
-  #     mix deps.get
-  #     cd assets && npm install
 
-  # - name: "Build Release"
-  #   shell: msys2 {0}
-  #   env:
-  #     MAKE: make
-  #     REBAR_TARGET_ARCH_WORDSIZE: "64"
-  #     REBAR_TARGET_ARCH: x86_64-w64-mingw32
-  #     WIN32_KEY_PASS: ${{ inputs.win32-key-pass }}
-  #   run: |
-  #     mix assets.deploy
-  #     mix desktop.installer
+  - name: "Compile and Lint"
+    shell: bash
+    run: |
+      asdf install
+      mix local.hex --force
+      mix local.rebar --force
+      mix deps.get
+      cd assets && npm install
+
+  - name: "Build Release"
+    shell: msys2 {0}
+    env:
+      MAKE: make
+      REBAR_TARGET_ARCH_WORDSIZE: "64"
+      REBAR_TARGET_ARCH: x86_64-w64-mingw32
+      WIN32_KEY_PASS: ${{ inputs.win32-key-pass }}
+    run: |
+      mix assets.deploy
+      mix desktop.installer
