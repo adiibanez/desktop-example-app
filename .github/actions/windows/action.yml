@@ -53,7 +53,8 @@ runs:
       IF EXIST "c:\\Program Files\\OpenSSL-Win64" (move "c:\\Program Files\\OpenSSL-Win64" "c:\\OpenSSL-Win64") ELSE (move "c:\\Program Files\\OpenSSL" "c:\\OpenSSL-Win64")
 
   - name: Download wxWidgets (Windows)
-    shell: wsl-bash {0}
+    #shell: wsl-bash {0}
+    shell: bash
     if: ${{ inputs.cache-hit != 'true' }}
     run: |
       git clone ${{ inputs.wxwidgets-repo }}
@@ -81,14 +82,16 @@ runs:
       nmake TARGET_CPU=amd64 BUILD=release SHARED=0 DIR_SUFFIX_CPU= -f makefile.vc
 
   - name: Copy wxWidgets (Windows)
-    shell: wsl-bash {0}
+    #shell: wsl-bash {0}
+    shell: bash
     if: ${{ inputs.cache-hit != 'true' }}
     run: |
       mkdir -p /mnt/c/opt/local64/pgm/
       cp -R wxWidgets /mnt/c/opt/local64/pgm/wxWidgets-3.x.x
 
   - name: Compile Erlang (Windows)
-    shell: wsl-bash {0}
+    #shell: wsl-bash {0}
+    shell: bash
     if: ${{ inputs.cache-hit != 'true' }}
     run: |
       git clone ${{ env.OTP_GITHUB_URL }}
