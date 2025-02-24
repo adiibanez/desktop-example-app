@@ -29,14 +29,21 @@ runs:
   using: "composite"
   steps:
 
-  - name: "Compile and Lint"
+  - name: "Debug"
     shell: bash
     run: |
-      asdf install
-      mix local.hex --force
-      mix local.rebar --force
-      mix deps.get
-      cd assets && npm install
+      ls -lah ~/.bash/
+      asdf --version
+      asdf plugin list
+
+  # - name: "Compile and Lint"
+  #   shell: bash
+  #   run: |
+  #     asdf install
+  #     mix local.hex --force
+  #     mix local.rebar --force
+  #     mix deps.get
+  #     cd assets && npm install
 
   - name: Linux Docker Build
     uses: whoan/docker-build-with-cache-action@master

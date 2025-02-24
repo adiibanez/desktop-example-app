@@ -29,6 +29,9 @@ runs:
   - name: Ensure WSL env
     uses: vedantmgoyal9/setup-wsl2@main
     if: ${{ inputs.cache-hit != 'true' }}
+
+  - name: Install dependencies
+    shell: bash
     run: apt update && apt install -y g++-mingw-w64 gcc-mingw-w64 make autoconf unzip
 
   - name: Install openssl (Windows)
