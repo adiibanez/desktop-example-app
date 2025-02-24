@@ -32,9 +32,6 @@ runs:
   - name: "Compile and Lint"
     shell: bash
     run: |
-      ls -lah ~/.asdf
-      ls -lah ~/.asdf/bin
-
       asdf install
       mix local.hex --force
       mix local.rebar --force
