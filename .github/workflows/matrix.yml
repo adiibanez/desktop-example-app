@@ -80,54 +80,6 @@ jobs:
             ${{ matrix.platform }}-deps-${{ env.WXWIDGETS_VERSION }}-
             ${{ matrix.platform }}-deps-
 
-
-      # - name: Install ASDF (Linux)
-      #   if: matrix.platform == 'linux-x86' && steps.asdf-cache-restore.outputs.cache-hit != 'true'
-      #   shell: bash
-      #   run: |
-      #     sudo apt-get update
-      #     sudo apt-get install -y git curl
-      #     git clone https://github.com/asdf-vm/asdf.git ~/.asdf
-      #     # --branch v0.8.1
-      #     echo ". $HOME/.asdf/asdf.sh" >> ~/.profile
-      #     source ~/.profile
-
-      #     asdf --version
-
-      # - name: Install ASDF (macOS)
-      #   if: matrix.platform == 'macos' && steps.asdf-cache-restore.outputs.cache-hit != 'true'
-      #   shell: bash
-      #   run: |
-      #     brew install coreutils automake autoconf libtool git asdf
-      #     #echo 'export PATH="/opt/homebrew/opt/libtool/libexec/gnubin:$PATH"' >> ~/.profile
-      #     #export PATH="/opt/homebrew/opt/libtool/libexec/gnubin:$PATH" # For current session
-      #     #git clone https://github.com/asdf-vm/asdf.git ~/.asdf
-      #     # --branch v0.8.1
-      #     echo ". $HOME/.asdf/asdf.sh" >> ~/.profile
-      #     echo ". /opt/homebrew/opt/asdf/libexec/asdf.sh" ~/.profile
-      #     source  ~/.profile
-
-      #     asdf --version
-
-      # - name: Install ASDF (Windows)
-      #   if: matrix.platform == 'windows' && steps.asdf-cache-restore.outputs.cache-hit != 'true'
-      #   shell: bash
-      #   run: |
-      #     # Assumes WSL is configured
-      #     apt-get update
-      #     apt-get install -y git curl
-      #     git clone https://github.com/asdf-vm/asdf.git ~/.asdf
-      #     # --branch v0.8.1
-      #     echo ". $HOME/.asdf/asdf.sh" >> ~/.profile
-      #     source ~/.profile
-
-      #     asdf --version
-
-      # - name: "Installing Erlang"
-      #   if: matrix.platform == 'macos'
-      #   run: |
-      #     export KERL_CONFIGURE_OPTIONS="--enable-parallel-configure --with-wxdir=`echo ~/projects/wxWidgets` --disable-jit --without-javac --disable-debug CXX='gcc -std=c++11'"
-
       - name: "Install asdf"
         uses: asdf-vm/actions/setup@v3
       #- name: "Install plugins"
@@ -141,7 +93,7 @@ jobs:
           echo "nodejs v18.7.0" >> .tool-versions
           cat .tool-versions
 
-      - name: Set up build tools
+      - name: Set up asdf build tools
         shell: bash
         run: |
           asdf plugin add erlang
@@ -181,7 +133,7 @@ jobs:
           macos-pem: ${{ secrets.MACOS_PEM }}
 
       - name: Linux Build Steps
-        if: matrix.platform == 'linux-x86'
+        if: matrix.platform == 'ubuntu-latest'
         uses: ./.github/actions/linux
         with:
           cache-hit: ${{ steps.deps-cache.outputs.cache-hit }}
@@ -194,7 +146,7 @@ jobs:
           github-actor: ${{ github.actor }}
 
       - name: Archive Installer
-        if: matrix.platform != 'linux-x86'
+        if: matrix.platform != 'ubuntu-latest'
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.platform }}-Installer
@@ -202,13 +154,12 @@ jobs:
             _build/prod/*.${{ matrix.platform == 'windows' && 'exe' || 'dmg' }}
 
       - name: Archive Installer Linux
-        if: matrix.platform == 'linux-x86'
+        if: matrix.platform == 'ubuntu-latest'
         uses: actions/upload-artifact@v4
         with:
           name: Linux-Installer
           path: |
             ./*.run
-
 
       - name: Save Build Cache
         if: steps.deps-cache.outputs.cache-hit != 'true'

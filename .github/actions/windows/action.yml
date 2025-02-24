@@ -26,7 +26,7 @@ runs:
   using: "composite"
   steps:
 
-  - name: Ensure WSL
+  - name: Ensure WSL env
     uses: vedantmgoyal9/setup-wsl2@main
     if: ${{ inputs.cache-hit != 'true' }}
     run: apt update && apt install -y g++-mingw-w64 gcc-mingw-w64 make autoconf unzip
