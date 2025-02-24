@@ -110,10 +110,10 @@ runs:
     env:
       KERL_CONFIGURE_OPTIONS: ${{ steps.erlang-prep.outputs.KERL_CONFIGURE_OPTIONS }}
 
-  - name: "Install erlang elixir"
+  - name: "Install erlang elixir and plugins"
     shell: bash
     id: erlang-elixir-install
-    if: steps.erlang-cache.outputs.cache-hit != 'true'
+    #if: steps.erlang-cache.outputs.cache-hit != 'true'
     run: |
       asdf install
 
