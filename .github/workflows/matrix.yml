@@ -51,6 +51,7 @@ jobs:
 
       - name: Restore Build Cache
         uses: actions/cache/restore@v3
+        #id: deps-cache
         id: deps-cache
         with:
           path: |
@@ -59,6 +60,8 @@ jobs:
             assets/node_modules
             ${{ steps.set-platform.outputs.PLATFORM == 'windows' && 'c:\\opt\\otp.exe' || '' }}
             ${{ steps.set-platform.outputs.PLATFORM == 'windows' && 'c:\\opt\\local64\\pgm\\wxWidgets-3.x.x' || '' }}
+            ${{ steps.set-platform.outputs.PLATFORM == 'macos' && '~/projects/wxWidgets' || '' }}
+            ${{ steps.set-platform.outputs.PLATFORM == 'macos' && '/usr/local/wxWidgets' || '' }}
           key: ${{ steps.cache-name.outputs.cache_name }}
           restore-keys: |
             ${{ matrix.generic_platform }}-deps-${{ env.WXWIDGETS_VERSION }}-otp-${{ env.OTP_VERSION }}-
@@ -191,17 +194,20 @@ jobs:
           path: |
             ./*.run
 
-      # - name: Save Build Cache
-      #   if: steps.deps-cache.outputs.cache-hit != 'true'
-      #   uses: actions/cache/save@v3
-      #   with:
-      #     path: |
-      #       deps
-      #       _build
-      #       assets/node_modules
-      #       ${{ steps.set-platform.outputs.PLATFORM == 'windows' && 'c:\\opt\\otp.exe' || '' }}
-      #       ${{ steps.set-platform.outputs.PLATFORM == 'windows' && 'c:\\opt\\local64\\pgm\\wxWidgets-3.x.x' || '' }}
-      #   key: ${{ steps.cache-name.outputs.cache_name }}
+
+      - name: Save Build Cache
+        if: steps.deps-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v3
+        with:
+          path: |
+            deps
+            _build
+            assets/node_modules
+            ${{ steps.set-platform.outputs.PLATFORM == 'windows' && 'c:\\opt\\otp.exe' || '' }}
+            ${{ steps.set-platform.outputs.PLATFORM == 'windows' && 'c:\\opt\\local64\\pgm\\wxWidgets-3.x.x' || '' }}
+            ${{ steps.set-platform.outputs.PLATFORM == 'macos' && '~/projects/wxWidgets' || '' }}
+            ${{ steps.set-platform.outputs.PLATFORM == 'macos' && '/usr/local/wxWidgets' || '' }}
+          key: ${{ steps.cache-name.outputs.cache_name }}
 
       - name: Save ASDF cache
         uses: actions/cache/save@v3
