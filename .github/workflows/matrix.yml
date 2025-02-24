@@ -1,5 +1,7 @@
 name: "Build binaries matrix"
+
 on: [ "push", "pull_request" ]
+
 env:
   OTP_GITHUB_URL: https://github.com/erlang/otp.git
   WXWIDGETS_REPO: https://github.com/wxWidgets/wxWidgets.git
@@ -31,7 +33,7 @@ jobs:
       ELIXIR_VARIANT: ${{ matrix.elixir.variant }}
 
     steps:
-      - uses: actions/checkout@v4 
+      - uses: actions/checkout@v4 # MUST be before ANY local actions and cache restores
 
       - name: Set platform output
         id: set-platform
@@ -61,82 +63,58 @@ jobs:
             ${{ matrix.generic_platform }}-deps-${{ env.WXWIDGETS_VERSION }}-
             ${{ matrix.generic_platform }}-deps-
 
-
-      # - name: Setup asdf
-      #   uses: asdf-vm/actions/setup@v1
-
-      - name: Install ASDF (Linux)
+      - name: Set up ASDF (Linux)
         if: matrix.generic_platform == 'linux-x86'
         shell: bash
         run: |
           sudo apt-get update
           sudo apt-get install -y git curl
-          git clone https://github.com/asdf-vm/asdf.git ~/.asdf --branch v0.8.1  # Use a stable version
+          git clone https://github.com/asdf-vm/asdf.git ~/.asdf --branch v0.8.1
           echo ". $HOME/.asdf/asdf.sh" >> ~/.profile
-          echo "export ASDF_DIR=$HOME/.asdf" >> ~/.profile
           source ~/.profile
 
-      - name: Install ASDF (macOS)
+      - name: Set up ASDF (macOS)
         if: matrix.generic_platform == 'macos'
         shell: bash
         run: |
-          brew install coreutils automake autoconf libtool
-          git clone https://github.com/asdf-vm/asdf.git ~/.asdf --branch v0.8.1 # Use a stable version
+          brew install binutils coreutils wget automake autoconf libtool
+          echo 'export PATH="/opt/homebrew/opt/libtool/libexec/gnubin:$PATH"' >> ~/.profile # Fix Brew prefix issue!
+          export PATH="/opt/homebrew/opt/libtool/libexec/gnubin:$PATH"  # For current session
+          git clone https://github.com/asdf-vm/asdf.git ~/.asdf --branch v0.8.1
           echo ". $HOME/.asdf/asdf.sh" >> ~/.profile
-          echo "export ASDF_DIR=$HOME/.asdf" >> ~/.profile
           source ~/.profile
 
-      - name: Install ASDF (Windows)
+      - name: Set up ASDF (Windows)
         if: matrix.generic_platform == 'windows'
         shell: bash
         run: |
-          # Assumes WSL is configured.  Adjust as needed for other environments.
+          # Assumes WSL is configured
           sudo apt-get update
           sudo apt-get install -y git curl
-          git clone https://github.com/asdf-vm/asdf.git ~/.asdf --branch v0.8.1 # Use a stable version
+          git clone https://github.com/asdf-vm/asdf.git ~/.asdf --branch v0.8.1
           echo ". $HOME/.asdf/asdf.sh" >> ~/.profile
-          echo "export ASDF_DIR=$HOME/.asdf" >> ~/.profile
           source ~/.profile
 
-      - name: "Prepare asdf"
-        run: |
-          echo "erlang ref:${{ env.OTP_VERSION }}" >> .tool-versions
-          echo "elixir ${{ env.ELIXIR_VERSION }}${{ env.ELIXIR_VARIANT }}" >> .tool-versions
-          echo "nodejs v18.7.0" >> .tool-versions
-
-      - name: "macOS erlang build opts"
-        if: matrix.generic_platform == 'macos'
+      - name: Install ASDF Build Tools
         shell: bash
         run: |
-          # echo 'eval "$(asdf env)"' >> ~/.profile
-          # source ~/.profile
-          # . $HOME/.asdf/asdf.sh
-          export KERL_CONFIGURE_OPTIONS="--enable-parallel-configure --with-wxdir=`echo ~/projects/wxWidgets` --disable-jit --without-javac --disable-debug CXX='gcc -std=c++11'"
-
-
-      - name: "Install asdf dependencies"
-        shell: bash
-        run: |
-         . $HOME/.asdf/asdf.sh
+          . $HOME/.asdf/asdf.sh
           asdf plugin add erlang
           asdf plugin add elixir
           asdf plugin add nodejs
           asdf install
 
-      # - name: "Install dependencies in .tool-versions"
-      #   uses: asdf-vm/actions/install@v1
-      
-      # - name: Install build tools
-      #   if: matrix.generic_platform != 'macos'
-      #   shell: bash
-      #   run: |
-      #     asdf install
+      - name: Common Build Steps
+        uses: ./.github/actions/common
+        with:
+          otp-version: ${{ env.OTP_VERSION }}
+          elixir-version: ${{ env.ELIXIR_VERSION }}
+          elixir-variant: ${{ env.ELIXIR_VARIANT }}
 
-      - name: "Compile and lint"
+      - name: "Compile and Lint"
         shell: bash
         run: |
           . $HOME/.asdf/asdf.sh
-          asdf install
           mix local.hex --force
           mix local.rebar --force
           mix deps.get
