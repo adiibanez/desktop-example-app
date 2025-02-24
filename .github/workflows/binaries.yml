@@ -5,8 +5,11 @@ env:
   OTP_VERSION: OTP-24.3.4.15
   WXWIDGETS_REPO: https://github.com/wxWidgets/wxWidgets.git
   WXWIDGETS_VERSION: master
-  ELIXIR_VERSION: 1.14.5
-  ELIXIR_VARIANT: -otp-24
+  #ELIXIR_VERSION: 1.14.5
+  #ELIXIR_VARIANT: -otp-24
+  ELIXIR_VERSION: 1.18.1
+  ELIXIR_VARIANT: -otp-27
+  
   DOCKER_BUILDKIT: 0
 
 jobs:
@@ -189,11 +192,15 @@ jobs:
         git submodule update --init
         ./configure --prefix=/usr/local/wxWidgets --enable-webview --enable-compat30 --disable-shared
         make -j8
+    
+    - name: Install asdf & tools
+      if: steps.macos-cache.outputs.cache-hit != 'true'
+      uses: asdf-vm/actions/install@v3
+      # #git clone https://github.com/asdf-vm/asdf.git ~/.asdf
 
     - name: "Installing Erlang"
       if: steps.macos-cache.outputs.cache-hit != 'true'
       run: |
-        git clone https://github.com/asdf-vm/asdf.git ~/.asdf
         . $HOME/.asdf/asdf.sh
         asdf plugin add erlang
         asdf plugin add elixir
