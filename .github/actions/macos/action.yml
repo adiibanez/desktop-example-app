@@ -46,10 +46,21 @@ runs:
       restore-keys: |
         ${{ inputs.cache-name }}-brew-deps-
 
+  - name: wxWidgets cache
+    id: wxWidgets-cache
+    uses: actions/cache@v3
+    with:
+      path: |
+        ~/projects/wxWidgets
+        /usr/local/wxWidgets
+      key: ${{ inputs.cache-name }}-wxWidgets
+      restore-keys: |
+        ${{ inputs.cache-name }}-wxWidgets
+
   - name: "Installing wxWidgets (macOS)"
     shell: bash
     id: wxwidgets
-    if: ${{ inputs.cache-hit != 'true' }}
+    if: ${{ steps.wxWidgets-cache.outputs.cache-hit != 'true' }}
     run: |
       mkdir ~/projects && cd ~/projects
       git clone ${{ inputs.wxwidgets-repo }}
@@ -60,7 +71,7 @@ runs:
       make -j8
 
   - name: Save wxWidgets Cache
-    if: steps.wxwidgets.outcome == 'success' && inputs.cache-hit != 'true'
+    if: steps.wxwidgets.outcome == 'success' && steps.wxWidgets-cache.outputs.cache-hit != 'true'
     uses: actions/cache/save@v3
     with:
       path: |
@@ -70,9 +81,20 @@ runs:
       restore-keys: |
         ${{ inputs.cache-name }}-wxwidgets-
 
+  - name: erlangelixir cache
+    id: erlang-cache
+    uses: actions/cache@v3
+    with:
+      path: |
+        ~/asdf
+      key: ${{ inputs.cache-name }}-asdf-${{ hashFiles('~/.asdf') }}
+      restore-keys: |
+        ${{ inputs.cache-name }}-asdf-
+
   - name: "Prepare Erlang (macOS)"
     shell: bash
     id: erlang-prep
+    if: steps.erlang-cache.outputs.cache-hit != 'true'
     run: |
       echo "Setting KERL_CONFIGURE_OPTIONS"
       find /opt/homebrew/Cellar/libtiff/ -name libtiff.h
@@ -84,22 +106,24 @@ runs:
 
   - name: "Ensure asdf"
     uses: asdf-vm/actions/setup@v3
+    if: steps.erlang-cache.outputs.cache-hit != 'true'
     env:
       KERL_CONFIGURE_OPTIONS: ${{ steps.erlang-prep.outputs.KERL_CONFIGURE_OPTIONS }}
 
   - name: "Install erlang elixir"
     shell: bash
     id: erlang-elixir-install
+    if: steps.erlang-cache.outputs.cache-hit != 'true'
     run: |
       asdf install
 
   - name: Save asdf erlang cache
-    if: steps.erlang-elixir-install.outcome == 'success' && inputs.cache-hit != 'true'
+    if: steps.erlang-elixir-install.outcome == 'success' && if: steps.wxwidgets.outcome == 'success' && steps.erlang-cache.outputs.cache-hit != 'true'
     uses: actions/cache/save@v3
     with:
       path: |
         ~/.asdf
-      key: ${{ inputs.cache-name }}-asdf-${{ hashFiles('~/.asdf/installs/erlang/') }}
+      key: ${{ inputs.cache-name }}-asdf-${{ hashFiles('~/.asdf') }}
       restore-keys: |
         ${{ inputs.cache-name }}-asdf-
 
