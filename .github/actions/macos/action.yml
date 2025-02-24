@@ -88,10 +88,6 @@ runs:
     id: erlang-elixir-install
     run: |
       asdf install
-      mix local.hex --force
-      mix local.rebar --force
-      mix deps.get
-      cd assets && npm install
 
   - name: Save asdf erlang cache
     if: steps.erlang-elixir-install.outcome == 'success' && inputs.cache-hit != 'true'

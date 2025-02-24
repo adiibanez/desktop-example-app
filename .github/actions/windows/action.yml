@@ -22,40 +22,75 @@ inputs:
   win32-key-pass:
     description: "WIN32 Key Pass"
     required: true
+  cache-name:
+    description: "Base cache name from matrix"
+    required: true
 runs:
   using: "composite"
   steps:
-
-  - name: "Ensure asdf"
-    uses: asdf-vm/actions/setup@v3
+  - name: Load msys
+    id: msys-cache
+    uses: actions/cache@v3
+    with:
+      path: C:\msys64
+      key: ${{ inputs.cache-name }}-msys
+      restore-keys: |
+        ${{ inputs.cache-name }}-msys
 
   - name: "Install msys2 (Windows)"
     uses: msys2/setup-msys2@v2
-    if: ${{ inputs.cache-hit != 'true' }}
+    id: msys2
+    if: steps.msys-cache.outputs.cache-hit != 'true'
     with:
       install: pacman-mirrors pkg-config base-devel mingw-w64-x86_64-toolchain mingw-w64-x86_64-go upx mingw-w64-x86_64-dlfcn unzip git tar mingw-w64-x86_64-nodejs mingw-w64-x86_64-imagemagick mingw-w64-x86_64-osslsigncode autoconf automake libtool gettext-devel gettext
       update: false
       release: false
 
-  # - name: Ensure WSL env
-  #   uses: vedantmgoyal9/setup-wsl2@main
-  #   if: ${{ inputs.cache-hit != 'true' }}
+  - name: Save msys
+    if: steps.msys2.outcome == 'success'
+    uses: actions/cache@v3
+    with:
+      path: C:\msys64
+      key: ${{ inputs.cache-name }}-msys
 
-  # - name: Install dependencies
-  #   shell: wsl-bash
-  #   run: apt update && apt install -y g++-mingw-w64 gcc-mingw-w64 make autoconf unzip
+  - name: Load openssl
+    id: openssl-cache
+    uses: actions/cache@v3
+    with:
+      path: 'C:\\Program Files\\OpenSSL-Win64'
+      key: ${{ inputs.cache-name }}-openssl
+      restore-keys: |
+        ${{ inputs.cache-name }}-openssl
 
   - name: Install openssl (Windows)
     shell: cmd
-    if: ${{ inputs.cache-hit != 'true' }}
+    id: install-openssl
+    if: steps.openssl-cache.outputs.cache-hit != 'true'
     run: |
       choco install openssl --version=1.1.1.2100
       IF EXIST "c:\\Program Files\\OpenSSL-Win64" (move "c:\\Program Files\\OpenSSL-Win64" "c:\\OpenSSL-Win64") ELSE (move "c:\\Program Files\\OpenSSL" "c:\\OpenSSL-Win64")
 
+  - name: Save openssl
+    if: steps.install-openssl.outcome == 'success'
+    uses: actions/cache@v3
+    with:
+      path: 'C:\\Program Files\\OpenSSL-Win64'
+      key: ${{ inputs.cache-name }}-openssl
+
+  - name: Load wxwidgets
+    id: wxwidgets-source
+    uses: actions/cache@v3
+    with:
+      path: wxWidgets
+      key: ${{ inputs.cache-name }}-wxsource-${{ inputs.wxwidgets-version }}
+      restore-keys: |
+        ${{ inputs.cache-name }}-wxsource-
+
   - name: Download wxWidgets (Windows)
     #shell: wsl-bash {0}
     shell: bash
-    if: ${{ inputs.cache-hit != 'true' }}
+    id: download-wx
+    if: steps.wxwidgets-source.outputs.cache-hit != 'true'
     run: |
       git clone ${{ inputs.wxwidgets-repo }}
       cd wxWidgets
@@ -65,8 +100,16 @@ runs:
       sed -i -r -e 's/wxUSE_WEBVIEW_EDGE +0/wxUSE_WEBVIEW_EDGE 1/' include/wx/msw/setup.h
       sed -i -r -e 's/WXWIN_COMPATIBILITY_3_0 +0/WXWIN_COMPATIBILITY_3_0 1/' include/wx/msw/setup.h
 
+  - name: Save wxwidgets
+    if: steps.download-wx.outcome == 'success'
+    uses: actions/cache@v3
+    with:
+      path: wxWidgets
+      key: ${{ inputs.cache-name }}-wxsource-${{ inputs.wxwidgets-version }}
+
   - name: Install WebView2 (Windows)
     shell: cmd
+    id: install-webview2
     if: ${{ inputs.cache-hit != 'true' }}
     run: |
       cd wxWidgets\\3rdparty
@@ -75,6 +118,7 @@ runs:
 
   - name: Build wxWidgets (Windows)
     shell: cmd
+    id: build-wx
     if: ${{ inputs.cache-hit != 'true' }}
     run: |
       cd wxWidgets\\build\\msw
@@ -84,7 +128,8 @@ runs:
   - name: Copy wxWidgets (Windows)
     #shell: wsl-bash {0}
     shell: bash
-    if: ${{ inputs.cache-hit != 'true' }}
+    id: copy-wx
+    if: steps.build-wx.outcome == 'success'
     run: |
       mkdir -p /mnt/c/opt/local64/pgm/
       cp -R wxWidgets /mnt/c/opt/local64/pgm/wxWidgets-3.x.x
@@ -92,6 +137,7 @@ runs:
   - name: Compile Erlang (Windows)
     #shell: wsl-bash {0}
     shell: bash
+    id: compile-erlang
     if: ${{ inputs.cache-hit != 'true' }}
     run: |
       git clone ${{ env.OTP_GITHUB_URL }}
@@ -110,11 +156,13 @@ runs:
 
   - name: Run Erlang installer (Windows)
     shell: cmd
+    id: run-erlang
     if: ${{ inputs.cache-hit != 'true' }}
     run: C:\\opt\\otp.exe /S
 
   - name: Locate Erlang (Windows)
     shell: msys2 {0}
+    id: locate-erlang
     if: ${{ inputs.cache-hit != 'true' }}
     run: |
       ERTS=`find /c/Program\ Files/[Ee]rl* -type d -name "erts-*" -not -path "*lib*"`
@@ -123,12 +171,14 @@ runs:
 
   - name: Locate NSIS (Windows)
     shell: msys2 {0}
+    id: locate-nsis
     if: ${{ inputs.cache-hit != 'true' }}
     run: |
       echo export PATH=\"\$PATH:/c/Program\ Files\ \(x86\)/NSIS\" >> $HOME/.bashrc
 
   - name: Install Elixir (Windows)
     shell: msys2 {0}
+    id: install-elixir
     if: ${{ inputs.cache-hit != 'true' }}
     run: |
       cd $HOME
