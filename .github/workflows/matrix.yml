@@ -49,12 +49,12 @@ jobs:
         run: |
           echo "ASDF Cache Key: ${{ steps.asdf-cache-key.outputs.key }}"
 
-      - name: Restore ASDF Cache
-        id: asdf-cache-restore
-        uses: actions/cache/restore@v3
-        with:
-          path: ~/.asdf
-          key: ${{ steps.asdf-cache-key.outputs.key }}
+      # - name: Restore ASDF Cache
+      #   id: asdf-cache-restore
+      #   uses: actions/cache/restore@v3
+      #   with:
+      #     path: ~/.asdf
+      #     key: ${{ steps.asdf-cache-key.outputs.key }}
 
       - name: Determine cache name
         id: cache-name
@@ -110,8 +110,8 @@ jobs:
         shell: bash
         run: |
           # Assumes WSL is configured
-          sudo apt-get update
-          sudo apt-get install -y git curl
+          apt-get update
+          apt-get install -y git curl
           git clone https://github.com/asdf-vm/asdf.git ~/.asdf --branch v0.8.1
           echo ". $HOME/.asdf/asdf.sh" >> ~/.profile
           source ~/.profile
@@ -209,8 +209,8 @@ jobs:
             ${{ steps.set-platform.outputs.PLATFORM == 'macos' && '/usr/local/wxWidgets' || '' }}
           key: ${{ steps.cache-name.outputs.cache_name }}
 
-      - name: Save ASDF cache
-        uses: actions/cache/save@v3
-        with:
-          path: ~/.asdf
-          key: ${{ steps.asdf-cache-key.outputs.key }}
+      # - name: Save ASDF cache
+      #   uses: actions/cache/save@v3
+      #   with:
+      #     path: ~/.asdf
+      #     key: ${{ steps.asdf-cache-key.outputs.key }}
