@@ -30,27 +30,6 @@ runs:
     shell: bash
     run: brew install binutils coreutils wget automake autoconf libtool
 
-  - name: "Prepare asdf (macOS)"
-    if: ${{ inputs.cache-hit != 'true' }}
-    shell: bash
-    run: |
-      echo "erlang ref:${{ inputs.otp-version }}" >> .tool-versions
-      echo "elixir ${{ inputs.elixir-version }}${{ inputs.elixir-variant }}" >> .tool-versions
-      echo "nodejs v18.7.0" >> .tool-versions
-
-  - name: "Install asdf & tools (macOS)"
-    if: ${{ inputs.cache-hit != 'true' }}
-    uses: asdf-vm/actions/install@v3
-
-  - name: "Install asdf plugins (macOS)"
-    if: ${{ inputs.cache-hit != 'true' }}
-    shell: bash
-    run: |
-      . $HOME/.asdf/asdf.sh
-      asdf plugin add erlang
-      asdf plugin add elixir
-      asdf plugin add nodejs
-
   - name: "Installing wxWidgets (macOS)"
     if: ${{ inputs.cache-hit != 'true' }}
     shell: bash
@@ -63,14 +42,6 @@ runs:
       git submodule update --init
       ./configure --prefix=/usr/local/wxWidgets --enable-webview --enable-compat30 --disable-shared
       make -j8
-
-  - name: "Installing Erlang (macOS)"
-    if: ${{ inputs.cache-hit != 'true' }}
-    shell: bash
-    run: |
-      . $HOME/.asdf/asdf.sh
-      export KERL_CONFIGURE_OPTIONS="--enable-parallel-configure --with-wxdir=`echo ~/projects/wxWidgets` --disable-jit --without-javac --disable-debug CXX='gcc -std=c++11'"
-      asdf install
 
   - name: "Build Release"
     env:

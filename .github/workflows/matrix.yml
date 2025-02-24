@@ -69,6 +69,22 @@ jobs:
           elixir-version: ${{ env.ELIXIR_VERSION }}
           elixir-variant: ${{ env.ELIXIR_VARIANT }}
 
+      - name: "Installing Erlang and other asdf packages (macOS)"
+        if: matrix.generic_platform == 'macos' && steps.deps-cache.outputs.cache-hit != 'true'
+        shell: bash
+        env:
+          KERL_CONFIGURE_OPTIONS: "--enable-parallel-configure --with-wxdir=`echo ~/projects/wxWidgets` --disable-jit --without-javac --disable-debug CXX='gcc -std=c++11'"
+        run: |
+          . $HOME/.asdf/asdf.sh
+          asdf install
+
+      - name: "Installing Erlang and other asdf packages (All other platforms)"
+        if: matrix.generic_platform != 'macos' && steps.deps-cache.outputs.cache-hit != 'true'
+        shell: bash
+        run: |
+          . $HOME/.asdf/asdf.sh
+          asdf install
+
       - name: Windows Build Steps
         if: matrix.generic_platform == 'windows'
         uses: ./.github/actions/windows

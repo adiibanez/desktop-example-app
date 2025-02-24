@@ -28,32 +28,33 @@ inputs:
 runs:
   using: "composite"
   steps:
-  - name: Install wxWidgets Dependencies (Linux)
-    if: ${{ inputs.cache-hit != 'true' }}
-    shell: bash
-    run: |
-      sudo apt-get update
-      sudo apt-get install -y \
-        libgtk-3-dev \
-        libwebkit2gtk-4.1-dev \
-        libjpeg-dev \
-        libtiff-dev \
-        libpng-dev \
-        libsdl2-dev \
-        libgstreamer1.0-dev \
-        libgstreamer-plugins-base1.0-dev
 
-  - name: Install Erlang Build Dependencies (Linux)
-    if: ${{ inputs.cache-hit != 'true' }}
-    shell: bash
-    run: |
-      . $HOME/.asdf/asdf.sh
-      sudo apt-get update
-      sudo apt-get install -y \
-        openjdk-11-jdk \
-        xsltproc \
-        fop \
-        libxml2-utils
+  # - name: Install wxWidgets Dependencies (Linux)
+  #   if: ${{ inputs.cache-hit != 'true' }}
+  #   shell: bash
+  #   run: |
+  #     sudo apt-get update
+  #     sudo apt-get install -y \
+  #       libgtk-3-dev \
+  #       libwebkit2gtk-4.1-dev \
+  #       libjpeg-dev \
+  #       libtiff-dev \
+  #       libpng-dev \
+  #       libsdl2-dev \
+  #       libgstreamer1.0-dev \
+  #       libgstreamer-plugins-base1.0-dev
+
+  # - name: Install Erlang Build Dependencies (Linux)
+  #   if: ${{ inputs.cache-hit != 'true' }}
+  #   shell: bash
+  #   run: |
+  #     . $HOME/.asdf/asdf.sh
+  #     sudo apt-get update
+  #     sudo apt-get install -y \
+  #       openjdk-11-jdk \
+  #       xsltproc \
+  #       fop \
+  #       libxml2-utils
 
   - name: Linux Docker Build
     shell: bash
@@ -92,3 +93,11 @@ runs:
       NAME=`echo $NAME | tr -d '\n\r'`
       docker run --platform=linux/amd64 -i ${{steps.docker.outputs.FULL_IMAGE_NAME}} bash -c 'xxd /app/_build/prod/*.run' | xxd -r > $NAME
       chmod +x $NAME
+
+  # Archive Installer
+  - name: Archive Installer
+    uses: actions/upload-artifact@v4
+    with:
+      name: Linux-Installer
+      path: |
+        ./*.run

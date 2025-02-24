@@ -21,11 +21,12 @@ runs:
       echo "erlang ref:${{ inputs.otp-version }}" >> .tool-versions
       echo "elixir ${{ inputs.elixir-version }}${{ inputs.elixir-variant }}" >> .tool-versions
       echo "nodejs v18.7.0" >> .tool-versions
-  # - name: "Compile and Lint"
-  #   shell: bash
-  #   run: |
-  #     . $HOME/.asdf/asdf.sh
-  #     mix local.hex --force
-  #     mix local.rebar --force
-  #     mix deps.get
-  #     cd assets && npm install
+
+  - name: "Compile and Lint"
+    shell: bash
+    run: |
+      . $HOME/.asdf/asdf.sh
+      mix local.hex --force
+      mix local.rebar --force
+      mix deps.get
+      cd assets && npm install
