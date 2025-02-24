@@ -1,8 +1,12 @@
+# https://www.msys2.org/docs/ci/
 name: "Windows Build Steps"
 description: "Build steps specific to Windows"
 inputs:
   cache-hit:
     description: "Was the cache hit?"
+    required: true
+  cache-name:
+    description: "Cache name"
     required: true
   otp-version:
     description: "OTP Version"
@@ -126,7 +130,6 @@ runs:
       nmake TARGET_CPU=amd64 BUILD=release SHARED=0 DIR_SUFFIX_CPU= -f makefile.vc
 
   - name: Copy wxWidgets (Windows)
-    #shell: wsl-bash {0}
     shell: bash
     id: copy-wx
     if: steps.build-wx.outcome == 'success'
@@ -135,7 +138,6 @@ runs:
       cp -R wxWidgets /mnt/c/opt/local64/pgm/wxWidgets-3.x.x
 
   - name: Compile Erlang (Windows)
-    #shell: wsl-bash {0}
     shell: bash
     id: compile-erlang
     if: ${{ inputs.cache-hit != 'true' }}

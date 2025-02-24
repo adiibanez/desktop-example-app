@@ -35,7 +35,7 @@ runs:
     shell: bash
     id: brew-deps
     if: ${{ inputs.cache-hit != 'true' }}
-    run: brew install binutils coreutils wget automake autoconf libtool
+    run: brew install binutils coreutils wget automake autoconf libtool libtiff
 
   - name: Save Brew Cache
     if: steps.brew-deps.outcome == 'success' && inputs.cache-hit != 'true'
