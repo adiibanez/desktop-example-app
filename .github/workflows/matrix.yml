@@ -15,7 +15,7 @@ jobs:
     timeout-minutes: 90
     
     strategy:
-      fail-fast: false
+      fail-fast: true
       matrix:
         otp_version: [OTP-24.3.4.14] #, OTP-27.2.4
         elixir:
