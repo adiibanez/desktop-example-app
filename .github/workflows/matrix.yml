@@ -5,7 +5,7 @@ on: [ "push", "pull_request" ]
 env:
   OTP_GITHUB_URL: https://github.com/erlang/otp.git
   WXWIDGETS_REPO: https://github.com/wxWidgets/wxWidgets.git
-  WXWIDGETS_VERSION: master
+  WXWIDGETS_VERSION: v3.2.4-with-msvs2012-fix # master
   DOCKER_BUILDKIT: 0
   ACTIONS_STEP_DEBUG: true
 
