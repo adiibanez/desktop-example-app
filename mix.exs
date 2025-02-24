@@ -93,13 +93,13 @@ defmodule Todo.MixProject do
       {:plug_cowboy, "~> 2.6"},
       {:jason, "~> 1.4"},
 
-      #{:rustler_precompiled, "~> 0.8.2"},
-      #{:rustler_btleplug, "~> 0.0.6-alpha"},
-      #{:rustler_btleplug,
+      # {:rustler_precompiled, "~> 0.8.2"},
+      # {:rustler_btleplug, "~> 0.0.6-alpha"},
+      # {:rustler_btleplug,
       #      path: "/Users/adrianibanez/Documents/projects/2024_sensor-platform/checkouts/rustler_btleplug",
       #      },
-      #{:rustler, "~> 0.34.0", optional: true},
-      #{:explorer, "~> 0.10.0"},
+      # {:rustler, "~> 0.34.0", optional: true},
+      # {:explorer, "~> 0.10.0"},
 
       # Assets
       {:esbuild, "~> 0.8", runtime: Mix.env() == :dev},
