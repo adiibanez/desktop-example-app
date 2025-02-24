@@ -42,24 +42,39 @@ runs:
       asdf --version
       asdf plugin list
 
+  - name: asdf cache
+    id: asdf-cache
+    uses: actions/cache@v3
+    with:
+      path: ~/.asdf
+      key: ${{ inputs.cache-name }}-asdf
+      restore-keys: |
+        ${{ inputs.cache-name }}-asdf
+
+  - name: "Install asdf deps"
+    shell: bash
+    id: erlang-elixir-install
+    if: steps.asdf-cache.outputs.cache-hit != 'true'
+    run: |
+      asdf install
+
   - name: "Compile and Lint"
     shell: bash
     run: |
-      asdf install
       mix local.hex --force
       mix local.rebar --force
       mix deps.get
       cd assets && npm install
 
   - name: Save asdf erlang cache
-    if: steps.erlang-elixir-install.outcome == 'success' && inputs.cache-hit != 'true'
-    uses: actions/cache@v3
+    if: steps.erlang-elixir-install.outcome == 'success' && steps.asdf-cache.outputs.cache-hit != 'true'
+    uses: actions/cache/save@v3
     with:
       path: |
         ~/.asdf
-      key: ${{ inputs.cache-name }}-asdf-${{ hashFiles('~/.asdf/') }}
+      key: ${{ inputs.cache-name }}-asdf
       restore-keys: |
-        ${{ inputs.cache-name }}-asdf-
+        ${{ inputs.cache-name }}-asdf
 
   - name: Linux Docker Build
     uses: whoan/docker-build-with-cache-action@master
