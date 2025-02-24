@@ -79,21 +79,6 @@ jobs:
             ${{ matrix.platform }}-deps-${{ env.WXWIDGETS_VERSION }}-
             ${{ matrix.platform }}-deps-
 
-      # - name: Check if .asdf exists
-      #   id: check_asdf
-      #   shell: bash
-      #   run: |
-      #     if [ ! -d "$HOME/.asdf" ]; then
-      #       echo "::set-output name=exists::false"
-      #     else
-      #       echo "::set-output name=exists::true"
-      #     fi
-      # # if: steps.check_asdf.outputs.exists == 'false'
-      # - name: "Install asdf"  
-      #   uses: asdf-vm/actions/setup@v3
-      # #- name: "Install plugins"
-      # #  uses: asdf-vm/actions/plugins-add@v3
-
       - name: "Prepare asdf"
         shell: bash
         run: |
@@ -101,27 +86,6 @@ jobs:
           echo "elixir ${{ env.ELIXIR_VERSION }}${{ env.ELIXIR_VARIANT }}" >> .tool-versions
           echo "nodejs v18.7.0" >> .tool-versions
           cat .tool-versions
-
-      # #if: startsWith(matrix.platform, 'ubuntu-') && steps.check_asdf.outputs.exists == 'false'
-      # - name: "Install asdf for linux edgecase"
-      #   uses: asdf-vm/actions/install@v3
-
-      # - name: Set up asdf build tools
-      #   shell: bash
-      #   run: |
-      #     asdf plugin add erlang
-      #     asdf plugin add elixir
-      #     asdf plugin add nodejs
-      #     asdf plugin list
-
-      #     ls -lah ~/.asdf/downloads/
-
-      # - name: Common Build Steps
-      #   uses: ./.github/actions/common
-      #   with:
-      #     otp-version: ${{ env.OTP_VERSION }}
-      #     elixir-version: ${{ env.ELIXIR_VERSION }}
-      #     elixir-variant: ${{ env.ELIXIR_VARIANT }}
 
       - name: Windows Build Steps
         if: startsWith(matrix.platform, 'windows-')

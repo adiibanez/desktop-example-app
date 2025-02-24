@@ -29,13 +29,21 @@ runs:
   - name: "Ensure asdf"
     uses: asdf-vm/actions/setup@v3
 
-  - name: Ensure WSL env
-    uses: vedantmgoyal9/setup-wsl2@main
+  - name: "Install msys2 (Windows)"
+    uses: msys2/setup-msys2@v2
     if: ${{ inputs.cache-hit != 'true' }}
+    with:
+      install: pacman-mirrors pkg-config base-devel mingw-w64-x86_64-toolchain mingw-w64-x86_64-go upx mingw-w64-x86_64-dlfcn unzip git tar mingw-w64-x86_64-nodejs mingw-w64-x86_64-imagemagick mingw-w64-x86_64-osslsigncode autoconf automake libtool gettext-devel gettext
+      update: false
+      release: false
 
-  - name: Install dependencies
-    shell: bash
-    run: apt update && apt install -y g++-mingw-w64 gcc-mingw-w64 make autoconf unzip
+  # - name: Ensure WSL env
+  #   uses: vedantmgoyal9/setup-wsl2@main
+  #   if: ${{ inputs.cache-hit != 'true' }}
+
+  # - name: Install dependencies
+  #   shell: wsl-bash
+  #   run: apt update && apt install -y g++-mingw-w64 gcc-mingw-w64 make autoconf unzip
 
   - name: Install openssl (Windows)
     shell: cmd
@@ -101,14 +109,6 @@ runs:
     shell: cmd
     if: ${{ inputs.cache-hit != 'true' }}
     run: C:\\opt\\otp.exe /S
-
-  - name: "Install msys2 (Windows)"
-    uses: msys2/setup-msys2@v2
-    if: ${{ inputs.cache-hit != 'true' }}
-    with:
-      install: pacman-mirrors pkg-config base-devel mingw-w64-x86_64-toolchain mingw-w64-x86_64-go upx mingw-w64-x86_64-dlfcn unzip git tar mingw-w64-x86_64-nodejs mingw-w64-x86_64-imagemagick mingw-w64-x86_64-osslsigncode autoconf automake libtool gettext-devel gettext
-      update: false
-      release: false
 
   - name: Locate Erlang (Windows)
     shell: msys2 {0}
