@@ -164,7 +164,7 @@ jobs:
           elixir-variant: ${{ env.ELIXIR_VARIANT }}
 
       - name: "Compile and Lint"
-        shell: bash
+        # shell: bash
         run: |
           asdf install
           mix local.hex --force
