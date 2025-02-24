@@ -15,12 +15,13 @@ jobs:
     timeout-minutes: 90
     
     strategy:
-      fail-fast: false
+      fail-fast: true
       matrix:
         otp_version: [OTP-24.3.4.14]
         elixir:
           - { version: 1.16.3, variant: "-otp-24" }
-        platform: [ubuntu-latest, macos-14, windows-2022]
+        # https://github.com/actions/runner-images
+        platform: [ windows-2022] # ubuntu-latest,macos-14,
         include:
           - platform: ubuntu-latest
             generic_platform: linux-x86
