@@ -15,7 +15,7 @@ jobs:
     timeout-minutes: 90
     
     strategy:
-      fail-fast: false
+      fail-fast: true
       matrix:
         otp_version: [OTP-24.3.4.14]
         elixir:
@@ -91,6 +91,10 @@ jobs:
           echo "elixir ${{ env.ELIXIR_VERSION }}${{ env.ELIXIR_VARIANT }}" >> .tool-versions
           echo "nodejs v18.7.0" >> .tool-versions
           cat .tool-versions
+
+      - name: "Install asdf for linux edgecase"
+        if: startsWith(matrix.platform, 'ubuntu-')
+        uses: asdf-vm/actions/install@v3
 
       - name: Set up asdf build tools
         shell: bash
