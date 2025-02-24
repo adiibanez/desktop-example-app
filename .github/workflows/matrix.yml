@@ -161,15 +161,6 @@ jobs:
       #     elixir-version: ${{ env.ELIXIR_VERSION }}
       #     elixir-variant: ${{ env.ELIXIR_VARIANT }}
 
-      - name: "Compile and Lint"
-        # shell: bash
-        run: |
-          asdf install
-          mix local.hex --force
-          mix local.rebar --force
-          mix deps.get
-          cd assets && npm install
-
       - name: Windows Build Steps
         if: matrix.generic_platform == 'windows'
         uses: ./.github/actions/windows

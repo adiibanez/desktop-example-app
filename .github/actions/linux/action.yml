@@ -55,6 +55,14 @@ runs:
   #       fop \
   #       libxml2-utils
 
+  - name: "Compile and Lint"
+    run: |
+      asdf install
+      mix local.hex --force
+      mix local.rebar --force
+      mix deps.get
+      cd assets && npm install
+
   - name: Linux Docker Build
     uses: whoan/docker-build-with-cache-action@master
     with:

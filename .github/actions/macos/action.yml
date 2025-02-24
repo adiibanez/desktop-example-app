@@ -49,6 +49,14 @@ runs:
       export KERL_CONFIGURE_OPTIONS="--enable-parallel-configure --with-wxdir=`echo ~/projects/wxWidgets` --disable-jit --without-javac --disable-debug CXX='gcc -std=c++11'"
       asdf install
 
+  - name: "Compile and Lint"
+    run: |
+      asdf install
+      mix local.hex --force
+      mix local.rebar --force
+      mix deps.get
+      cd assets && npm install
+
   - name: "Build Release"
     shell: bash
     env:
