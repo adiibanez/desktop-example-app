@@ -232,9 +232,15 @@ jobs:
         MACOS_PEM: ${{ secrets.MACOS_PEM }}
       run: |
         . $HOME/.asdf/asdf.sh
+
+        echo "$MACOS_PEM" | base64 --decode > certificate.p12
+
         mix desktop.create_keychain maybe
         export MACOS_KEYCHAIN="$HOME/Library/Keychains/macos-build.keychain"
         export LD_LIBRARY_PATH="$HOME/projects/wxWidgets/lib/"
+
+        security import certificate.p12 -k "$MACOS_KEYCHAIN" -P "" -T /usr/bin/codesign
+
         mix assets.deploy
         mix desktop.installer
 
