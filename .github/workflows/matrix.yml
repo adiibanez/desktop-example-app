@@ -23,10 +23,10 @@ jobs:
         # https://github.com/actions/runner-images
         platform: [ windows-2022] # ubuntu-latest,macos-14,
         include:
-          - platform: ubuntu-latest
-            generic_platform: linux-x86
-          - platform: macos-14
-            generic_platform: macos
+          #- platform: ubuntu-latest
+          #  generic_platform: linux-x86
+          #- platform: macos-14
+          #  generic_platform: macos
           - platform: windows-2022
             generic_platform: windows
 
