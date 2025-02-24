@@ -157,6 +157,8 @@ jobs:
           asdf plugin add nodejs
           asdf install
 
+          asdf plugin list
+
       - name: Common Build Steps
         uses: ./.github/actions/common
         with:
@@ -167,8 +169,8 @@ jobs:
       - name: "Compile and Lint"
         shell: bash
         run: |
-          . $HOME/.asdf/asdf.sh
-          asdf reshim elixir
+          # source $HOME/.asdf/asdf.sh
+          # asdf reshim elixir
           mix local.hex --force
           mix local.rebar --force
           mix deps.get
