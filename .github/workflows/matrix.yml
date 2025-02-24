@@ -17,9 +17,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        otp_version: [OTP-24.3.4.14, OTP-27.2.4]
+        otp_version: [OTP-27.2.4] #OTP-24.3.4.14, 
         elixir:
-          - { version: 1.16.3, variant: "-otp-24" }
+          #- { version: 1.16.3, variant: "-otp-24" }
           - { version: 1.18.1, variant: "-otp-27" }
         
           # https://github.com/actions/runner-images
