@@ -85,8 +85,6 @@ jobs:
             ${{ matrix.generic_platform }}-deps-
 
 
-      
-
       # - name: Install ASDF (Linux)
       #   if: matrix.generic_platform == 'linux-x86' && steps.asdf-cache-restore.outputs.cache-hit != 'true'
       #   shell: bash
@@ -129,17 +127,10 @@ jobs:
 
       #     asdf --version
 
-      - name: "Prepare asdf"
-        run: |
-          echo "erlang ref:${{ env.OTP_VERSION }}" >> ~/.tool-versions
-          echo "elixir ${{ env.ELIXIR_VERSION }}${{ env.ELIXIR_VARIANT }}" >> ~/.tool-versions
-          echo "nodejs v18.7.0" >> ~/.tool-versions
-          cat ~/.tool-versions
-
-      - name: "Installing Erlang"
-        if: matrix.generic_platform == 'macos'
-        run: |
-          export KERL_CONFIGURE_OPTIONS="--enable-parallel-configure --with-wxdir=`echo ~/projects/wxWidgets` --disable-jit --without-javac --disable-debug CXX='gcc -std=c++11'"
+      # - name: "Installing Erlang"
+      #   if: matrix.generic_platform == 'macos'
+      #   run: |
+      #     export KERL_CONFIGURE_OPTIONS="--enable-parallel-configure --with-wxdir=`echo ~/projects/wxWidgets` --disable-jit --without-javac --disable-debug CXX='gcc -std=c++11'"
 
       - name: "Install asdf"
         #uses: asdf-vm/actions/install@v3
@@ -147,8 +138,15 @@ jobs:
       #- name: "Install plugins"
       #  uses: asdf-vm/actions/plugins-add@v3
 
+      - name: "Prepare asdf"
+        run: |
+          echo "erlang ref:${{ env.OTP_VERSION }}" >> .tool-versions
+          echo "elixir ${{ env.ELIXIR_VERSION }}${{ env.ELIXIR_VARIANT }}" >> .tool-versions
+          echo "nodejs v18.7.0" >> .tool-versions
+          cat .tool-versions
+
       - name: Set up build tools
-        shell: bash
+        # shell: bash
         run: |
           asdf plugin add erlang
           asdf plugin add elixir
@@ -156,12 +154,12 @@ jobs:
 
           asdf plugin list
 
-      - name: Common Build Steps
-        uses: ./.github/actions/common
-        with:
-          otp-version: ${{ env.OTP_VERSION }}
-          elixir-version: ${{ env.ELIXIR_VERSION }}
-          elixir-variant: ${{ env.ELIXIR_VARIANT }}
+      # - name: Common Build Steps
+      #   uses: ./.github/actions/common
+      #   with:
+      #     otp-version: ${{ env.OTP_VERSION }}
+      #     elixir-version: ${{ env.ELIXIR_VERSION }}
+      #     elixir-variant: ${{ env.ELIXIR_VARIANT }}
 
       - name: "Compile and Lint"
         # shell: bash
