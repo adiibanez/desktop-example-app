@@ -12,6 +12,7 @@ env:
 jobs:
   build:
     runs-on: ${{ matrix.platform }}
+    # runs-on: self-hosted
     timeout-minutes: 90
     
     strategy:
@@ -23,11 +24,12 @@ jobs:
           - { otp_version: OTP-27.2.4, wxwidgets_version: master, elixir_version: 1.18.1, elixir_variant: "-otp-27" }
         
           # https://github.com/actions/runner-images
-        platform: [ ubuntu-latest] # ubuntu-latest,macos-14,
+        platform: [ ubuntu-latest ] # ubuntu-latest,macos-14,
+        #platform: [ macos-latest ] # ubuntu-latest,macos-14,
         #, macos-latest
         #windows-2022
 
-    name: ${{ matrix.platform }}:${{ matrix.erlixir.otp_version }}:${{ matrix.erlixir.version }}
+    name: "${{ matrix.platform }} ${{ matrix.erlixir.otp_version }}, wx: ${{ matrix.erlixir.wxwidgets_version }}, exs: ${{ matrix.erlixir.version }}"
     env:
       OTP_VERSION: ${{ matrix.erlixir.otp_version }}
       ELIXIR_VERSION: ${{ matrix.erlixir.elixir_version }}

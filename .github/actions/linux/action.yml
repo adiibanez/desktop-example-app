@@ -155,9 +155,9 @@ runs:
       # username: ${{ secrets.DOCKER_USERNAME }}
       # password: ${{ secrets.DOCKER_PASSWORD }}
       username: ${{ inputs.github-actor }}
-      password: ${{inputs.ghcr-pat-token}}
+      password: ${{ inputs.ghcr-pat-token }}
       registry: ghcr.io
-      image: linux_installer:${{inputs.otp-version }}_wx-${{ inputs.wxwidgets-version }}_elixir-${{ inputs.elixir-version }}
+      image: ${{github.repository }}/linux_installer:${{inputs.otp-version }}_wx-${{ inputs.wxwidgets-version }}_elixir-${{ inputs.elixir-version }}
       # options: -v ${{ github.workspace }}:/work -e ABC=123
       options: -v ${{ github.workspace }}:/app
       run: |
