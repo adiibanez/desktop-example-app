@@ -11,69 +11,69 @@ RUN apt-get install -y openjdk-11-jdk xsltproc fop libxml2-utils
 # ENV WXWIDGETS_REPO=https://github.com/vadz/wxWidgets.git
 # ENV WXWIDGETS_REPO=https://github.com/TcT2k/wxWidgets.git
 # ENV WXWIDGETS_REPO=https://github.com/dominicletz/wxWidgets.git
-ARG WXWIDGETS_REPO
-ENV WXWIDGETS_REPO=${WXWIDGETS_REPO:-https://github.com/wxWidgets/wxWidgets.git}
-RUN mkdir ~/projects && cd ~/projects && \
-    git clone ${WXWIDGETS_REPO}
+# ARG WXWIDGETS_REPO
+# ENV WXWIDGETS_REPO=${WXWIDGETS_REPO:-https://github.com/wxWidgets/wxWidgets.git}
+# RUN mkdir ~/projects && cd ~/projects && \
+#     git clone ${WXWIDGETS_REPO}
 
-ARG CMAKE_VERSION
-ENV CMAKE_VERSION=${CMAKE_VERSION:-3.27.4}
-RUN curl -sSL https://github.com/Kitware/CMake/releases/download/v${CMAKE_VERSION}/cmake-${CMAKE_VERSION}-linux-x86_64.sh > cmake.sh && \
-    sh cmake.sh --skip-license --prefix=/usr/local
+# ARG CMAKE_VERSION
+# ENV CMAKE_VERSION=${CMAKE_VERSION:-3.27.4}
+# RUN curl -sSL https://github.com/Kitware/CMake/releases/download/v${CMAKE_VERSION}/cmake-${CMAKE_VERSION}-linux-x86_64.sh > cmake.sh && \
+#     sh cmake.sh --skip-license --prefix=/usr/local
 
-# ENV WXWIDGETS_VERSION=v3.1.4
-# ENV WXWIDGETS_VERSION=chromium
-# ENV WXWIDGETS_VERSION=wide-init-fix
-ARG WXWIDGETS_VERSION
-ENV WXWIDGETS_VERSION=${WXWIDGETS_VERSION:-master}
-RUN cd ~/projects/wxWidgets && \
-    git fetch origin && \
-    git reset --hard origin/${WXWIDGETS_VERSION} && \
-    git submodule update --init
+# # ENV WXWIDGETS_VERSION=v3.1.4
+# # ENV WXWIDGETS_VERSION=chromium
+# # ENV WXWIDGETS_VERSION=wide-init-fix
+# ARG WXWIDGETS_VERSION
+# ENV WXWIDGETS_VERSION=${WXWIDGETS_VERSION:-master}
+# RUN cd ~/projects/wxWidgets && \
+#     git fetch origin && \
+#     git reset --hard origin/${WXWIDGETS_VERSION} && \
+#     git submodule update --init
 
-# ENV WXWIDGETS_DEBUG=--enable-debug
-ARG WXWIDGETS_DEBUG
-ENV WXWIDGETS_DEBUG=${WXWIDGETS_DEBUG:-}
-RUN cd ~/projects/wxWidgets && \
-    ./configure --prefix=/usr/local/wxWidgets ${WXWIDGETS_DEBUG} --enable-webview --enable-compat30 --disable-shared && \
-    make -j16
+# # ENV WXWIDGETS_DEBUG=--enable-debug
+# ARG WXWIDGETS_DEBUG
+# ENV WXWIDGETS_DEBUG=${WXWIDGETS_DEBUG:-}
+# RUN cd ~/projects/wxWidgets && \
+#     ./configure --prefix=/usr/local/wxWidgets ${WXWIDGETS_DEBUG} --enable-webview --enable-compat30 --disable-shared && \
+#     make -j16
 
-# Installing Erlang
+# # Installing Erlang
 
-ARG OTP_VERSION
-ENV OTP_VERSION=${OTP_VERSION:-master}
-# Used by ASDF
-# ENV OTP_GITHUB_URL=https://github.com/erlang/otp.git
-ARG OTP_GITHUB_URL
-ENV OTP_GITHUB_URL=${OTP_GITHUB_URL:-https://github.com/erlang/otp.git}
+# ARG OTP_VERSION
+# ENV OTP_VERSION=${OTP_VERSION:-master}
+# # Used by ASDF
+# # ENV OTP_GITHUB_URL=https://github.com/erlang/otp.git
+# ARG OTP_GITHUB_URL
+# ENV OTP_GITHUB_URL=${OTP_GITHUB_URL:-https://github.com/erlang/otp.git}
 
-ENV KERL_CONFIGURE_OPTIONS="--with-wxdir=/root/projects/wxWidgets --disable-javac --disable-debug"
-ARG ELIXIR_VERSION
-ENV ELIXIR_VERSION=${ELIXIR_VERSION:-1.13.4}
-ARG ELIXIR_VARIANT
-ENV ELIXIR_VARIANT=${ELIXIR_VARIANT:-"-otp-26"}
+# ENV KERL_CONFIGURE_OPTIONS="--with-wxdir=/root/projects/wxWidgets --disable-javac --disable-debug"
+# ARG ELIXIR_VERSION
+# ENV ELIXIR_VERSION=${ELIXIR_VERSION:-1.13.4}
+# ARG ELIXIR_VARIANT
+# ENV ELIXIR_VARIANT=${ELIXIR_VARIANT:-"-otp-26"}
 
-#ENV ASDF_DIR=/root/.asdf
-#ENV ASDF_DATA_DIR="$HOME/.asdf"
-#RUN git clone https://github.com/asdf-vm/asdf.git ${ASDF_DIR} && \
-RUN curl  -O -L https://github.com/asdf-vm/asdf/releases/download/v0.16.4/asdf-v0.16.4-linux-amd64.tar.gz && \
-    tar -xzf asdf-v0.16.4-linux-amd64.tar.gz && \
-    mv asdf /usr/local/bin/asdf && \
-    chmod +x /usr/local/bin/asdf && \
-    rm asdf-v0.16.4-linux-amd64.tar.gz && \
-    echo export PATH=\"\/usr/local/bin:$ASDF_DATA_DIR/shims:$PATH\" >> $HOME/.bashrc
+# #ENV ASDF_DIR=/root/.asdf
+# #ENV ASDF_DATA_DIR="$HOME/.asdf"
+# #RUN git clone https://github.com/asdf-vm/asdf.git ${ASDF_DIR} && \
+# RUN curl  -O -L https://github.com/asdf-vm/asdf/releases/download/v0.16.4/asdf-v0.16.4-linux-amd64.tar.gz && \
+#     tar -xzf asdf-v0.16.4-linux-amd64.tar.gz && \
+#     mv asdf /usr/local/bin/asdf && \
+#     chmod +x /usr/local/bin/asdf && \
+#     rm asdf-v0.16.4-linux-amd64.tar.gz && \
+#     echo export PATH=\"\/usr/local/bin:$ASDF_DATA_DIR/shims:$PATH\" >> $HOME/.bashrc
 
-# RUN . $HOME/.bashrc
+# # RUN . $HOME/.bashrc
 
-RUN asdf plugin list && \
-    asdf plugin add elixir && \
-    echo "elixir ${ELIXIR_VERSION}${ELIXIR_VARIANT}" >> .tool-versions && \
-    asdf plugin add erlang && \
-    echo "erlang ref:${OTP_VERSION}" >> .tool-versions && \
-    asdf plugin add nodejs && \
-    echo "nodejs v18.7.0" >> .tool-versions && \
-    asdf plugin list && \
-    asdf install
+# RUN asdf plugin list && \
+#     asdf plugin add elixir && \
+#     echo "elixir ${ELIXIR_VERSION}${ELIXIR_VARIANT}" >> .tool-versions && \
+#     asdf plugin add erlang && \
+#     echo "erlang ref:${OTP_VERSION}" >> .tool-versions && \
+#     asdf plugin add nodejs && \
+#     echo "nodejs v18.7.0" >> .tool-versions && \
+#     asdf plugin list && \
+#     asdf install
 
 # # Compile and lint
 # COPY mix.exs mix.lock .formatter.exs /app/
