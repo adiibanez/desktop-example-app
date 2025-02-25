@@ -34,87 +34,6 @@ inputs:
 runs:
   using: "composite"
   steps:
-  - name: asdf cache
-    id: asdf-cache
-    uses: actions/cache@v3
-    with:
-      path: /home/runner/.asdf
-      key: ${{ inputs.cache-name }}-asdf
-      restore-keys: |
-        ${{ inputs.cache-name }}-asdf
-
-  # - name: "Ensure asdf"
-  #   uses: asdf-vm/actions/install@v3
-
-  # - name: "Debug"
-  #   shell: bash
-  #   run: |
-  #     ls -lah ~/.asdf/
-  #     asdf --version
-  #     asdf plugin list
-
-  # - name: "Install asdf deps"
-  #   shell: bash
-  #   id: erlang-elixir-install
-  #   if: steps.asdf-cache.outputs.cache-hit != 'true'
-  #   run: |
-  #     asdf install
-
-  # - name: "Compile and Lint"
-  #   shell: bash
-  #   run: |
-  #     mix local.hex --force
-  #     mix local.rebar --force
-  #     mix deps.get
-  #     cd assets && npm install
-
-  # - name: Save asdf erlang cache
-  #   if: steps.erlang-elixir-install.outcome == 'success' && steps.asdf-cache.outputs.cache-hit != 'true'
-  #   uses: actions/cache/save@v3
-  #   with:
-  #     path: |
-  #       /home/runner/.asdf
-  #     key: ${{ inputs.cache-name }}-asdf
-
-  # - name: Checkout code
-  #   uses: actions/checkout@v2
-
-  # - name: Set up Docker Buildx
-  #   uses: docker/setup-buildx-action@v1
-
-  # - name: Cache Docker layers
-  #   uses: actions/cache@v2
-  #   with:
-  #     path: /tmp/.buildx-cache
-  #     key: ${{ runner.os }}-buildx-${{ github.sha }}
-  #     restore-keys: |
-  #       ${{ runner.os }}-buildx-
-
-  # - name: Log in to GitHub Docker Registry
-  #   shell: bash
-  #   run: |
-  #     echo "${{ inputs.ghcr-pat-token }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-
-  # - name: buildx cache
-  #   id: buildx-cache
-  #   uses: actions/cache@v3
-  #   with:
-  #     path: |
-  #       /tmp/.buildx-cache
-  #     key: ${{ inputs.cache-name }}-buildx-${{ github.sha }}
-  #     restore-keys: |
-  #       ${{ inputs.cache-name }}-buildx-
-
-  # - name: Pull Docker image
-  #   if: ${{ hashFiles('/tmp/.buildx-cache') == '' }}
-  #   shell: bash
-  #   run: |
-  #     if docker pull ghcr.io/${{ github.repository }}/linux_installer:${{inputs.otp-version }}_${{ inputs.elixir-version }}; then
-  #       echo "Successfully pulled image ghcr.io/${{ github.repository }}/linux_installer:${{inputs.otp-version }}_${{ inputs.elixir-version }}." 
-  #     else 
-  #       echo "Image ghcr.io/${{ github.repository }}/linux_installer:${{inputs.otp-version }}_${{ inputs.elixir-version }} not found, continuing without pull." 
-  #     fi
-
   - name: Linux docker builder image
     uses: whoan/docker-build-with-cache-action@v5
     id: buildx
@@ -138,113 +57,56 @@ runs:
         --build-arg=OTP_GITHUB_URL=${{ env.OTP_GITHUB_URL }}
         --build-arg=ELIXIR_VERSION=${{ inputs.elixir-version }}
         --build-arg=ELIXIR_VARIANT=${{ inputs.elixir-variant }}
-      #cache_from: type=local,src=/tmp/.buildx-cache
-      #cache_to: type=local,dest=/tmp/.buildx-cache-new,mode=max
 
-      # - name: Build and push Docker image
-      #   shell: bash
-      #   run: |
-      #     echo "${{ inputs.ghcr-pat-token }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-      #     docker tag linux_installer:${{inputs.otp-version }}_wx-${{ inputs.wxwidgets-version }}_elixir-${{ inputs.elixir-version }}-${{github.sha}} ghcr.io/${{ github.repository }}/linux_installer:${{inputs.otp-version }}_wx-${{ inputs.wxwidgets-version }}_elixir-${{ inputs.elixir-version }}-${{github.sha}}
-      #     docker tag linux_installer:${{inputs.otp-version }}_wx-${{ inputs.wxwidgets-version }}_elixir-${{ inputs.elixir-version }}-${{github.sha}} ghcr.io/${{ github.repository }}/linux_installer:${{inputs.otp-version }}_wx-${{ inputs.wxwidgets-version }}_elixir-${{ inputs.elixir-version }}
-      #     docker push ghcr.io/${{ github.repository }}/linux_installer:${{inputs.otp-version }}_wx-${{ inputs.wxwidgets-version }}_elixir-${{ inputs.elixir-version }}
-
-      # - name: Login to GHCR
-      #   run: |
-      #     echo "${{ inputs.ghcr-pat-token }}" | docker login ghcr.io -u ${{ inputs.github-actor }} --password-stdin
-
-  - name: Checkout code
-    uses: actions/checkout@v3
-
-  - name: Login to GHCR
-    run: |
-      echo "${{ inputs.ghcr-pat-token }}" | docker login ghcr.io -u ${{ inputs.github-actor }} --password-stdin
+  # - name: Checkout
+  #   #if: false
+  #   uses: actions/checkout@v2 # Required to mount the Github Workspace to a volume 
+  - name: Checkout
+    uses: actions/checkout@v2
 
   - name: Run command in Docker container
-    run: |
+    shell: bash
+    run: |+
       docker run \
         --rm \
         -v ${{ github.workspace }}:/app \
         -w /app \
         ghcr.io/adiibanez/desktop-example-app/linux_installer:${{inputs.otp-version }}_wx-${{ inputs.wxwidgets-version }}_elixir-${{ inputs.elixir-version }} \
-        /bin/bash -c " \
-          echo 'Running Script'; \
-          # Compile and lint \
-          asdf install; \
-          mix local.hex --force; \
-          mix local.rebar --force; \
-          mix deps.get; \
-          mix deps.compile; \
-          cd assets; \
-          npm install; \
-          # Build Release \
-          export LD_LIBRARY_PATH=/root/projects/wxWidgets/lib/; \
-          MIX_ENV=prod mix compile; \
-          # Build installer \
-          cd ..; \
-          mix deps.update desktop; \
-          mix deps.update desktop_deployment; \
-          mix assets.deploy; \
-          mix desktop.installer \
-        "
+        /bin/bash -c ./scripts/linux_build_release.sh
+        
+  # - name: Build release
+  #   uses: addnab/docker-run-action@v3
+  #   with:
+  #     # username: ${{ secrets.DOCKER_USERNAME }}
+  #     # password: ${{ secrets.DOCKER_PASSWORD }}
+  #     username: ${{ inputs.github-actor }}
+  #     password: ${{ inputs.ghcr-pat-token }}
+  #     registry: ghcr.io
+  #     image: ghcr.io/adiibanez/desktop-example-app/linux_installer:${{inputs.otp-version }}_wx-${{ inputs.wxwidgets-version }}_elixir-${{ inputs.elixir-version }}
+  #     #image: ${{github.repository }}/linux_installer:${{inputs.otp-version }}_wx-${{ inputs.wxwidgets-version }}_elixir-${{ inputs.elixir-version }}
+  #     # options: -v ${{ github.workspace }}:/work -e ABC=123
+  #     options: -v ${{ github.workspace }}:/app
+  #     run: |
+  #       echo "Running Script"
 
-  - name: Build release
-    if: false
-    uses: actions/checkout@v2 # Required to mount the Github Workspace to a volume 
-  - uses: addnab/docker-run-action@v3
-    with:
-      # username: ${{ secrets.DOCKER_USERNAME }}
-      # password: ${{ secrets.DOCKER_PASSWORD }}
-      username: ${{ inputs.github-actor }}
-      password: ${{ inputs.ghcr-pat-token }}
-      registry: ghcr.io
-      image: ghcr.io/adiibanez/desktop-example-app/linux_installer:${{inputs.otp-version }}_wx-${{ inputs.wxwidgets-version }}_elixir-${{ inputs.elixir-version }}
-      #image: ${{github.repository }}/linux_installer:${{inputs.otp-version }}_wx-${{ inputs.wxwidgets-version }}_elixir-${{ inputs.elixir-version }}
-      # options: -v ${{ github.workspace }}:/work -e ABC=123
-      options: -v ${{ github.workspace }}:/app
-      run: |
-        echo "Running Script"
+  #       # Compile and lint
+  #       cd /app
+  #       asdf install
+  #       mix local.hex --force
+  #       mix local.rebar --force
+  #       mix deps.get
+  #       mix deps.compile
 
-        # Compile and lint
-        cd /app
-        asdf install
-        mix local.hex --force
-        mix local.rebar --force
-        mix deps.get
-        mix deps.compile
+  #       cd /app/assets
+  #       npm install
 
-        cd /app/assets
-        npm install
+  #       # Build Release
+  #       export LD_LIBRARY_PATH=/root/projects/wxWidgets/lib/
+  #       MIX_ENV=prod mix compile
 
-        # Build Release
-        export LD_LIBRARY_PATH=/root/projects/wxWidgets/lib/
-        MIX_ENV=prod mix compile
-
-        # Build installer
-        cd /app
-        mix deps.update desktop
-        mix deps.update desktop_deployment
-        mix assets.deploy
-        mix desktop.installer
-      #       find /app/_build/prod/ -name "*.run"
-      # - name: Move Docker Cache
-      #   shell: bash
-      #   run: |
-      #     rm -rf /tmp/.buildx-cache
-      #     mv /tmp/.buildx-cache-new /tmp/.buildx-cache
-
-      # - name: Save buildx Cache
-      #   if: steps.buildx.outcome == 'success' && steps.buildx-cache.outputs.cache-hit != 'true'
-      #   uses: actions/cache/save@v3
-      #   with:
-      #     path: |
-      #       /tmp/.buildx-cache
-      #     key: ${{ inputs.cache-name }}-buildx-${{ github.sha }}
-
-      # - name: Extract runfile Linux
-      #   shell: bash
-      #   run: |
-      #     NAME=$(docker run --platform=linux/amd64 -i ${{steps.docker.outputs.FULL_IMAGE_NAME}} bash -c 'basename `ls /app/_build/prod/*.run`')
-      #     NAME=`echo $NAME | tr -d '\n\r'`
-      #     docker run --platform=linux/amd64 -i ${{steps.docker.outputs.FULL_IMAGE_NAME}} bash -c 'xxd /app/_build/prod/*.run' | xxd -r > $NAME
-      #     chmod +x $NAME
+  #       # Build installer
+  #       cd /app
+  #       mix deps.update desktop
+  #       mix deps.update desktop_deployment
+  #       mix assets.deploy
+  #       mix desktop.installer
