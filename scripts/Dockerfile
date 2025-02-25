@@ -61,7 +61,7 @@ RUN curl  -O -L https://github.com/asdf-vm/asdf/releases/download/v0.16.4/asdf-v
     rm asdf-v0.16.4-linux-amd64.tar.gz && \
     echo export PATH=\"\$PATH:/usr/local/bin\" >> $HOME/.bashrc
 
-RUN source $HOME/.bashrc && \
+RUN . $HOME/.bashrc && \
     asdf plugin add elixir && \
     echo "elixir ${ELIXIR_VERSION}${ELIXIR_VARIANT}" >> .tool-versions && \
     asdf plugin add erlang && \
