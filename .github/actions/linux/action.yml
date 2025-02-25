@@ -157,21 +157,21 @@ runs:
       username: ${{ inputs.github-actor }}
       password: ${{inputs.ghcr-pat-token}}
       registry: ghcr.io
-      image_name: linux_installer:${{inputs.otp-version }}_wx-${{ inputs.wxwidgets-version }}_elixir-${{ inputs.elixir-version }}
+      image: linux_installer:${{inputs.otp-version }}_wx-${{ inputs.wxwidgets-version }}_elixir-${{ inputs.elixir-version }}
       # options: -v ${{ github.workspace }}:/work -e ABC=123
       options: -v ${{ github.workspace }}:/app
       run: |
         echo "Running Script"
 
         # Compile and lint
-        cd /app && \
-        asdf install && \
-        mix local.hex --force && \
-        mix local.rebar --force && \
-        mix deps.get && \
+        cd /app
+        asdf install
+        mix local.hex --force
+        mix local.rebar --force
+        mix deps.get
         mix deps.compile
 
-        cd /app/assets && \
+        cd /app/assets
         npm install
 
         # Build Release
@@ -179,10 +179,10 @@ runs:
         MIX_ENV=prod mix compile
 
         # Build installer
-        cd /app && \
-        mix deps.update desktop && \
-        mix deps.update desktop_deployment  && \
-        mix assets.deploy && \
+        cd /app
+        mix deps.update desktop
+        mix deps.update desktop_deployment
+        mix assets.deploy
         mix desktop.installer
 
         find /app/_build/prod/ -name "*.run"
