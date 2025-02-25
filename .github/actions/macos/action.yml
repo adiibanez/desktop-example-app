@@ -38,9 +38,9 @@ runs:
       path: |
         /opt/homebrew/Cellar
         /usr/local/Cellar
-      key: ${{ inputs.cache-name }}-brew
+      key: ${{ inputs.cache-name }}-brew-
       restore-keys: |
-        ${{ inputs.cache-name }}-brew
+        ${{ inputs.cache-name }}-brew-
 
   - name: "Install brew deps (macOS)"
     shell: bash
