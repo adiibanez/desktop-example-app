@@ -115,7 +115,7 @@ runs:
 
   - name: "Ensure asdf"
     uses: asdf-vm/actions/setup@v3
-    if: steps.erlang-cache.outputs.cache-hit != 'true'
+    #if: steps.erlang-cache.outputs.cache-hit != 'true'
     env:
       KERL_CONFIGURE_OPTIONS: ${{ steps.erlang-prep.outputs.KERL_CONFIGURE_OPTIONS }}
 
