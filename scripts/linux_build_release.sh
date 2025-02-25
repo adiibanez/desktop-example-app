@@ -8,6 +8,8 @@ asdf reshim elixir
 asdf reshim erlang
 asdf reshim nodejs
 
+asdf install
+
 echo 'Running Script';
 # Compile and lint
 mix local.hex --force;
