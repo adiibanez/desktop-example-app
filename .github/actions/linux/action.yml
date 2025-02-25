@@ -74,7 +74,7 @@ runs:
         -v ${{ github.workspace }}:/app \
         -w /app \
         ghcr.io/adiibanez/linux_installer:${{inputs.otp-version }}_wx-${{ inputs.wxwidgets-version }}_elixir-${{ inputs.elixir-version }} \
-        /bin/bash -c ./scripts/linux_build_release.sh
+        /bin/bash -c /app/scripts/linux_build_release.sh
         
   # - name: Build release
   #   uses: addnab/docker-run-action@v3
