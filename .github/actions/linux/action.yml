@@ -67,12 +67,14 @@ runs:
   - name: Run command in Docker container
     shell: bash
     run: |+
-      docker run \
-        --rm \
-        -v ${{ github.workspace }}:/app \
-        -w /app \
-        ghcr.io/adiibanez/desktop-example-app/linux_installer:${{inputs.otp-version }}_wx-${{ inputs.wxwidgets-version }}_elixir-${{ inputs.elixir-version }} \
-        /bin/bash -c ./scripts/linux_build_release.sh
+      docker images
+      docker ps -a
+      # docker run \
+      #   --rm \
+      #   -v ${{ github.workspace }}:/app \
+      #   -w /app \
+      #   ghcr.io/adiibanez/desktop-example-app/linux_installer:${{inputs.otp-version }}_wx-${{ inputs.wxwidgets-version }}_elixir-${{ inputs.elixir-version }} \
+      #   /bin/bash -c ./scripts/linux_build_release.sh
         
   # - name: Build release
   #   uses: addnab/docker-run-action@v3
