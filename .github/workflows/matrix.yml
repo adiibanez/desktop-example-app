@@ -68,7 +68,7 @@ jobs:
             ${{ matrix.platform }}-deps-otp-${{ env.OTP_VERSION }}-
             ${{ matrix.platform }}-deps-
 
-      - name: "Prepare asdf"
+      - name: "Prepare asdf .tool-versions"
         shell: bash
         run: |
           echo "erlang ref:${{ env.OTP_VERSION }}" > .tool-versions
@@ -77,7 +77,6 @@ jobs:
           cat .tool-versions
 
       - name: Print HOME directory
-        # if: startsWith(matrix.platform, 'windows-')
         shell: bash
         run: echo "HOME directory $HOME"
     
