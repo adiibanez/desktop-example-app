@@ -142,7 +142,6 @@ runs:
     shell: bash
     run: |
       ls -lah ~/.asdf/
-      ls -lah ~/.asdf/installed/elixir
       asdf install
       mix local.hex --force
       mix local.rebar --force
