@@ -39,30 +39,30 @@ RUN cd ~/projects/wxWidgets && \
     ./configure --prefix=/usr/local/wxWidgets ${WXWIDGETS_DEBUG} --enable-webview --enable-compat30 --disable-shared && \
     make -j16
 
-# # Installing Erlang
+# Installing Erlang
 
-# ARG OTP_VERSION
-# ENV OTP_VERSION=${OTP_VERSION:-master}
-# # Used by ASDF
-# # ENV OTP_GITHUB_URL=https://github.com/erlang/otp.git
-# ARG OTP_GITHUB_URL
-# ENV OTP_GITHUB_URL=${OTP_GITHUB_URL:-https://github.com/erlang/otp.git}
+ARG OTP_VERSION
+ENV OTP_VERSION=${OTP_VERSION:-master}
+# Used by ASDF
+# ENV OTP_GITHUB_URL=https://github.com/erlang/otp.git
+ARG OTP_GITHUB_URL
+ENV OTP_GITHUB_URL=${OTP_GITHUB_URL:-https://github.com/erlang/otp.git}
 
-# ENV KERL_CONFIGURE_OPTIONS="--with-wxdir=/root/projects/wxWidgets --disable-javac --disable-debug"
-# ARG ELIXIR_VERSION
-# ENV ELIXIR_VERSION=${ELIXIR_VERSION:-1.13.4}
-# ARG ELIXIR_VARIANT
-# ENV ELIXIR_VARIANT=${ELIXIR_VARIANT:-"-otp-26"}
+ENV KERL_CONFIGURE_OPTIONS="--with-wxdir=/root/projects/wxWidgets --disable-javac --disable-debug"
+ARG ELIXIR_VERSION
+ENV ELIXIR_VERSION=${ELIXIR_VERSION:-1.13.4}
+ARG ELIXIR_VARIANT
+ENV ELIXIR_VARIANT=${ELIXIR_VARIANT:-"-otp-26"}
 
-# #ENV ASDF_DIR=/root/.asdf
-# #ENV ASDF_DATA_DIR="$HOME/.asdf"
-# #RUN git clone https://github.com/asdf-vm/asdf.git ${ASDF_DIR} && \
-# RUN curl  -O -L https://github.com/asdf-vm/asdf/releases/download/v0.16.4/asdf-v0.16.4-linux-amd64.tar.gz && \
-#     tar -xzf asdf-v0.16.4-linux-amd64.tar.gz && \
-#     mv asdf /usr/local/bin/asdf && \
-#     chmod +x /usr/local/bin/asdf && \
-#     rm asdf-v0.16.4-linux-amd64.tar.gz && \
-#     echo export PATH=\"\/usr/local/bin:$ASDF_DATA_DIR/shims:$PATH\" >> $HOME/.bashrc
+#ENV ASDF_DIR=/root/.asdf
+#ENV ASDF_DATA_DIR="$HOME/.asdf"
+#RUN git clone https://github.com/asdf-vm/asdf.git ${ASDF_DIR} && \
+RUN curl  -O -L https://github.com/asdf-vm/asdf/releases/download/v0.16.4/asdf-v0.16.4-linux-amd64.tar.gz && \
+    tar -xzf asdf-v0.16.4-linux-amd64.tar.gz && \
+    mv asdf /usr/local/bin/asdf && \
+    chmod +x /usr/local/bin/asdf && \
+    rm asdf-v0.16.4-linux-amd64.tar.gz && \
+    echo export PATH=\"\/usr/local/bin:$ASDF_DATA_DIR/shims:$PATH\" >> $HOME/.bashrc
 
 # # RUN . $HOME/.bashrc
 
