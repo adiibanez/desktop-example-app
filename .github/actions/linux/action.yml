@@ -74,6 +74,23 @@ runs:
         /home/runner/.asdf
       key: ${{ inputs.cache-name }}-asdf
 
+  - name: Checkout code
+    uses: actions/checkout@v2
+
+  - name: Set up Docker Buildx
+    uses: docker/setup-buildx-action@v1
+
+  - name: Cache Docker layers
+    uses: actions/cache@v2
+    with:
+      path: /tmp/.buildx-cache
+      key: ${{ runner.os }}-buildx-${{ github.sha }}
+      restore-keys: |
+        ${{ runner.os }}-buildx-
+
+  - name: Log in to GitHub Docker Registry
+    run: echo "${{ secrets.GHCR_PAT }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
   - name: buildx cache
     id: buildx-cache
     uses: actions/cache@v3
@@ -83,6 +100,10 @@ runs:
       key: ${{ inputs.cache-name }}-buildx
       restore-keys: |
         ${{ inputs.cache-name }}-buildx
+
+  - name: Pull Docker image
+    run: |
+      docker pull ghcr.io/${{ github.repository }}/linux_installer:${{inputs.otp-version }}_${{ inputs.elixir-version }}
 
   - name: Linux Docker Build
     uses: whoan/docker-build-with-cache-action@master
@@ -105,6 +126,12 @@ runs:
         --build-arg=ELIXIR_VARIANT=${{ inputs.elixir-variant }}
       cache_from: type=local,src=/tmp/.buildx-cache
       cache_to: type=local,dest=/tmp/.buildx-cache-new,mode=max
+
+  - name: Build and push Docker image
+    run: |
+      # docker buildx build --cache-to type=local,dest=/tmp/.buildx-cache --cache-from type=local,src=/tmp/.buildx-cache --push -t ghcr.io/${{ github.repository }}/my-image:latest .
+      docker tag linux_installer ghcr.io/${{ github.repository }}/linux_installer:${{inputs.otp-version }}_${{ inputs.elixir-version }}
+      docker push ghcr.io/${{ github.repository }}/linux_installer:${{inputs.otp-version }}_${{ inputs.elixir-version }}
 
   - name: Move Docker Cache
     shell: bash

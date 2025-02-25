@@ -15,7 +15,7 @@ jobs:
     timeout-minutes: 90
     
     strategy:
-      fail-fast: true
+      fail-fast: false
       matrix:
         
         erlixir:
