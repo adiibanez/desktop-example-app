@@ -38,7 +38,7 @@ runs:
   - name: "Debug"
     shell: bash
     run: |
-      ls -lah ~/.asdf/downloads/
+      ls -lah ~/.asdf/
       asdf --version
       asdf plugin list
 

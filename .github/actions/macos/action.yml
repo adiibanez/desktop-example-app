@@ -142,6 +142,7 @@ runs:
     shell: bash
     run: |
       ls -lah ~/.asdf/
+      asdf plugin list
       asdf install
       mix local.hex --force
       mix local.rebar --force
