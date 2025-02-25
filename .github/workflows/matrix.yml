@@ -20,11 +20,11 @@ jobs:
       matrix:
         
         erlixir:
-          - { otp_version: OTP-24.3.4.14, wxwidgets_version: master, elixir_version: 1.16.3, elixir_variant: "-otp-24" }
+          # - { otp_version: OTP-24.3.4.14, wxwidgets_version: master, elixir_version: 1.16.3, elixir_variant: "-otp-24" }
           - { otp_version: OTP-27.2.4, wxwidgets_version: master, elixir_version: 1.18.1, elixir_variant: "-otp-27" }
         
           # https://github.com/actions/runner-images
-        platform: [ ubuntu-latest ] # ubuntu-latest,macos-14,
+        platform: [ macos-latest, ubuntu-latest ] # ubuntu-latest,macos-14,
         #platform: [ macos-latest ] # ubuntu-latest,macos-14,
         #, macos-latest
         #windows-2022
