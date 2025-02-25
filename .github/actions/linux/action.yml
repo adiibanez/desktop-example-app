@@ -157,7 +157,8 @@ runs:
       username: ${{ inputs.github-actor }}
       password: ${{ inputs.ghcr-pat-token }}
       registry: ghcr.io
-      image: ${{github.repository }}/linux_installer:${{inputs.otp-version }}_wx-${{ inputs.wxwidgets-version }}_elixir-${{ inputs.elixir-version }}
+      image: ghcr.io/adiibanez/desktop-example-app/linux_installer:${{inputs.otp-version }}_wx-${{ inputs.wxwidgets-version }}_elixir-${{ inputs.elixir-version }}
+      #image: ${{github.repository }}/linux_installer:${{inputs.otp-version }}_wx-${{ inputs.wxwidgets-version }}_elixir-${{ inputs.elixir-version }}
       # options: -v ${{ github.workspace }}:/work -e ABC=123
       options: -v ${{ github.workspace }}:/app
       run: |

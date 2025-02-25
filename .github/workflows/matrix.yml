@@ -29,7 +29,7 @@ jobs:
         #, macos-latest
         #windows-2022
 
-    name: "${{ matrix.platform }} ${{ matrix.erlixir.otp_version }}, wx: ${{ matrix.erlixir.wxwidgets_version }}, exs: ${{ matrix.erlixir.version }}"
+    name: "${{ matrix.platform }} ${{ matrix.erlixir.otp_version }}, wx: ${{ matrix.erlixir.wxwidgets_version }}, exs: ${{ matrix.erlixir.elixir_version }}"
     env:
       OTP_VERSION: ${{ matrix.erlixir.otp_version }}
       ELIXIR_VERSION: ${{ matrix.erlixir.elixir_version }}
