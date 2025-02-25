@@ -2,11 +2,11 @@
 ls -lah /usr/local/bin/asdf
 cat .tool-versions
 asdf plugin list
-# asdf plugin add elixir
-# asdf plugin add erlang
-# asdf plugin add nodejs
-
 asdf current
+
+asdf reshim elixir
+asdf reshim erlang
+asdf reshim nodejs
 
 echo 'Running Script';
 # Compile and lint
