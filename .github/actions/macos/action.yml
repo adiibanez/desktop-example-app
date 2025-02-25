@@ -47,8 +47,20 @@ runs:
     id: brew-deps
     if: ${{ steps.brew-cache.outputs.cache-hit != 'true' }}
     run: |
-      brew install binutils coreutils  automake autoconf libtool openssl@1.1
-      ls -lah /opt/homebrew/Cellar/openssl@1.1
+      brew install binutils coreutils automake autoconf libtool
+      ls -lah /opt/homebrew/Cellar/openssl@3
+
+      find $(brew --prefix openssl) -name libcrypto.a
+
+      # echo 'export PATH="/opt/homebrew/opt/binutils/bin:/opt/homebrew/opt/libtool/libexec/gnubin:$PATH"' >> /Users/runner/.bash_profile
+
+      # export CFLAGS="-I/opt/homebrew/Cellar/libtiff/4.7.0/include -I/opt/homebrew/opt/openssl@1.1/include $CFLAGS" 
+      # export CPPFLAGS="-I/opt/homebrew/Cellar/libtiff/4.7.0/include -I/opt/homebrew/opt/openssl@1.1/include $CPPFLAGS" 
+      # export LDFLAGS="-L/opt/homebrew/opt/openssl@1.1/lib -lssl -lcrypto -L/opt/homebrew/Cellar/libtiff/4.7.0/lib $LDFLAGS"
+
+      # export LDFLAGS="-L/opt/homebrew/opt/binutils/lib $LDFLAGS" 
+      # export CPPFLAGS="-I/opt/homebrew/opt/binutils/include $CPPFLAGS"
+      # export PATH="/opt/homebrew/opt/libtool/libexec/gnubin:$PATH"
     # wget libtiff
     # - name: Save Brew Cache
     #   if: steps.brew-deps.outcome == 'success' && steps.brew-cache.outputs.cache-hit != 'true'
@@ -68,6 +80,11 @@ runs:
       tar -xzf asdf-v0.16.4-darwin-amd64.tar.gz
       mv asdf /usr/local/bin
       rm asdf-v0.16.4-darwin-amd64.tar.gz
+      echo export PATH="/usr/local/bin:$PATH" >> ~/.zshrc
+      echo export ASDF_DATA_DIR="$HOME/.asdf" >> ~/.zshrc
+      . ~/.zshrc
+      asdf --version
+      asdf plugin list
 
   - name: wxWidgets cache
     id: wxWidgets-cache
@@ -119,10 +136,7 @@ runs:
     run: |
       echo "Setting KERL_CONFIGURE_OPTIONS"
       find /opt/homebrew/Cellar/libtiff/ -name libtiff.h
-      export KERL_CONFIGURE_OPTIONS="--enable-parallel-configure --with-wxdir=`echo ~/projects/wxWidgets` --disable-jit --without-javac --disable-debug CXX='gcc -std=c++11'"
-      export CFLAGS="-I/opt/homebrew/Cellar/libtiff/4.7.0/include"
-      export CXXFLAGS="-I/opt/homebrew/Cellar/libtiff/4.7.0/include"
-      export LDFLAGS="-L/opt/homebrew/Cellar/libtiff/4.7.0/lib"
+      export KERL_CONFIGURE_OPTIONS="--enable-parallel-configure --with-wxdir=`echo ~/projects/wxWidgets` --disable-jit --without-javac --disable-debug CXX='gcc -std=c++11' --with-tiff=$(brew --prefix libtiff) --disable-dynamic-ssl-lib --with-ssl=$(brew --prefix openssl) --with-crypto=$(brew --prefix openssl) '"
       echo "KERL_CONFIGURE_OPTIONS is now $KERL_CONFIGURE_OPTIONS"
 
   - name: "Install erlang elixir and plugins"

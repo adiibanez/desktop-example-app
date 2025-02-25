@@ -53,50 +53,54 @@ ENV ELIXIR_VERSION=${ELIXIR_VERSION:-1.13.4}
 ARG ELIXIR_VARIANT
 ENV ELIXIR_VARIANT=${ELIXIR_VARIANT:-"-otp-26"}
 
-ENV ASDF_DIR=/root/.asdf
-ENV ASDF_DATA_DIR="$HOME/.asdf"
+#ENV ASDF_DIR=/root/.asdf
+#ENV ASDF_DATA_DIR="$HOME/.asdf"
 #RUN git clone https://github.com/asdf-vm/asdf.git ${ASDF_DIR} && \
 RUN curl  -O -L https://github.com/asdf-vm/asdf/releases/download/v0.16.4/asdf-v0.16.4-linux-amd64.tar.gz && \
     tar -xzf asdf-v0.16.4-linux-amd64.tar.gz && \
-    mv asdf /usr/local/bin && \
+    mv asdf /usr/local/bin/asdf && \
+    chmod +x /usr/local/bin/asdf && \
     rm asdf-v0.16.4-linux-amd64.tar.gz && \
-    echo export PATH=\"\$PATH:/usr/local/bin\" >> $HOME/.bashrc
+    echo export PATH=\"\/usr/local/bin:$ASDF_DATA_DIR/shims:$PATH\" >> $HOME/.bashrc
 
-RUN . $HOME/.bashrc
+# RUN . $HOME/.bashrc
 
-RUN asdf plugin add elixir && \
+RUN asdf plugin list && \
+    asdf plugin add elixir && \
     echo "elixir ${ELIXIR_VERSION}${ELIXIR_VARIANT}" >> .tool-versions && \
     asdf plugin add erlang && \
     echo "erlang ref:${OTP_VERSION}" >> .tool-versions && \
     asdf plugin add nodejs && \
     echo "nodejs v18.7.0" >> .tool-versions && \
+    asdf plugin list && \
     asdf install
 
-# Compile and lint
-COPY mix.exs mix.lock .formatter.exs /app/
-RUN cd /app && \
-    cp /.tool-versions .tool-versions && \
-    mix local.hex --force && \
-    mix local.rebar --force && \
-    mix deps.get && \
-    mix deps.compile
+# # Compile and lint
+# COPY mix.exs mix.lock .formatter.exs /app/
+# RUN cd /app && \
+#     asdf install && \
+#     cp /.tool-versions .tool-versions && \
+#     mix local.hex --force && \
+#     mix local.rebar --force && \
+#     mix deps.get && \
+#     mix deps.compile
 
-# NPM
-COPY assets/package.json assets/package-lock.json /app/assets/
-RUN cd /app/assets && \
-    asdf install && \
-    npm install
+# # NPM
+# COPY assets/package.json assets/package-lock.json /app/assets/
+# RUN cd /app/assets && \
+#     asdf install && \
+#     npm install
 
-# Build Release
-ENV LD_LIBRARY_PATH=/root/projects/wxWidgets/lib/
-COPY . /app/
-RUN cd /app && \
-    cp /.tool-versions .tool-versions && \
-    MIX_ENV=prod mix compile
+# # Build Release
+# ENV LD_LIBRARY_PATH=/root/projects/wxWidgets/lib/
+# COPY . /app/
+# RUN cd /app && \
+#     cp /.tool-versions .tool-versions && \
+#     MIX_ENV=prod mix compile
 
-# Build Installer
-RUN cd /app && \
-    mix deps.update desktop && \
-    mix deps.update desktop_deployment  && \
-    mix assets.deploy && \
-    mix desktop.installer
+# # Build Installer
+# RUN cd /app && \
+#     mix deps.update desktop && \
+#     mix deps.update desktop_deployment  && \
+#     mix assets.deploy && \
+#     mix desktop.installer

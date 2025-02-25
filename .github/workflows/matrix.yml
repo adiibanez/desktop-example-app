@@ -19,11 +19,12 @@ jobs:
       matrix:
         
         erlixir:
-          - { otp_version: OTP-24.3.4.14, version: 1.16.3, variant: "-otp-24" }
+          #- { otp_version: OTP-24.3.4.14, version: 1.16.3, variant: "-otp-24" }
           - { otp_version: OTP-27.2.4, version: 1.18.1, variant: "-otp-27" }
         
           # https://github.com/actions/runner-images
-        platform: [ ubuntu-latest, macos-14] # ubuntu-latest,macos-14,
+        platform: [ ubuntu-latest] # ubuntu-latest,macos-14,
+        #, macos-latest
         #windows-2022
 
     name: ${{ matrix.platform }}:${{ matrix.erlixir.otp_version }}:${{ matrix.erlixir.version }}
