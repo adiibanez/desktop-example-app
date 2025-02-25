@@ -46,16 +46,16 @@ runs:
     shell: bash
     id: brew-deps
     if: ${{ steps.brew-cache.outputs.cache-hit != 'true' }}
-    run: brew install binutils coreutils wget automake autoconf libtool libtiff
-
-  - name: Save Brew Cache
-    if: steps.brew-deps.outcome == 'success' && steps.brew-cache.outputs.cache-hit != 'true'
-    uses: actions/cache/save@v3
-    with:
-      path: |
-        /opt/homebrew/Cellar
-        /usr/local/Cellar
-      key: ${{ inputs.cache-name }}-brew
+    run: brew install binutils coreutils  automake autoconf libtool
+    # wget libtiff
+    # - name: Save Brew Cache
+    #   if: steps.brew-deps.outcome == 'success' && steps.brew-cache.outputs.cache-hit != 'true'
+    #   uses: actions/cache/save@v3
+    #   with:
+    #     path: |
+    #       /opt/homebrew/Cellar
+    #       /usr/local/Cellar
+    #     key: ${{ inputs.cache-name }}-brew
 
   - name: wxWidgets cache
     id: wxWidgets-cache
@@ -141,6 +141,8 @@ runs:
   - name: "Compile and lint"
     shell: bash
     run: |
+      ls -lah ~/.asdf/
+      ls -lah ~/.asdf/installed/elixir
       asdf install
       mix local.hex --force
       mix local.rebar --force
