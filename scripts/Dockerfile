@@ -73,8 +73,9 @@ RUN asdf plugin list && \
     echo "erlang ref:${OTP_VERSION}" >> .tool-versions && \
     asdf plugin add nodejs && \
     echo "nodejs v18.7.0" >> .tool-versions && \
-    asdf plugin list && \
-    asdf install
+    asdf plugin list
+
+RUN asdf install
 
 # # Compile and lint
 # COPY mix.exs mix.lock .formatter.exs /app/
