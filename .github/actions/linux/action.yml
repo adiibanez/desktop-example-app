@@ -145,8 +145,8 @@ runs:
     shell: bash
     run: |
       echo "${{ inputs.ghcr-pat-token }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-      docker tag linux_installer ghcr.io/${{ github.repository }}/linux_installer:${{inputs.otp-version }}_wx-${{ inputs.wxwidgets-version }}_elixir-${{ inputs.elixir-version }}-${{github.sha}}
-      docker tag linux_installer ghcr.io/${{ github.repository }}/linux_installer:${{inputs.otp-version }}_wx-${{ inputs.wxwidgets-version }}_elixir-${{ inputs.elixir-version }}
+      docker tag linux_installer:${{inputs.otp-version }}_wx-${{ inputs.wxwidgets-version }}_elixir-${{ inputs.elixir-version }}-${{github.sha}} ghcr.io/${{ github.repository }}/linux_installer:${{inputs.otp-version }}_wx-${{ inputs.wxwidgets-version }}_elixir-${{ inputs.elixir-version }}-${{github.sha}}
+      docker tag linux_installer:${{inputs.otp-version }}_wx-${{ inputs.wxwidgets-version }}_elixir-${{ inputs.elixir-version }}-${{github.sha}} ghcr.io/${{ github.repository }}/linux_installer:${{inputs.otp-version }}_wx-${{ inputs.wxwidgets-version }}_elixir-${{ inputs.elixir-version }}
       docker push ghcr.io/${{ github.repository }}/linux_installer:${{inputs.otp-version }}_wx-${{ inputs.wxwidgets-version }}_elixir-${{ inputs.elixir-version }}
 
 # - name: Build release
