@@ -12,32 +12,32 @@ RUN apt-get install -y xsltproc fop libxml2-utils
 # ENV WXWIDGETS_REPO=https://github.com/vadz/wxWidgets.git
 # ENV WXWIDGETS_REPO=https://github.com/TcT2k/wxWidgets.git
 # ENV WXWIDGETS_REPO=https://github.com/dominicletz/wxWidgets.git
-# ARG WXWIDGETS_REPO
-# ENV WXWIDGETS_REPO=${WXWIDGETS_REPO:-https://github.com/wxWidgets/wxWidgets.git}
-# RUN mkdir ~/projects && cd ~/projects && \
-#     git clone ${WXWIDGETS_REPO}
+ARG WXWIDGETS_REPO
+ENV WXWIDGETS_REPO=${WXWIDGETS_REPO:-https://github.com/wxWidgets/wxWidgets.git}
+RUN mkdir ~/projects && cd ~/projects && \
+    git clone ${WXWIDGETS_REPO}
 
-# ARG CMAKE_VERSION
-# ENV CMAKE_VERSION=${CMAKE_VERSION:-3.27.4}
-# RUN curl -sSL https://github.com/Kitware/CMake/releases/download/v${CMAKE_VERSION}/cmake-${CMAKE_VERSION}-linux-x86_64.sh > cmake.sh && \
-#     sh cmake.sh --skip-license --prefix=/usr/local
+ARG CMAKE_VERSION
+ENV CMAKE_VERSION=${CMAKE_VERSION:-3.27.4}
+RUN curl -sSL https://github.com/Kitware/CMake/releases/download/v${CMAKE_VERSION}/cmake-${CMAKE_VERSION}-linux-x86_64.sh > cmake.sh && \
+    sh cmake.sh --skip-license --prefix=/usr/local
 
-# # ENV WXWIDGETS_VERSION=v3.1.4
-# # ENV WXWIDGETS_VERSION=chromium
-# # ENV WXWIDGETS_VERSION=wide-init-fix
-# ARG WXWIDGETS_VERSION
-# ENV WXWIDGETS_VERSION=${WXWIDGETS_VERSION:-master}
-# RUN cd ~/projects/wxWidgets && \
-#     git fetch origin && \
-#     git reset --hard origin/${WXWIDGETS_VERSION} && \
-#     git submodule update --init
+# ENV WXWIDGETS_VERSION=v3.1.4
+# ENV WXWIDGETS_VERSION=chromium
+# ENV WXWIDGETS_VERSION=wide-init-fix
+ARG WXWIDGETS_VERSION
+ENV WXWIDGETS_VERSION=${WXWIDGETS_VERSION:-master}
+RUN cd ~/projects/wxWidgets && \
+    git fetch origin && \
+    git reset --hard origin/${WXWIDGETS_VERSION} && \
+    git submodule update --init
 
-# # ENV WXWIDGETS_DEBUG=--enable-debug
-# ARG WXWIDGETS_DEBUG
-# ENV WXWIDGETS_DEBUG=${WXWIDGETS_DEBUG:-}
-# RUN cd ~/projects/wxWidgets && \
-#     ./configure --prefix=/usr/local/wxWidgets ${WXWIDGETS_DEBUG} --enable-webview --enable-compat30 --disable-shared && \
-#     make -j16
+# ENV WXWIDGETS_DEBUG=--enable-debug
+ARG WXWIDGETS_DEBUG
+ENV WXWIDGETS_DEBUG=${WXWIDGETS_DEBUG:-}
+RUN cd ~/projects/wxWidgets && \
+    ./configure --prefix=/usr/local/wxWidgets ${WXWIDGETS_DEBUG} --enable-webview --enable-compat30 --disable-shared && \
+    make -j16
 
 # # Installing Erlang
 
