@@ -115,7 +115,7 @@ runs:
   #       echo "Image ghcr.io/${{ github.repository }}/linux_installer:${{inputs.otp-version }}_${{ inputs.elixir-version }} not found, continuing without pull." 
   #     fi
 
-  - name: Linux Docker Build
+  - name: Linux docker builder image
     uses: whoan/docker-build-with-cache-action@v5
     id: buildx
     with:
@@ -124,7 +124,7 @@ runs:
       password: ${{inputs.ghcr-pat-token}}
       #registry: docker.pkg.github.com
       registry: ghcr.io
-      image_name: ghcr.io/${{ github.repository }}/linux_installer:${{inputs.otp-version }}_${{ inputs.elixir-version }}
+      image_name: ${{ github.repository }}/linux_installer:${{inputs.otp-version }}_${{ inputs.elixir-version }}
       dockerfile: scripts/Dockerfile
       build_extra_args: |
         --build-arg=BASE_IMAGE=ubuntu:18.04
@@ -155,7 +155,7 @@ runs:
       username: ${{ inputs.github-actor }}
       password: ${{inputs.ghcr-pat-token}}
       registry: ghcr.io
-      image: ghcr.io/${{ github.repository }}/linux_installer:${{inputs.otp-version }}_${{ inputs.elixir-version }}
+      image: ${{ github.repository }}/linux_installer:${{inputs.otp-version }}_${{ inputs.elixir-version }}
       # options: -v ${{ github.workspace }}:/work -e ABC=123
       options: -v ${{ github.workspace }}:/app
       run: |
