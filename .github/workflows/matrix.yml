@@ -49,17 +49,15 @@ jobs:
         id: deps-cache
         with:
           path: |
-            deps
-            ~/.asdf
             ${{ startsWith(matrix.platform, 'ubuntu-') && '/tmp/.buildx-cache' || '' }}
             ${{ startsWith(matrix.platform, 'ubuntu-') && '/home/runner/.asdf' || '' }}
             ${{ startsWith(matrix.platform, 'windows-') && 'c:\\opt\\otp.exe' || '' }}
             ${{ startsWith(matrix.platform, 'windows-') && 'c:\\opt\\local64\\pgm\\wxWidgets-3.x.x' || '' }}
             ${{ startsWith(matrix.platform, 'windows-') && 'c:\\Program Files\\OpenSSL-Win64' || '' }}
             ${{ startsWith(matrix.platform, 'windows-') && 'c:\\OpenSSL-Win64' || '' }}
-            
+            ${{ startsWith(matrix.platform, 'windows-') && '/c/Users/runneradmin/.asdf' || '' }}
             ${{ startsWith(matrix.platform, 'windows-') && '/c/Users/runneradmin/elixir' || '' }}
-            
+            ${{ startsWith(matrix.platform, 'macos-') && '/Users/runner/.asdf' || '' }}
             ${{ startsWith(matrix.platform, 'macos-') && '/Users/runner/projects/wxWidgets' || '' }}
             ${{ startsWith(matrix.platform, 'macos-') && '/usr/local/wxWidgets' || '' }}
             ${{ startsWith(matrix.platform, 'macos-') && '/usr/local/Cellar' || '' }}
@@ -145,15 +143,15 @@ jobs:
         uses: actions/cache/save@v3
         with:
           path: |
-            deps
-            ~/.asdf
             ${{ startsWith(matrix.platform, 'ubuntu-') && '/tmp/.buildx-cache' || '' }}
             ${{ startsWith(matrix.platform, 'ubuntu-') && '/home/runner/.asdf' || '' }}
             ${{ startsWith(matrix.platform, 'windows-') && 'c:\\opt\\otp.exe' || '' }}
             ${{ startsWith(matrix.platform, 'windows-') && 'c:\\opt\\local64\\pgm\\wxWidgets-3.x.x' || '' }}
             ${{ startsWith(matrix.platform, 'windows-') && 'c:\\Program Files\\OpenSSL-Win64' || '' }}
             ${{ startsWith(matrix.platform, 'windows-') && 'c:\\OpenSSL-Win64' || '' }}
+            ${{ startsWith(matrix.platform, 'windows-') && '/c/Users/runneradmin/.asdf' || '' }}
             ${{ startsWith(matrix.platform, 'windows-') && '/c/Users/runneradmin/elixir' || '' }}
+            ${{ startsWith(matrix.platform, 'macos-') && '/Users/runner/.asdf' || '' }}
             ${{ startsWith(matrix.platform, 'macos-') && '/Users/runner/projects/wxWidgets' || '' }}
             ${{ startsWith(matrix.platform, 'macos-') && '/usr/local/wxWidgets' || '' }}
             ${{ startsWith(matrix.platform, 'macos-') && '/usr/local/Cellar' || '' }}
