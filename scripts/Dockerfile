@@ -54,8 +54,14 @@ ARG ELIXIR_VARIANT
 ENV ELIXIR_VARIANT=${ELIXIR_VARIANT:-"-otp-26"}
 
 ENV ASDF_DIR=/root/.asdf
-RUN git clone https://github.com/asdf-vm/asdf.git ${ASDF_DIR} && \
-    . ${ASDF_DIR}/asdf.sh && \
+#RUN git clone https://github.com/asdf-vm/asdf.git ${ASDF_DIR} && \
+RUN curl  -O -L https://github.com/asdf-vm/asdf/releases/download/v0.16.4/asdf-v0.16.4-linux-amd64.tar.gz && \
+    tar -xzf asdf-v0.16.4-linux-amd64.tar.gz && \
+    mv asdf /usr/local/bin && \
+    rm asdf-v0.16.4-linux-amd64.tar.gz && \
+    echo export PATH=\"\$PATH:/usr/local/bin\" >> $HOME/.bashrc
+
+RUN source $HOME/.bashrc && \
     asdf plugin add elixir && \
     echo "elixir ${ELIXIR_VERSION}${ELIXIR_VARIANT}" >> .tool-versions && \
     asdf plugin add erlang && \
@@ -66,8 +72,7 @@ RUN git clone https://github.com/asdf-vm/asdf.git ${ASDF_DIR} && \
 
 # Compile and lint
 COPY mix.exs mix.lock .formatter.exs /app/
-RUN . ${ASDF_DIR}/asdf.sh && \
-    cd /app && \
+RUN cd /app && \
     cp /.tool-versions .tool-versions && \
     mix local.hex --force && \
     mix local.rebar --force && \
@@ -76,22 +81,19 @@ RUN . ${ASDF_DIR}/asdf.sh && \
 
 # NPM
 COPY assets/package.json assets/package-lock.json /app/assets/
-RUN . ${ASDF_DIR}/asdf.sh && \
-    cd /app/assets && \
+RUN cd /app/assets && \
     asdf install && \
     npm install
 
 # Build Release
 ENV LD_LIBRARY_PATH=/root/projects/wxWidgets/lib/
 COPY . /app/
-RUN . ${ASDF_DIR}/asdf.sh && \
-    cd /app && \
+RUN cd /app && \
     cp /.tool-versions .tool-versions && \
     MIX_ENV=prod mix compile
 
 # Build Installer
-RUN . ${ASDF_DIR}/asdf.sh  && \
-    cd /app && \
+RUN cd /app && \
     mix deps.update desktop && \
     mix deps.update desktop_deployment  && \
     mix assets.deploy && \

@@ -252,6 +252,16 @@ runs:
       path: $HOME/elixir
       key: ${{ inputs.cache-name }}-elixir-${{ inputs.elixir-version }}
 
+  - name: "Install asdf binary"
+    shell: bash
+    id: asdf-binary
+    run: |
+      curl -O -L https://github.com/asdf-vm/asdf/releases/download/v0.16.4/asdf-v0.16.4-linux-amd64.tar.gz
+      tar -xzf asdf-v0.16.4-linux-amd64.tar.gz
+      mv asdf /usr/local/bin
+      rm asdf-v0.16.4-linux-amd64.tar.gz
+      echo export PATH=\"\$PATH:/usr/local/bin\" >> $HOME/.bashrc
+
   - name: "Compile and Lint"
     shell: bash
     run: |

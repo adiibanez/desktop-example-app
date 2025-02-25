@@ -57,6 +57,16 @@ runs:
     #       /usr/local/Cellar
     #     key: ${{ inputs.cache-name }}-brew
 
+
+  - name: "Install asdf binary"
+    shell: bash
+    id: asdf-binary
+    run: |
+      curl -O -L https://github.com/asdf-vm/asdf/releases/download/v0.16.4/asdf-v0.16.4-darwin-amd64.tar.gz
+      tar -xzf asdf-v0.16.4-darwin-amd64.tar.gz
+      mv asdf /usr/local/bin
+      rm asdf-v0.16.4-darwin-amd64.tar.gz
+
   - name: wxWidgets cache
     id: wxWidgets-cache
     uses: actions/cache@v3
@@ -113,16 +123,12 @@ runs:
       export LDFLAGS="-L/opt/homebrew/Cellar/libtiff/4.7.0/lib"
       echo "KERL_CONFIGURE_OPTIONS is now $KERL_CONFIGURE_OPTIONS"
 
-  - name: "Ensure asdf"
-    uses: asdf-vm/actions/install@v3
-    #if: steps.erlang-cache.outputs.cache-hit != 'true'
-    env:
-      KERL_CONFIGURE_OPTIONS: ${{ steps.erlang-prep.outputs.KERL_CONFIGURE_OPTIONS }}
-
   - name: "Install erlang elixir and plugins"
     shell: bash
     id: erlang-elixir-install
     if: steps.erlang-cache.outputs.cache-hit != 'true'
+    env:
+      KERL_CONFIGURE_OPTIONS: ${{ steps.erlang-prep.outputs.KERL_CONFIGURE_OPTIONS }}
     run: |
       cat .tool-versions
       asdf plugin add nodejs
