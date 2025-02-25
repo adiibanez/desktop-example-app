@@ -7,7 +7,7 @@ RUN apt-get install -y libssl-dev libjpeg-dev libpng-dev libtiff-dev zlib1g-dev 
 RUN apt-get install -y git xxd curl g++ make libwebkit2gtk-4.0-dev unzip procps inotify-tools
 # aib
 RUN apt-get install -y xsltproc fop libxml2-utils
-# openjdk-11-jdk 
+# openjdk-11-jdk
 
 # ENV WXWIDGETS_REPO=https://github.com/vadz/wxWidgets.git
 # ENV WXWIDGETS_REPO=https://github.com/TcT2k/wxWidgets.git
