@@ -126,6 +126,7 @@ runs:
       registry: ghcr.io
       #image_name: linux_installer:${{inputs.otp-version }}_wx-${{ inputs.wxwidgets-version }}_elixir-${{ inputs.elixir-version }}
       image_name: linux_installer
+      image_tag: ${{inputs.otp-version }}_wx-${{ inputs.wxwidgets-version }}_elixir-${{ inputs.elixir-version }}
       dockerfile: scripts/Dockerfile
       build_extra_args: |
         --build-arg=BASE_IMAGE=ubuntu:18.04
