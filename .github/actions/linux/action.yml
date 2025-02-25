@@ -73,8 +73,6 @@ runs:
       path: |
         ~/.asdf
       key: ${{ inputs.cache-name }}-asdf
-      restore-keys: |
-        ${{ inputs.cache-name }}-asdf
 
   - name: Linux Docker Build
     uses: whoan/docker-build-with-cache-action@master

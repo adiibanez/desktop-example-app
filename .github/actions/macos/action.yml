@@ -56,8 +56,6 @@ runs:
         /opt/homebrew/
         /usr/local/Cellar
       key: ${{ inputs.cache-name }}-brew-
-      restore-keys: |
-        ${{ inputs.cache-name }}-brew-
 
   - name: wxWidgets cache
     id: wxWidgets-cache
@@ -91,8 +89,6 @@ runs:
         ~/projects/wxWidgets
         /usr/local/wxWidgets
       key: ${{ inputs.cache-name }}-wxwidgets-${{ inputs.wxwidgets-version }}-
-      restore-keys: |
-        ${{ inputs.cache-name }}-wxwidgets-
 
   - name: erlangelixir cache
     id: erlang-cache
@@ -137,8 +133,6 @@ runs:
       path: |
         ~/.asdf
       key: ${{ inputs.cache-name }}-asdf-
-      restore-keys: |
-        ${{ inputs.cache-name }}-asdf-
 
   - name: "Compile and lint"
     shell: bash
