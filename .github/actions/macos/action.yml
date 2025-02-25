@@ -31,20 +31,33 @@ inputs:
 runs:
   using: "composite"
   steps:
+  - name: brew cache
+    id: brew-cache
+    uses: actions/cache@v3
+    with:
+      path: |
+        /opt/homebrew/
+        /usr/local/Cellar
+      key: ${{ inputs.cache-name }}-brew
+      restore-keys: |
+        ${{ inputs.cache-name }}-brew
+
   - name: "Install brew deps (macOS)"
     shell: bash
     id: brew-deps
-    if: ${{ inputs.cache-hit != 'true' }}
+    if: ${{ steps.brew-cache.outputs.cache-hit != 'true' }}
     run: brew install binutils coreutils wget automake autoconf libtool libtiff
 
   - name: Save Brew Cache
-    if: steps.brew-deps.outcome == 'success' && inputs.cache-hit != 'true'
+    if: steps.brew-deps.outcome == 'success' && steps.brew-cache.outputs.cache-hit != 'true'
     uses: actions/cache/save@v3
     with:
-      path: /usr/local/Cellar
-      key: ${{ inputs.cache-name }}-brew-deps-
+      path: |
+        /opt/homebrew/
+        /usr/local/Cellar
+      key: ${{ inputs.cache-name }}-brew-
       restore-keys: |
-        ${{ inputs.cache-name }}-brew-deps-
+        ${{ inputs.cache-name }}-brew-
 
   - name: wxWidgets cache
     id: wxWidgets-cache

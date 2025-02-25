@@ -60,6 +60,7 @@ jobs:
             ${{ startsWith(matrix.platform, 'macos-') && '~/projects/wxWidgets' || '' }}
             ${{ startsWith(matrix.platform, 'macos-') && '/usr/local/wxWidgets' || '' }}
             ${{ startsWith(matrix.platform, 'macos-') && '/usr/local/Cellar' || '' }}
+            ${{ startsWith(matrix.platform, 'macos-') && '/opt/homebrew/' || '' }}
           key: ${{ steps.cache-name.outputs.cache_name }}
           restore-keys: |
             ${{ matrix.platform }}-deps-otp-${{ env.OTP_VERSION }}-${{ env.WXWIDGETS_VERSION }}-      
@@ -146,4 +147,5 @@ jobs:
             ${{ startsWith(matrix.platform, 'macos-') && '~/projects/wxWidgets' || '' }}
             ${{ startsWith(matrix.platform, 'macos-') && '/usr/local/wxWidgets' || '' }}
             ${{ startsWith(matrix.platform, 'macos-') && '/usr/local/Cellar' || '' }}
+            ${{ startsWith(matrix.platform, 'macos-') && '/opt/homebrew/' || '' }}
           key: ${{ steps.cache-name.outputs.cache_name }}
