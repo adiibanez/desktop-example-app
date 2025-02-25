@@ -38,9 +38,9 @@ runs:
       path: |
         /opt/homebrew/Cellar
         /usr/local/Cellar
-      key: ${{ inputs.cache-name }}-brew-
+      key: ${{ inputs.cache-name }}-brew
       restore-keys: |
-        ${{ inputs.cache-name }}-brew-
+        ${{ inputs.cache-name }}-brew
 
   - name: "Install brew deps (macOS)"
     shell: bash
@@ -55,14 +55,14 @@ runs:
       path: |
         /opt/homebrew/Cellar
         /usr/local/Cellar
-      key: ${{ inputs.cache-name }}-brew-
+      key: ${{ inputs.cache-name }}-brew
 
   - name: wxWidgets cache
     id: wxWidgets-cache
     uses: actions/cache@v3
     with:
       path: |
-        ~/projects/wxWidgets
+        /Users/runner/projects/wxWidgets
         /usr/local/wxWidgets
       key: ${{ inputs.cache-name }}-wxWidgets
       restore-keys: |
@@ -86,7 +86,7 @@ runs:
     uses: actions/cache/save@v3
     with:
       path: |
-        ~/projects/wxWidgets
+        /Users/runner/projects/wxWidgets
         /usr/local/wxWidgets
       key: ${{ inputs.cache-name }}-wxwidgets-${{ inputs.wxwidgets-version }}-
 
@@ -96,9 +96,9 @@ runs:
     with:
       path: |
         ~/asdf
-      key: ${{ inputs.cache-name }}-asdf-
+      key: ${{ inputs.cache-name }}-asdf
       restore-keys: |
-        ${{ inputs.cache-name }}-asdf-
+        ${{ inputs.cache-name }}-asdf
 
   - name: "Prepare Erlang (macOS)"
     shell: bash
@@ -122,7 +122,7 @@ runs:
   - name: "Install erlang elixir and plugins"
     shell: bash
     id: erlang-elixir-install
-    #if: steps.erlang-cache.outputs.cache-hit != 'true'
+    if: steps.erlang-cache.outputs.cache-hit != 'true'
     run: |
       cat .tool-versions
       asdf install
@@ -132,8 +132,8 @@ runs:
     uses: actions/cache/save@v3
     with:
       path: |
-        ~/.asdf
-      key: ${{ inputs.cache-name }}-asdf-
+        /Users/runner/.asdf
+      key: ${{ inputs.cache-name }}-asdf
 
   - name: "Compile and lint"
     shell: bash

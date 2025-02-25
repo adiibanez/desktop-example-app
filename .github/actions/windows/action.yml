@@ -34,9 +34,9 @@ runs:
     uses: actions/cache@v3
     with:
       path: C:\msys64
-      key: ${{ inputs.cache-name }}-msys-
+      key: ${{ inputs.cache-name }}-msys
       restore-keys: |
-        ${{ inputs.cache-name }}-msys-
+        ${{ inputs.cache-name }}-msys
 
   - name: "Install msys2 (Windows)"
     uses: msys2/setup-msys2@v2
@@ -61,9 +61,9 @@ runs:
       path: |
         'C:\Program Files\OpenSSL'
         'c:\\OpenSSL-Win64'
-      key: ${{ inputs.cache-name }}-openssl-
+      key: ${{ inputs.cache-name }}-openssl
       restore-keys: |
-        ${{ inputs.cache-name }}-openssl-
+        ${{ inputs.cache-name }}-openssl
 
   - name: Install openssl (Windows)
     shell: cmd
@@ -80,16 +80,16 @@ runs:
       path: |
         'C:\Program Files\OpenSSL'
         'c:\\OpenSSL-Win64'
-      key: ${{ inputs.cache-name }}-openssl-
+      key: ${{ inputs.cache-name }}-openssl
 
   - name: Load wxwidgets source
     id: wxwidgets-source-cache
     uses: actions/cache@v3
     with:
       path: wxWidgets
-      key: ${{ inputs.cache-name }}-wxsource-${{ inputs.wxwidgets-version }}-
+      key: ${{ inputs.cache-name }}-wxsource-${{ inputs.wxwidgets-version }}
       restore-keys: |
-        ${{ inputs.cache-name }}-wxsource-
+        ${{ inputs.cache-name }}-wxsource
 
   - name: Download wxWidgets (Windows)
     if: steps.wxwidgets-source-cache.outputs.cache-hit != 'true'
@@ -105,11 +105,11 @@ runs:
       sed -i -r -e 's/WXWIN_COMPATIBILITY_3_0 +0/WXWIN_COMPATIBILITY_3_0 1/' include/wx/msw/setup.h
 
   - name: Save wxwidgets source Cache
-    if: steps.download-wx.outcome == 'success'
+    if: steps.download-wx.outcome == 'success' && steps.wxwidgets-source-cache.outputs.cache-hit != 'true'
     uses: actions/cache/save@v3
     with:
       path: wxWidgets
-      key: ${{ inputs.cache-name }}-wxsource-${{ inputs.wxwidgets-version }}-
+      key: ${{ inputs.cache-name }}-wxsource-${{ inputs.wxwidgets-version }}
 
   - name: Compile wxWidgets and WebView2 Cache
     id: wxWidgets-cache
@@ -225,10 +225,6 @@ runs:
       restore-keys: |
         ${{ inputs.cache-name }}-elixir-${{ inputs.elixir-version  }}
         ${{ inputs.cache-name }}-elixir-
-
-  - name: Print HOME directory
-    shell: bash
-    run: echo "HOME directory $HOME"
 
   - name: Install Elixir (Windows)
     shell: msys2 {0}
