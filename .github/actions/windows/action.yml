@@ -58,7 +58,9 @@ runs:
     id: openssl-cache
     uses: actions/cache@v3
     with:
-      path: 'C:\\Program Files\\OpenSSL-Win64'
+      path: |
+        'C:\Program Files\OpenSSL'
+        'c:\\OpenSSL-Win64'
       key: ${{ inputs.cache-name }}-openssl-
       restore-keys: |
         ${{ inputs.cache-name }}-openssl-
@@ -75,7 +77,9 @@ runs:
     if: steps.install-openssl.outcome == 'success'
     uses: actions/cache/save@v3
     with:
-      path: 'C:\\Program Files\\OpenSSL-Win64'
+      path: |
+        'C:\Program Files\OpenSSL'
+        'c:\\OpenSSL-Win64'
       key: ${{ inputs.cache-name }}-openssl-
 
   - name: Load wxwidgets source

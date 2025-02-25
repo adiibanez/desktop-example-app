@@ -36,7 +36,7 @@ runs:
     uses: actions/cache@v3
     with:
       path: |
-        /opt/homebrew/
+        /opt/homebrew/Cellar
         /usr/local/Cellar
       key: ${{ inputs.cache-name }}-brew
       restore-keys: |
@@ -53,9 +53,9 @@ runs:
     uses: actions/cache/save@v3
     with:
       path: |
-        /opt/homebrew/
+        /opt/homebrew/Cellar
         /usr/local/Cellar
-      key: ${{ inputs.cache-name }}-brew-
+      key: ${{ inputs.cache-name }}-brew-${{}}
 
   - name: wxWidgets cache
     id: wxWidgets-cache
@@ -124,6 +124,7 @@ runs:
     id: erlang-elixir-install
     #if: steps.erlang-cache.outputs.cache-hit != 'true'
     run: |
+      cat .tool-versions
       asdf install
 
   - name: Save asdf erlang cache
