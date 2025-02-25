@@ -2,6 +2,10 @@ cat $HOME/.bashrc
 ls -lah /usr/local/bin/asdf
 cat .tool-versions
 asdf plugin list
+asdf plugin add elixir
+asdf plugin add erlang
+asdf plugin add nodejs
+
 asdf current
 
 echo 'Running Script';

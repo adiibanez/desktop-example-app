@@ -66,15 +66,15 @@ RUN curl  -O -L https://github.com/asdf-vm/asdf/releases/download/v0.16.4/asdf-v
 
 # # RUN . $HOME/.bashrc
 
-# RUN asdf plugin list && \
-#     asdf plugin add elixir && \
-#     echo "elixir ${ELIXIR_VERSION}${ELIXIR_VARIANT}" >> .tool-versions && \
-#     asdf plugin add erlang && \
-#     echo "erlang ref:${OTP_VERSION}" >> .tool-versions && \
-#     asdf plugin add nodejs && \
-#     echo "nodejs v18.7.0" >> .tool-versions && \
-#     asdf plugin list && \
-#     asdf install
+RUN asdf plugin list && \
+    asdf plugin add elixir && \
+    echo "elixir ${ELIXIR_VERSION}${ELIXIR_VARIANT}" >> .tool-versions && \
+    asdf plugin add erlang && \
+    echo "erlang ref:${OTP_VERSION}" >> .tool-versions && \
+    asdf plugin add nodejs && \
+    echo "nodejs v18.7.0" >> .tool-versions && \
+    asdf plugin list && \
+    asdf install
 
 # # Compile and lint
 # COPY mix.exs mix.lock .formatter.exs /app/
