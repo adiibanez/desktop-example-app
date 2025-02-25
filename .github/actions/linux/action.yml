@@ -28,6 +28,9 @@ inputs:
   github-actor:
     description: "Github Actor"
     required: true
+  secrets:
+    description: "Secrets"
+    required: true
 runs:
   using: "composite"
   steps:
@@ -90,7 +93,7 @@ runs:
   - name: Log in to GitHub Docker Registry
     shell: bash
     run: |
-      echo "${{ secrets.GHCR_PAT }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+      echo "${{ GHCR_PAT }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
   - name: buildx cache
     id: buildx-cache
@@ -103,7 +106,7 @@ runs:
         ${{ inputs.cache-name }}-buildx-
 
   - name: Pull Docker image
-    if: ${{!fileExists('/tmp/.buildx-cache')}}
+    if: ${{ hashFiles('/tmp/.buildx-cache') == '' }}
     shell: bash
     run: |
       docker pull ghcr.io/${{ github.repository }}/linux_installer:${{inputs.otp-version }}_${{ inputs.elixir-version }}
