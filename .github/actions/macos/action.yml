@@ -31,16 +31,16 @@ inputs:
 runs:
   using: "composite"
   steps:
-  - name: brew cache
-    id: brew-cache
-    uses: actions/cache@v3
-    with:
-      path: |
-        /opt/homebrew/Cellar
-        /usr/local/Cellar
-      key: ${{ inputs.cache-name }}-brew
-      restore-keys: |
-        ${{ inputs.cache-name }}-brew
+  # - name: brew cache
+  #   id: brew-cache
+  #   uses: actions/cache@v3
+  #   with:
+  #     path: |
+  #       /opt/homebrew/Cellar
+  #       /usr/local/Cellar
+  #     key: ${{ inputs.cache-name }}-brew
+  #     restore-keys: |
+  #       ${{ inputs.cache-name }}-brew
 
   - name: "Install brew deps (macOS)"
     shell: bash
