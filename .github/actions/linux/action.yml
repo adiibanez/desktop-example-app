@@ -71,7 +71,7 @@ runs:
     uses: actions/cache/save@v3
     with:
       path: |
-        ~/.asdf
+        /home/runner/.asdf
       key: ${{ inputs.cache-name }}-asdf
 
   - name: Linux Docker Build

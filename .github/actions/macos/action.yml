@@ -64,9 +64,9 @@ runs:
       path: |
         /Users/runner/projects/wxWidgets
         /usr/local/wxWidgets
-      key: ${{ inputs.cache-name }}-wxWidgets
+      key: ${{ inputs.cache-name }}-wxwidgets-${{ inputs.wxwidgets-version }}-
       restore-keys: |
-        ${{ inputs.cache-name }}-wxWidgets
+        ${{ inputs.cache-name }}-wxWidgets-
 
   - name: "Installing wxWidgets (macOS)"
     shell: bash

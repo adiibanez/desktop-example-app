@@ -78,7 +78,7 @@ jobs:
           cat .tool-versions
 
       - name: Print HOME directory
-        if: startsWith(matrix.platform, 'windows-')
+        # if: startsWith(matrix.platform, 'windows-')
         shell: bash
         run: echo "HOME directory $HOME"
     
