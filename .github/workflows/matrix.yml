@@ -106,7 +106,6 @@ jobs:
           elixir-version: ${{ env.ELIXIR_VERSION }}
           elixir-variant: ${{ env.ELIXIR_VARIANT }}
           macos-pem: ${{ secrets.MACOS_PEM }}
-          
 
       - name: Linux Build Steps
         if: startsWith(matrix.platform, 'ubuntu-')
@@ -122,13 +121,12 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           ghcr-pat-token: ${{ secrets.GHCR_PAT }}
           github-actor: ${{ github.actor }}
-          
-
+      
       - name: Archive Installer
-        if: ${{ !startsWith(matrix.platform, 'ubuntu-') }}
+        if: ${{ !startsWith(matrix.platform, 'macos-') }}
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.platform }}-Installer
+          name: ${{ matrix.platform }}-${{ env.OTP_VERSION }}-${{ env.ELIXIR_VERSION }}-Installer
           path: |
             _build/prod/*.${{ matrix.platform == 'windows' && 'exe' || 'dmg' }}
 
@@ -136,7 +134,7 @@ jobs:
         if: startsWith(matrix.platform, 'ubuntu-')
         uses: actions/upload-artifact@v4
         with:
-          name: Linux-Installer
+          name: ${{ matrix.platform }}-${{ env.OTP_VERSION }}-${{ env.ELIXIR_VERSION }}-Installer
           path: |
             ./*.run
 
