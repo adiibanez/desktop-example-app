@@ -32,16 +32,6 @@ runs:
   using: "composite"
   steps:
 
-  - name: "Ensure asdf"
-    uses: asdf-vm/actions/setup@v3
-
-  - name: "Debug"
-    shell: bash
-    run: |
-      ls -lah ~/.asdf/
-      asdf --version
-      asdf plugin list
-
   - name: asdf cache
     id: asdf-cache
     uses: actions/cache@v3
@@ -51,12 +41,22 @@ runs:
       restore-keys: |
         ${{ inputs.cache-name }}-asdf
 
-  - name: "Install asdf deps"
+  - name: "Ensure asdf"
+    uses: asdf-vm/actions/install@v3
+
+  - name: "Debug"
     shell: bash
-    id: erlang-elixir-install
-    if: steps.asdf-cache.outputs.cache-hit != 'true'
     run: |
-      asdf install
+      ls -lah ~/.asdf/
+      asdf --version
+      asdf plugin list
+
+  # - name: "Install asdf deps"
+  #   shell: bash
+  #   id: erlang-elixir-install
+  #   if: steps.asdf-cache.outputs.cache-hit != 'true'
+  #   run: |
+  #     asdf install
 
   - name: "Compile and Lint"
     shell: bash

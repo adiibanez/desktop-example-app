@@ -114,7 +114,7 @@ runs:
       echo "KERL_CONFIGURE_OPTIONS is now $KERL_CONFIGURE_OPTIONS"
 
   - name: "Ensure asdf"
-    uses: asdf-vm/actions/setup@v3
+    uses: asdf-vm/actions/install@v3
     #if: steps.erlang-cache.outputs.cache-hit != 'true'
     env:
       KERL_CONFIGURE_OPTIONS: ${{ steps.erlang-prep.outputs.KERL_CONFIGURE_OPTIONS }}
