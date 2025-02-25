@@ -75,7 +75,12 @@ RUN asdf plugin list && \
     echo "nodejs v18.7.0" >> .tool-versions && \
     asdf plugin list
 
-RUN asdf install
+RUN asdf install elixir ${ELIXIR_VERSION}${ELIXIR_VARIANT} && \
+    asdf global elixir ${ELIXIR_VERSION}${ELIXIR_VARIANT}
+RUN asdf install erlang ref:${OTP_VERSION} && \
+    asdf global erlang ref:${OTP_VERSION}
+RUN asdf install nodejs v18.7.0 && \
+    asdf global nodejs v18.7.0
 
 # # Compile and lint
 # COPY mix.exs mix.lock .formatter.exs /app/
