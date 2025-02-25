@@ -46,7 +46,9 @@ runs:
     shell: bash
     id: brew-deps
     if: ${{ steps.brew-cache.outputs.cache-hit != 'true' }}
-    run: brew install binutils coreutils  automake autoconf libtool
+    run: |
+      brew install binutils coreutils  automake autoconf libtool openssl@1.1
+      ls -lah /opt/homebrew/Cellar/openssl@1.1
     # wget libtiff
     # - name: Save Brew Cache
     #   if: steps.brew-deps.outcome == 'success' && steps.brew-cache.outputs.cache-hit != 'true'
