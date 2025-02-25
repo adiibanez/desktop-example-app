@@ -54,6 +54,7 @@ ARG ELIXIR_VARIANT
 ENV ELIXIR_VARIANT=${ELIXIR_VARIANT:-"-otp-26"}
 
 ENV ASDF_DIR=/root/.asdf
+ENV ASDF_DATA_DIR="$HOME/.asdf"
 #RUN git clone https://github.com/asdf-vm/asdf.git ${ASDF_DIR} && \
 RUN curl  -O -L https://github.com/asdf-vm/asdf/releases/download/v0.16.4/asdf-v0.16.4-linux-amd64.tar.gz && \
     tar -xzf asdf-v0.16.4-linux-amd64.tar.gz && \
@@ -61,8 +62,9 @@ RUN curl  -O -L https://github.com/asdf-vm/asdf/releases/download/v0.16.4/asdf-v
     rm asdf-v0.16.4-linux-amd64.tar.gz && \
     echo export PATH=\"\$PATH:/usr/local/bin\" >> $HOME/.bashrc
 
-RUN . $HOME/.bashrc && \
-    asdf plugin add elixir && \
+RUN . $HOME/.bashrc
+
+RUN asdf plugin add elixir && \
     echo "elixir ${ELIXIR_VERSION}${ELIXIR_VARIANT}" >> .tool-versions && \
     asdf plugin add erlang && \
     echo "erlang ref:${OTP_VERSION}" >> .tool-versions && \
