@@ -109,7 +109,11 @@ runs:
     if: ${{ hashFiles('/tmp/.buildx-cache') == '' }}
     shell: bash
     run: |
-      docker pull ghcr.io/${{ github.repository }}/linux_installer:${{inputs.otp-version }}_${{ inputs.elixir-version }} || true
+      if docker pull ghcr.io/${{ github.repository }}/linux_installer:${{inputs.otp-version }}_${{ inputs.elixir-version }}; then
+        echo "Successfully pulled image ghcr.io/${{ github.repository }}/linux_installer:${{inputs.otp-version }}_${{ inputs.elixir-version }}." 
+      else 
+        echo "Image ghcr.io/${{ github.repository }}/linux_installer:${{inputs.otp-version }}_${{ inputs.elixir-version }} not found, continuing without pull." 
+      fi
 
   - name: Linux Docker Build
     uses: whoan/docker-build-with-cache-action@master
