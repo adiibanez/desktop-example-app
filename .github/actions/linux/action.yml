@@ -109,7 +109,7 @@ runs:
     if: ${{ hashFiles('/tmp/.buildx-cache') == '' }}
     shell: bash
     run: |
-      docker pull ghcr.io/${{ github.repository }}/linux_installer:${{inputs.otp-version }}_${{ inputs.elixir-version }}
+      docker pull ghcr.io/${{ github.repository }}/linux_installer:${{inputs.otp-version }}_${{ inputs.elixir-version }} || true
 
   - name: Linux Docker Build
     uses: whoan/docker-build-with-cache-action@master
