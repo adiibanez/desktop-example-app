@@ -95,7 +95,7 @@ runs:
     uses: actions/cache@v3
     with:
       path: |
-        ~/asdf
+        /User/runner/.asdf
       key: ${{ inputs.cache-name }}-asdf
       restore-keys: |
         ${{ inputs.cache-name }}-asdf
@@ -125,6 +125,9 @@ runs:
     if: steps.erlang-cache.outputs.cache-hit != 'true'
     run: |
       cat .tool-versions
+      asdf add plugin nodejs
+      asdf add plugin erlang
+      asdf add plugin elixir
       asdf install
 
   - name: Save asdf erlang cache
