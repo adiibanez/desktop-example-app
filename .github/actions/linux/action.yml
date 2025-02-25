@@ -46,7 +46,7 @@ runs:
     id: asdf-cache
     uses: actions/cache@v3
     with:
-      path: ~/.asdf
+      path: /home/runner/.asdf
       key: ${{ inputs.cache-name }}-asdf
       restore-keys: |
         ${{ inputs.cache-name }}-asdf
