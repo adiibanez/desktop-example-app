@@ -120,7 +120,7 @@ jobs:
           elixir-version: ${{ env.ELIXIR_VERSION }}
           elixir-variant: ${{ env.ELIXIR_VARIANT }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          GHCR_PAT: ${{ secrets.GHCR_PAT }}
+          ghcr-pat-token: ${{ secrets.GHCR_PAT }}
           github-actor: ${{ github.actor }}
           
 
