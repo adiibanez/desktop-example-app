@@ -74,8 +74,19 @@ runs:
         /home/runner/.asdf
       key: ${{ inputs.cache-name }}-asdf
 
+  - name: buildx cache
+    id: buildx-cache
+    uses: actions/cache@v3
+    with:
+      path: |
+        /tmp/.buildx-cache
+      key: ${{ inputs.cache-name }}-buildx
+      restore-keys: |
+        ${{ inputs.cache-name }}-buildx
+
   - name: Linux Docker Build
     uses: whoan/docker-build-with-cache-action@master
+    id: buildx
     with:
       username: ${{ inputs.github-actor }}
       password: "${{ inputs.github-token }}"
@@ -100,6 +111,14 @@ runs:
     run: |
       rm -rf /tmp/.buildx-cache
       mv /tmp/.buildx-cache-new /tmp/.buildx-cache
+
+  - name: Save buildx Cache
+    if: steps.buildx.outcome == 'success' && steps.buildx-cache.outputs.cache-hit != 'true'
+    uses: actions/cache/save@v3
+    with:
+      path: |
+        /tmp/.buildx-cache
+      key: ${{ inputs.cache-name }}-buildx
 
   - name: Extract runfile Linux
     shell: bash

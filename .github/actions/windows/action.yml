@@ -33,16 +33,16 @@ runs:
   #     shell: msys2 {0}
 
   steps:
-  - name: Load msys
-    id: msys-cache
-    uses: actions/cache@v3
-    with:
-      path: C:\msys64
-      key: ${{ inputs.cache-name }}-msys
-      restore-keys: |
-        ${{ inputs.cache-name }}-msys
-
+  # - name: Load msys
+  #   id: msys-cache
+  #   uses: actions/cache@v3
+  #   with:
+  #     path: C:\msys64
+  #     key: ${{ inputs.cache-name }}-msys
+  #     restore-keys: |
+  #       ${{ inputs.cache-name }}-msys
   #
+
   - name: "Install msys2 (Windows)"
     uses: msys2/setup-msys2@v2
     #shell: bash
@@ -54,12 +54,12 @@ runs:
       # update: true
       install: pacman-mirrors pkg-config base-devel mingw-w64-x86_64-toolchain mingw-w64-x86_64-go upx mingw-w64-x86_64-dlfcn unzip git tar mingw-w64-x86_64-nodejs mingw-w64-x86_64-imagemagick mingw-w64-x86_64-osslsigncode autoconf automake libtool gettext-devel gettext
 
-  - name: Save msys
-    if: steps.msys2.outcome == 'success'
-    uses: actions/cache/save@v3
-    with:
-      path: C:\msys64
-      key: ${{ inputs.cache-name }}-msys
+  # - name: Save msys
+  #   if: steps.msys2.outcome == 'success'
+  #   uses: actions/cache/save@v3
+  #   with:
+  #     path: C:\msys64
+  #     key: ${{ inputs.cache-name }}-msys
 
   - name: Load openssl
     id: openssl-cache
