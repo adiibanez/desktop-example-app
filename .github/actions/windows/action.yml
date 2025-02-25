@@ -40,16 +40,14 @@ runs:
 
   - name: "Install msys2 (Windows)"
     uses: msys2/setup-msys2@v2
-    with:
-      release: false
-      cache: true
     shell: bash
     id: msys2
     if: steps.msys-cache.outputs.cache-hit != 'true'
     with:
-      install: pacman-mirrors pkg-config base-devel mingw-w64-x86_64-toolchain mingw-w64-x86_64-go upx mingw-w64-x86_64-dlfcn unzip git tar mingw-w64-x86_64-nodejs mingw-w64-x86_64-imagemagick mingw-w64-x86_64-osslsigncode autoconf automake libtool gettext-devel gettext
-      update: false
       release: false
+      cache: true
+      install: pacman-mirrors pkg-config base-devel mingw-w64-x86_64-toolchain mingw-w64-x86_64-go upx mingw-w64-x86_64-dlfcn unzip git tar mingw-w64-x86_64-nodejs mingw-w64-x86_64-imagemagick mingw-w64-x86_64-osslsigncode autoconf automake libtool gettext-devel gettext
+      update: true
 
   # - name: Save msys
   #   if: steps.msys2.outcome == 'success'
