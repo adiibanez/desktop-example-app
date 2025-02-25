@@ -28,8 +28,8 @@ inputs:
   github-actor:
     description: "Github Actor"
     required: true
-  secrets:
-    description: "Secrets"
+  GHCR_PAT:
+    description: "docker secret"
     required: true
 runs:
   using: "composite"
