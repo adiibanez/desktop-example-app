@@ -1,12 +1,12 @@
 FROM ubuntu:20.04
 ENV DEBIAN_FRONTEND=noninteractive
-
+RUN echo "1" > /tmp/test.txt
 # Installing wxWidgets
-RUN apt-get update
-RUN apt-get install -y libssl-dev libjpeg-dev libpng-dev libtiff-dev zlib1g-dev libncurses5-dev libssh-dev unixodbc-dev libgmp3-dev libsctp-dev libgtk-3-dev libnotify-dev libsecret-1-dev catch mesa-common-dev libglu1-mesa-dev freeglut3-dev
-RUN apt-get install -y git xxd curl g++ make libwebkit2gtk-4.0-dev unzip procps inotify-tools
-# aib
-RUN apt-get install -y openjdk-11-jdk xsltproc fop libxml2-utils
+# RUN apt-get update
+# RUN apt-get install -y libssl-dev libjpeg-dev libpng-dev libtiff-dev zlib1g-dev libncurses5-dev libssh-dev unixodbc-dev libgmp3-dev libsctp-dev libgtk-3-dev libnotify-dev libsecret-1-dev catch mesa-common-dev libglu1-mesa-dev freeglut3-dev
+# RUN apt-get install -y git xxd curl g++ make libwebkit2gtk-4.0-dev unzip procps inotify-tools
+# # aib
+# RUN apt-get install -y openjdk-11-jdk xsltproc fop libxml2-utils
 
 # ENV WXWIDGETS_REPO=https://github.com/vadz/wxWidgets.git
 # ENV WXWIDGETS_REPO=https://github.com/TcT2k/wxWidgets.git
