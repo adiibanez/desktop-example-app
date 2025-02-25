@@ -141,12 +141,13 @@ runs:
       #cache_from: type=local,src=/tmp/.buildx-cache
       #cache_to: type=local,dest=/tmp/.buildx-cache-new,mode=max
 
-      # - name: Build and push Docker image
-      #   shell: bash
-      #   run: |
-      #     docker tag linux_installer ghcr.io/${{ github.repository }}/linux_installer:${{inputs.otp-version }}_${{ inputs.elixir-version }}
-      #     docker push ghcr.io/${{ github.repository }}/linux_installer:${{inputs.otp-version }}_${{ inputs.elixir-version }}
-      #   #docker buildx build --cache-to type=local,dest=/tmp/.buildx-cache --cache-from type=local,src=/tmp/.buildx-cache --push -t ghcr.io/${{ github.repository }}/my-image:latest 
+  - name: Build and push Docker image
+    shell: bash
+    run: |
+      docker tag linux_installer ghcr.io/${{ github.repository }}/linux_installer:${{inputs.otp-version }}_wx-${{ inputs.wxwidgets-version }}_elixir-${{ inputs.elixir-version }}-${{github.sha}}
+      docker tag linux_installer ghcr.io/${{ github.repository }}/linux_installer:${{inputs.otp-version }}_wx-${{ inputs.wxwidgets-version }}_elixir-${{ inputs.elixir-version }}
+      docker push ghcr.io/${{ github.repository }}/linux_installer:${{inputs.otp-version }}_wx-${{ inputs.wxwidgets-version }}_elixir-${{ inputs.elixir-version }}
+        #docker buildx build --cache-to type=local,dest=/tmp/.buildx-cache --cache-from type=local,src=/tmp/.buildx-cache --push -t ghcr.io/${{ github.repository }}/my-image:latest 
 
       # - name: Build release
       #   uses: actions/checkout@v2 # Required to mount the Github Workspace to a volume 
