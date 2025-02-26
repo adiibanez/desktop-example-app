@@ -12,6 +12,7 @@ env:
 jobs:
   windows:
     runs-on: windows-latest
+    if: false
     timeout-minutes: 90
     defaults:
       run:
