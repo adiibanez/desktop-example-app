@@ -1,18 +1,18 @@
 #!/bin/bash
 # cat $HOME/.bashrc
 # ls -lah /usr/local/bin/asdf
-export ASDF_DIR=/root/.asdf
-. ${ASDF_DIR}/asdf.sh
+#export ASDF_DIR=/root/.asdf
+#. ${ASDF_DIR}/asdf.sh
 
-ls -lah /root/.asdf/plugins
+ls -lah /root/.asdf
 
 cat .tool-versions
 asdf plugin list
 asdf current
 
-asdf reshim elixir
-asdf reshim erlang
-asdf reshim nodejs
+#asdf reshim elixir
+#asdf reshim erlang
+#asdf reshim nodejs
 
 cat "*.log" || echo "No logs found"
 
