@@ -54,27 +54,28 @@ ENV ELIXIR_VARIANT=${ELIXIR_VARIANT:-"-otp-26"}
 # aib
 RUN apt-get install -y xsltproc fop libxml2-utils
 
-ENV ASDF_DIR=/root/.asdf
-RUN git clone https://github.com/asdf-vm/asdf.git ${ASDF_DIR} && \
-    . ${ASDF_DIR}/asdf.sh
+RUN curl  -O -L https://github.com/asdf-vm/asdf/releases/download/v0.16.4/asdf-v0.16.4-linux-amd64.tar.gz && \
+    tar -xzf asdf-v0.16.4-linux-amd64.tar.gz && \
+    mv asdf /usr/local/bin/asdf && \
+    chmod +x /usr/local/bin/asdf && \
+    rm asdf-v0.16.4-linux-amd64.tar.gz && \
+    echo export PATH=\"\/usr/local/bin:$ASDF_DATA_DIR/shims:$PATH\" >> $HOME/.bashrc
 
-RUN . ${ASDF_DIR}/asdf.sh \
-    asdf plugin add erlang
-RUN . ${ASDF_DIR}/asdf.sh \
-    asdf install erlang ref:${OTP_VERSION} > asdf_erlang_install.log 2>&1 || (cat asdf_erlang_install.log && cat /root/.asdf/plugins/erlang/kerl-home/builds/asdf_${OTP_VERSION}/otp_build_git.log && exit 1)
+# ENV ASDF_DIR=/root/.asdf
+# RUN git clone https://github.com/asdf-vm/asdf.git ${ASDF_DIR} && \
+#     . ${ASDF_DIR}/asdf.sh
 
-RUN . ${ASDF_DIR}/asdf.sh \
-    asdf plugin add elixir
-RUN . ${ASDF_DIR}/asdf.sh \
-    asdf install elixir ${ELIXIR_VERSION}${ELIXIR_VARIANT} > asdf_elixir_install.log 2>&1 || (cat asdf_elixir_install.log && exit 1)
+RUN asdf plugin add erlang
+RUN asdf install erlang ref:${OTP_VERSION} > asdf_erlang_install.log 2>&1 || (cat asdf_erlang_install.log && cat /root/.asdf/plugins/erlang/kerl-home/builds/asdf_${OTP_VERSION}/otp_build_git.log && exit 1)
 
-RUN . ${ASDF_DIR}/asdf.sh \ 
-    asdf plugin add nodejs
-RUN . ${ASDF_DIR}/asdf.sh \
-    asdf install nodejs v18.7.0 > asdf_nodejs_install.log 2>&1 || (cat asdf_nodejs_install.log && exit 1)
+RUN asdf plugin add elixir
+RUN asdf install elixir ${ELIXIR_VERSION}${ELIXIR_VARIANT} > asdf_elixir_install.log 2>&1 || (cat asdf_elixir_install.log && exit 1)
 
-RUN ls -lah ${ASDF_DIR}/installs
-RUN ls -lah ${ASDF_DIR}/plugins
+RUN asdf plugin add nodejs
+RUN asdf install nodejs v18.7.0 > asdf_nodejs_install.log 2>&1 || (cat asdf_nodejs_install.log && exit 1)
+
+RUN ls -lah ~/.asdf/installs
+RUN ls -lah ~/.asdf/plugins
 
 # Compile and lint
 # COPY mix.exs mix.lock .formatter.exs /app/
