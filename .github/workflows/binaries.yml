@@ -60,7 +60,7 @@ jobs:
         IF EXIST "c:\\Program Files\\OpenSSL-Win64" (move "c:\\Program Files\\OpenSSL-Win64" "c:\\OpenSSL-Win64") ELSE (move "c:\\Program Files\\OpenSSL" "c:\\OpenSSL-Win64")
 
     - name: Save Windows Cache
-      if: steps.win32-cache.outputs.cache-hit != 'true'
+      # if: steps.win32-cache.outputs.cache-hit != 'true'
       uses: actions/cache/save@v3
       with:
         path: |
@@ -71,9 +71,9 @@ jobs:
     - name: Download wxWidgets
       if: steps.wxwidgets-cache.outputs.cache-hit != 'true'
       run: |
-        git clone ${{ env.WXWIDGETS_REPO }}
+        git clone ${{ env.WXWIDGETS_REPO }} --branch v3.2.4-with-msvs2012-fix
         cd wxWidgets
-        git checkout ${{ env.WXWIDGETS_VERSION }}
+        # git checkout ${{ env.WXWIDGETS_VERSION }}
         git submodule update --init
         sed -i -r -e 's/wxUSE_POSTSCRIPT +0/wxUSE_POSTSCRIPT 1/' include/wx/msw/setup.h
         sed -i -r -e 's/wxUSE_WEBVIEW_EDGE +0/wxUSE_WEBVIEW_EDGE 1/' include/wx/msw/setup.h        
@@ -119,7 +119,7 @@ jobs:
         cp $NAME /mnt/c/opt/otp.exe
 
     - name: Save Windows Cache
-      if: steps.win32-cache.outputs.cache-hit != 'true'
+      # if: steps.win32-cache.outputs.cache-hit != 'true'
       uses: actions/cache/save@v3
       with:
         path: |
@@ -163,7 +163,7 @@ jobs:
         echo export PATH=\"\$PATH:$HOME/elixir/bin\" >> $HOME/.bashrc
 
     - name: Save Windows Cache
-      if: steps.win32-cache.outputs.cache-hit != 'true'
+      # if: steps.win32-cache.outputs.cache-hit != 'true'
       uses: actions/cache/save@v3
       with:
         path: |
