@@ -47,19 +47,17 @@ runs:
     id: brew-deps
     if: ${{ steps.brew-cache.outputs.cache-hit != 'true' }}
     run: |
-      brew install binutils coreutils automake autoconf libtool
-
+      brew install binutils coreutils automake autoconf libtool libtiff
       find $(brew --prefix openssl) -name libcrypto.a
-
       # echo 'export PATH="/opt/homebrew/opt/binutils/bin:/opt/homebrew/opt/libtool/libexec/gnubin:$PATH"' >> /Users/runner/.bash_profile
 
-      # export CFLAGS="-I/opt/homebrew/Cellar/libtiff/4.7.0/include -I/opt/homebrew/opt/openssl@1.1/include $CFLAGS" 
-      # export CPPFLAGS="-I/opt/homebrew/Cellar/libtiff/4.7.0/include -I/opt/homebrew/opt/openssl@1.1/include $CPPFLAGS" 
-      # export LDFLAGS="-L/opt/homebrew/opt/openssl@1.1/lib -lssl -lcrypto -L/opt/homebrew/Cellar/libtiff/4.7.0/lib $LDFLAGS"
+      export CFLAGS="-I$(brew --prefix libtiff)/include -I$(brew --prefix openssl)/include $CFLAGS" 
+      export CPPFLAGS="-I$(brew --prefix libtiff)/include -I$(brew --prefix openssl)/include $CPPFLAGS" 
+      export LDFLAGS="-L$(brew --prefix openssl)/lib -lssl -lcrypto -L$(brew --prefix libtiff)/lib $LDFLAGS"
 
-      # export LDFLAGS="-L/opt/homebrew/opt/binutils/lib $LDFLAGS" 
-      # export CPPFLAGS="-I/opt/homebrew/opt/binutils/include $CPPFLAGS"
-      # export PATH="/opt/homebrew/opt/libtool/libexec/gnubin:$PATH"
+      export LDFLAGS="-L$(brew --prefix binutils)/lib $LDFLAGS" 
+      export CPPFLAGS="-I$(brew --prefix binutils)/include $CPPFLAGS" 
+      export PATH="$(brew --prefix libtool)/libexec/gnubin:$PATH"
     # wget libtiff
     # - name: Save Brew Cache
     #   if: steps.brew-deps.outcome == 'success' && steps.brew-cache.outputs.cache-hit != 'true'
@@ -136,6 +134,7 @@ runs:
       echo "Setting KERL_CONFIGURE_OPTIONS"
       # disable ssl and crypto  for now, macos is acting up
       #export KERL_CONFIGURE_OPTIONS="--enable-parallel-configure --with-wxdir=`echo ~/projects/wxWidgets` --disable-jit --without-javac --disable-debug CXX='gcc -std=c++11' --with-tiff=$(brew --prefix libtiff) --disable-dynamic-ssl-lib --without-ssl --without-crypto '"
+
       export EGREP=egrep
       export CC=clang
       export CPP="clang -E"
