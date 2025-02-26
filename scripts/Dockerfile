@@ -51,6 +51,10 @@ ENV ELIXIR_VERSION=${ELIXIR_VERSION:-1.13.4}
 ARG ELIXIR_VARIANT
 ENV ELIXIR_VARIANT=${ELIXIR_VARIANT:-"-otp-26"}
 
+
+# aib
+RUN apt-get install -y xsltproc fop libxml2-utils
+
 ENV ASDF_DIR=/root/.asdf
 RUN git clone https://github.com/asdf-vm/asdf.git ${ASDF_DIR} && \
     . ${ASDF_DIR}/asdf.sh && \

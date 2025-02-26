@@ -22,7 +22,20 @@ jobs:
       uses: actions/cache/restore@v3
       id: win32-cache
       with:
-        path: "c:\\opt\\otp.exe"
+        path: |
+           "c:\\opt\\otp.exe"
+           "c:\\OpenSSL-Win64"
+           /c/Users/runneradmin/.asdf
+           /c/Users/runneradmin/elixir
+        key: win32-${{ env.WXWIDGETS_VERSION }}-otp-${{ env.OTP_VERSION }}
+
+    - name: Restore wxwidgets Cache
+      uses: actions/cache/restore@v3
+      id: wxwidgets-cache
+      with:
+        path: |
+           'c:\\opt\\local64\\pgm\\wxWidgets-3.x.x'
+           /mnt/c/opt/local64/pgm/wxWidgets-3.x.x
         key: win32-wxwidgets-${{ env.WXWIDGETS_VERSION }}-otp-${{ env.OTP_VERSION }}
   
     - uses: Vampire/setup-wsl@v2
@@ -40,9 +53,18 @@ jobs:
       run: |
         choco install openssl --version=1.1.1.2100
         IF EXIST "c:\\Program Files\\OpenSSL-Win64" (move "c:\\Program Files\\OpenSSL-Win64" "c:\\OpenSSL-Win64") ELSE (move "c:\\Program Files\\OpenSSL" "c:\\OpenSSL-Win64")
- 
-    - name: Download wxWidgets
+
+    - name: Save Windows Cache
       if: steps.win32-cache.outputs.cache-hit != 'true'
+      uses: actions/cache/save@v3
+      with:
+        path: |
+          "c:\\opt\\otp.exe"
+          "c:\\OpenSSL-Win64"
+        key: win32-${{ env.WXWIDGETS_VERSION }}-otp-${{ env.OTP_VERSION }}
+  
+    - name: Download wxWidgets
+      if: steps.wxwidgets-cache.outputs.cache-hit != 'true'
       run: |
         git clone ${{ env.WXWIDGETS_REPO }}
         cd wxWidgets
@@ -53,7 +75,7 @@ jobs:
         sed -i -r -e 's/WXWIN_COMPATIBILITY_3_0 +0/WXWIN_COMPATIBILITY_3_0 1/' include/wx/msw/setup.h        
 
     - name: Install WebView2
-      if: steps.win32-cache.outputs.cache-hit != 'true'
+      if: steps.wxwidgets-cache.outputs.cache-hit != 'true'
       shell: cmd
       run: |
         cd wxWidgets\\3rdparty
@@ -61,7 +83,7 @@ jobs:
         rename Microsoft.Web.WebView2.1.0.864.35 webview2
 
     - name: Build wxWidgets
-      if: steps.win32-cache.outputs.cache-hit != 'true'
+      if: steps.wxwidgets-cache.outputs.cache-hit != 'true'
       shell: cmd
       run: |
         cd wxWidgets\\build\\msw
@@ -69,13 +91,13 @@ jobs:
         nmake TARGET_CPU=amd64 BUILD=release SHARED=0 DIR_SUFFIX_CPU= -f makefile.vc
 
     - name: Copy wxWidgets
-      if: steps.win32-cache.outputs.cache-hit != 'true'
+      if: steps.wxwidgets-cache.outputs.cache-hit != 'true'
       run: |
         mkdir -p /mnt/c/opt/local64/pgm/
         cp -R wxWidgets /mnt/c/opt/local64/pgm/wxWidgets-3.x.x
 
     - name: Compile Erlang
-      if: steps.win32-cache.outputs.cache-hit != 'true'
+      if: ${{steps.win32-cache.outputs.cache-hit != 'true' || steps.wxwidgets-cache.outputs.cache-hit != 'true'}}
       run: |
         git clone ${{ env.OTP_GITHUB_URL }}
         cd otp
@@ -95,8 +117,12 @@ jobs:
       if: steps.win32-cache.outputs.cache-hit != 'true'
       uses: actions/cache/save@v3
       with:
-        path: "c:\\opt\\otp.exe"
-        key: win32-wxwidgets-${{ env.WXWIDGETS_VERSION }}-otp-${{ env.OTP_VERSION }}
+        path: |
+          "c:\\opt\\otp.exe"
+           "c:\\OpenSSL-Win64"
+           /c/Users/runneradmin/.asdf
+           /c/Users/runneradmin/elixir
+        key: win32-${{ env.WXWIDGETS_VERSION }}-otp-${{ env.OTP_VERSION }}
   
     - name: Run Erlang installer
       shell: cmd
@@ -130,7 +156,18 @@ jobs:
         git checkout v${{ env.ELIXIR_VERSION }}
         make 
         echo export PATH=\"\$PATH:$HOME/elixir/bin\" >> $HOME/.bashrc
-    
+
+    - name: Save Windows Cache
+      if: steps.win32-cache.outputs.cache-hit != 'true'
+      uses: actions/cache/save@v3
+      with:
+        path: |
+          "c:\\opt\\otp.exe"
+           "c:\\OpenSSL-Win64"
+           /c/Users/runneradmin/.asdf
+           /c/Users/runneradmin/elixir
+        key: win32-${{ env.WXWIDGETS_VERSION }}-otp-${{ env.OTP_VERSION }}
+  
     - uses: actions/checkout@v1
 
     - name: "Get dependencies"
@@ -229,8 +266,7 @@ jobs:
       uses: actions/cache/save@v3
       with:
         path: |
-          /Users/runner/projects/wxWidgets
-          /usr/local/wxWidgets
+          /Users/runner/.asdf
         key:  macos-asdf-${{ env.WXWIDGETS_VERSION }}-otp-${{ env.OTP_VERSION }}
 
     - uses: actions/checkout@v1
@@ -246,14 +282,14 @@ jobs:
         mix deps.get
         cd assets && npm install
 
-    - name: "Build Release"
-      env:
-        MACOS_PEM: ${{ secrets.MACOS_PEM }}
-      run: |
-        . $HOME/.asdf/asdf.sh
-        export LD_LIBRARY_PATH="$HOME/projects/wxWidgets/lib/"
-        mix assets.deploy
-        mix desktop.installer
+    # - name: "Build Release"
+    #   env:
+    #     MACOS_PEM: ${{ secrets.MACOS_PEM }}
+    #   run: |
+    #     . $HOME/.asdf/asdf.sh
+    #     export LD_LIBRARY_PATH="$HOME/projects/wxWidgets/lib/"
+    #     mix assets.deploy
+    #     mix desktop.installer
     #  mix desktop.create_keychain maybe
       #  export MACOS_KEYCHAIN="$HOME/Library/Keychains/macos-build.keychain"
       
