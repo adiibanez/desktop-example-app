@@ -1,6 +1,6 @@
 name: "Build binaries"
-#on: [ "push", "pull_request" ]
-on: ["pull_request"]
+on: [ "push", "pull_request" ]
+#on: ["pull_request"]
 env:
   OTP_GITHUB_URL: https://github.com/erlang/otp.git
   #OTP_VERSION: OTP-24.3.3
