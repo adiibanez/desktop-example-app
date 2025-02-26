@@ -1,7 +1,10 @@
 #!/bin/bash
 # cat $HOME/.bashrc
 # ls -lah /usr/local/bin/asdf
+export ASDF_DIR=/root/.asdf
 . ${ASDF_DIR}/asdf.sh
+
+ls -lah /root/.asdf/plugins
 
 cat .tool-versions
 asdf plugin list
@@ -11,7 +14,7 @@ asdf reshim elixir
 asdf reshim erlang
 asdf reshim nodejs
 
-cat "*.log"
+cat "*.log" || echo "No logs found"
 
 # asdf install
 

@@ -51,7 +51,6 @@ ENV ELIXIR_VERSION=${ELIXIR_VERSION:-1.13.4}
 ARG ELIXIR_VARIANT
 ENV ELIXIR_VARIANT=${ELIXIR_VARIANT:-"-otp-26"}
 
-
 # aib
 RUN apt-get install -y xsltproc fop libxml2-utils
 
@@ -73,6 +72,9 @@ RUN . ${ASDF_DIR}/asdf.sh \
     asdf plugin add nodejs
 RUN . ${ASDF_DIR}/asdf.sh \
     asdf install nodejs v18.7.0 > asdf_nodejs_install.log 2>&1 || (cat asdf_nodejs_install.log && exit 1)
+
+RUN ls -lah ${ASDF_DIR}/installs
+RUN ls -lah ${ASDF_DIR}/plugins
 
 # Compile and lint
 # COPY mix.exs mix.lock .formatter.exs /app/
