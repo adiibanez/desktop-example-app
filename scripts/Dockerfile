@@ -45,7 +45,7 @@ ENV OTP_VERSION=${OTP_VERSION:-master}
 ARG OTP_GITHUB_URL
 ENV OTP_GITHUB_URL=${OTP_GITHUB_URL:-https://github.com/erlang/otp.git}
 
-ENV KERL_CONFIGURE_OPTIONS="--with-wxdir=/root/projects/wxWidgets --disable-javac --disable-debug"
+ENV KERL_CONFIGURE_OPTIONS="--with-wxdir=/root/projects/wxWidgets --without-javac --disable-debug"
 ARG ELIXIR_VERSION
 ENV ELIXIR_VERSION=${ELIXIR_VERSION:-1.13.4}
 ARG ELIXIR_VARIANT

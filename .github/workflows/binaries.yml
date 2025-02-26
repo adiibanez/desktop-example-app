@@ -205,6 +205,7 @@ jobs:
 
   macos:
     runs-on: macos-latest
+    if: false
     steps:
     - name: Asdf Cache
       uses: actions/cache@v3
