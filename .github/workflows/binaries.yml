@@ -354,6 +354,22 @@ jobs:
             --build-arg=ELIXIR_VERSION=${{ env.ELIXIR_VERSION }}
             --build-arg=ELIXIR_VARIANT=${{ env.ELIXIR_VARIANT }}
 
+
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Run command in Docker container
+        shell: bash
+        run: |+
+          docker images
+          docker ps -a
+          docker run \
+            --rm \
+            -v ${{ github.workspace }}:/app \
+            -w /app \
+            ghcr.io/adiibanez/linux_installer_binaries_workflow:${{env.OTP_VERSION }}_wx-${{ env.WXWIDGETS_VERSION }}_elixir-${{ env.ELIXIR_VERSION }} \
+            /bin/bash -c /app/scripts/linux_build_release.sh
+
       # - name: Extract runfile
       #   shell: bash
       #   run: |

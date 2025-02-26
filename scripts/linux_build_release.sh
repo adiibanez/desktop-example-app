@@ -1,5 +1,7 @@
 # cat $HOME/.bashrc
-ls -lah /usr/local/bin/asdf
+# ls -lah /usr/local/bin/asdf
+. ${ASDF_DIR}/asdf.sh
+
 cat .tool-versions
 asdf plugin list
 asdf current
