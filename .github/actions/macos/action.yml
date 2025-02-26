@@ -104,7 +104,7 @@ runs:
       cd wxWidgets;
       git checkout ${{ inputs.wxwidgets-version }}
       git submodule update --init
-      ./configure --prefix=/usr/local/wxWidgets --enable-webview --enable-compat30 --disable-shared
+      ./configure --prefix=/usr/local/wxWidgets --enable-webview --enable-compat30 --disable-shared --disable-tiff
       make -j8
 
   - name: Save wxWidgets Cache
