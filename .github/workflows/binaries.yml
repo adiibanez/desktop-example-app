@@ -19,12 +19,14 @@ on:
       - ".github/workflows/**"
 env:
   OTP_GITHUB_URL: https://github.com/erlang/otp.git
-  OTP_VERSION: OTP-24.3.4.15
+  #OTP_VERSION: OTP-24.3.4.15
+  OTP_VERSION: OTP-27.2.4
   WXWIDGETS_REPO: https://github.com/wxWidgets/wxWidgets.git
   WXWIDGETS_VERSION: master
-  ELIXIR_VERSION: 1.14.5
-  ELIXIR_VARIANT: -otp-24
-  DOCKER_BUILDKIT: 0
+  #ELIXIR_VERSION: 1.14.5
+  ELIXIR_VERSION: 1.18.1
+  #ELIXIR_VARIANT: -otp-24
+  ELIXIR_VARIANT: -otp-27
 
 jobs:
   windows:
@@ -222,7 +224,7 @@ jobs:
 
   macos:
     runs-on: macos-latest
-    if: false
+    # if: false
     steps:
     - name: Asdf Cache
       uses: actions/cache@v3
