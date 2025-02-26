@@ -134,7 +134,6 @@ runs:
     if: steps.erlang-cache.outputs.cache-hit != 'true'
     run: |
       echo "Setting KERL_CONFIGURE_OPTIONS"
-      find /opt/homebrew/Cellar/libtiff/ -name libtiff.h
       # disable ssl and crypto  for now, macos is acting up
       #export KERL_CONFIGURE_OPTIONS="--enable-parallel-configure --with-wxdir=`echo ~/projects/wxWidgets` --disable-jit --without-javac --disable-debug CXX='gcc -std=c++11' --with-tiff=$(brew --prefix libtiff) --disable-dynamic-ssl-lib --without-ssl --without-crypto '"
       export EGREP=egrep
