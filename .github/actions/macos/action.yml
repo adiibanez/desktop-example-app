@@ -48,7 +48,6 @@ runs:
     if: ${{ steps.brew-cache.outputs.cache-hit != 'true' }}
     run: |
       brew install binutils coreutils automake autoconf libtool
-      ls -lah /opt/homebrew/Cellar/openssl@3
 
       find $(brew --prefix openssl) -name libcrypto.a
 
@@ -137,8 +136,13 @@ runs:
       echo "Setting KERL_CONFIGURE_OPTIONS"
       find /opt/homebrew/Cellar/libtiff/ -name libtiff.h
       # disable ssl and crypto  for now, macos is acting up
-      export KERL_CONFIGURE_OPTIONS="--enable-parallel-configure --with-wxdir=`echo ~/projects/wxWidgets` --disable-jit --without-javac --disable-debug CXX='gcc -std=c++11' --with-tiff=$(brew --prefix libtiff) --disable-dynamic-ssl-lib --without-ssl --without-crypto '"
-      #export KERL_CONFIGURE_OPTIONS="--enable-parallel-configure --with-wxdir=`echo ~/projects/wxWidgets` --disable-jit --without-javac --disable-debug CXX='gcc -std=c++11' --with-tiff=$(brew --prefix libtiff) --disable-dynamic-ssl-lib --with-ssl=$(brew --prefix openssl) --with-crypto=$(brew --prefix openssl) '"
+      #export KERL_CONFIGURE_OPTIONS="--enable-parallel-configure --with-wxdir=`echo ~/projects/wxWidgets` --disable-jit --without-javac --disable-debug CXX='gcc -std=c++11' --with-tiff=$(brew --prefix libtiff) --disable-dynamic-ssl-lib --without-ssl --without-crypto '"
+      export EGREP=egrep
+      export CC=clang
+      export CPP="clang -E"
+      export KERL_USE_AUTOCONF=0
+      export KERL_CONFIGURE_OPTIONS="--enable-parallel-configure --with-wxdir=`echo ~/projects/wxWidgets` --disable-jit --without-javac --disable-debug CXX='gcc -std=c++11' --with-tiff=$(brew --prefix libtiff) --disable-dynamic-ssl-lib --with-ssl=$(brew --prefix openssl)'"
+
       echo "KERL_CONFIGURE_OPTIONS is now $KERL_CONFIGURE_OPTIONS"
 
   - name: "Install erlang elixir and plugins"
