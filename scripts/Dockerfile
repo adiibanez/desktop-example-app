@@ -91,36 +91,28 @@ RUN echo "source /etc/profile" >> /root/.bashrc
 
 # Install Erlang with logging and error handling
 RUN asdf plugin add erlang
-RUN source /etc/profile && \
-    if KERL_CONFIGURE_OPTIONS="$KERL_CONFIGURE_OPTIONS" asdf install erlang ref:${OTP_VERSION} > /tmp/asdf_erlang_install.log 2>&1; then \
-        source /etc/profile && asdf global erlang ref:${OTP_VERSION}; \
-        echo "Erlang installation succeeded"; \
-    else \
-        echo "Erlang installation failed"; \
-        exit_code=$?;  # Capture exit code \
-        cat /tmp/asdf_erlang_install.log; \
-        exit $exit_code; # Propagate error to Docker build. \
-    fi
+RUN asdf install erlang ref:${OTP_VERSION} > asdf_erlang_install.log 2>&1 || (cat asdf_erlang_install.log && exit 1)
+# RUN source /etc/profile && \
+#     if KERL_CONFIGURE_OPTIONS="$KERL_CONFIGURE_OPTIONS" asdf install erlang ref:${OTP_VERSION} > /tmp/asdf_erlang_install.log 2>&1; then \
+#         source /etc/profile && asdf global erlang ref:${OTP_VERSION}; \
+#         echo "Erlang installation succeeded"; \
+#     else \
+#         echo "Erlang installation failed"; \
+#         exit_code=$?;  # Capture exit code \
+#         cat /tmp/asdf_erlang_install.log; \
+#         exit $exit_code; # Propagate error to Docker build. \
+#     fi
 
-# Install Elixir with logging and error handling
-RUN asdf plugin add erlang
-RUN if asdf install erlang ref:${{ inputs.otp-version }} > asdf_erlang_install.log 2>&1; then \
-        asdf global erlang ref:${{ inputs.otp-version }} \
-        echo "Erlang installation succeeded" \
-    else \
-        echo "Erlang installation failed" \
-        cat asdf_erlang_install.log \
-        exit 1 \
-    fi
 RUN asdf plugin add elixir
-RUN if asdf install elixir ${{ inputs.elixir-version }}${{ inputs.elixir-variant }} > asdf_elixir_install.log 2>&1; then \
-        asdf global elixir ${{ inputs.elixir-version }}${{ inputs.elixir-variant }} \
-        echo "Elixir installation succeeded" \
-    else \
-        echo "Elixir installation failed" \
-        cat asdf_elixir_install.log \
-        exit 1 \
-    fi
+RUN asdf install elixir ${ELIXIR_VERSION}${ELIXIR_VARIANT} > asdf_elixir_install.log 2>&1 || (cat asdf_elixir_install.log && exit 1)
+# RUN if asdf install elixir ${{ inputs.elixir-version }}${{ inputs.elixir-variant }} > asdf_elixir_install.log 2>&1; then \
+#         asdf global elixir ${{ inputs.elixir-version }}${{ inputs.elixir-variant }} \
+#         echo "Elixir installation succeeded" \
+#     else \
+#         echo "Elixir installation failed" \
+#         cat asdf_elixir_install.log \
+#         exit 1 \
+#     fi
 
 # Install Node.js with logging and error handling
 RUN asdf plugin add nodejs
