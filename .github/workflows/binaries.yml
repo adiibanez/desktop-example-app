@@ -84,7 +84,7 @@ jobs:
       uses: actions/cache/save@v3
       with:
         path: |
-          "c:\\OpenSSL-Win64"
+          "c:\\Program Files\\OpenSSL-Win64"
         key: win32-${{ env.WXWIDGETS_VERSION }}-otp-${{ env.OTP_VERSION }}
   
     # - name: Download wxWidgets
