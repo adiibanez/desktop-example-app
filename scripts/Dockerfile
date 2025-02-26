@@ -91,7 +91,7 @@ RUN echo "source /etc/profile" >> /root/.bashrc
 
 # Install Erlang with logging and error handling
 RUN asdf plugin add erlang
-RUN asdf install erlang ref:${OTP_VERSION} > asdf_erlang_install.log 2>&1 || (cat asdf_erlang_install.log && exit 1)
+RUN asdf install erlang ref:${OTP_VERSION} > asdf_erlang_install.log 2>&1 || (cat asdf_erlang_install.log && cat /root/.asdf/plugins/erlang/kerl-home/builds/asdf_${OTP_VERSION}/otp_build_git.log && exit 1)
 # RUN source /etc/profile && \
 #     if KERL_CONFIGURE_OPTIONS="$KERL_CONFIGURE_OPTIONS" asdf install erlang ref:${OTP_VERSION} > /tmp/asdf_erlang_install.log 2>&1; then \
 #         source /etc/profile && asdf global erlang ref:${OTP_VERSION}; \
