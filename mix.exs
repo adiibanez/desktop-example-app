@@ -94,7 +94,7 @@ defmodule Todo.MixProject do
       {:jason, "~> 1.4"},
 
       {:rustler_precompiled, "~> 0.8"},
-      {:rustler_btleplug, "~> 0.0.6-alpha"},
+      {:rustler_btleplug, "~> 0.0.9-alpha"},
       # {:rustler_btleplug,
       # path: "/Users/adrianibanez/Documents/projects/2024_sensor-platform/checkouts/rustler_btleplug",
       # },
