@@ -15,7 +15,7 @@ RUN apt-get install -y xsltproc fop libxml2-utils
 ARG WXWIDGETS_REPO
 ENV WXWIDGETS_REPO=${WXWIDGETS_REPO:-https://github.com/wxWidgets/wxWidgets.git}
 RUN mkdir ~/projects && cd ~/projects && \
-    git clone ${WXWIDGETS_REPO} --branch ${WXWIDGETS_VERSION}
+    git clone ${WXWIDGETS_REPO}
 
 ARG CMAKE_VERSION
 ENV CMAKE_VERSION=${CMAKE_VERSION:-3.27.4}
