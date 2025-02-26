@@ -1,5 +1,22 @@
 name: "Build binaries"
-on: ["push", "pull_request"]
+on:
+  push:
+    branches: 
+      - main
+    paths:
+    # Just run on main branch if "native" path changed.
+    #- "native/**"
+    - "**"
+    # Also run if this file changes.
+    #- ".github/workflows/release.yml"
+    #- ".github/workflows/**"
+    tags:
+    # Tags will always run.
+    - "*"
+  pull_request:
+    paths:
+      # In PRs we only run if this file changes.
+      - ".github/workflows/**"
 env:
   OTP_GITHUB_URL: https://github.com/erlang/otp.git
   OTP_VERSION: OTP-24.3.4.15
