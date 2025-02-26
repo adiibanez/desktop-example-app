@@ -24,7 +24,7 @@ jobs:
           - { otp_version: OTP-27.2.4, wxwidgets_version: master, elixir_version: 1.18.1, elixir_variant: "-otp-27" }
         
           # https://github.com/actions/runner-images
-        platform: [ macos-24, ubuntu-latest ] # ubuntu-latest,macos-14,
+        platform: [ macos-13, ubuntu-latest ] # ubuntu-latest,macos-14,
         #platform: [ macos-latest ] # ubuntu-latest,macos-14,
         #, macos-latest
         #windows-2022
