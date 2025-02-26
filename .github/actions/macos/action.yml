@@ -156,23 +156,8 @@ runs:
       asdf plugin add erlang
       asdf plugin add elixir
 
-      if asdf install erlang ref:${{ inputs.otp-version }} > asdf_erlang_install.log 2>&1; then 
-        asdf global erlang ref:${{ inputs.otp-version }} 
-        echo "Erlang installation succeeded" 
-      else
-        echo "Erlang installation failed" 
-        cat asdf_erlang_install.log
-        exit 1 
-      fi
-
-      if asdf install elixir ${{ inputs.elixir-version }}${{ inputs.elixir-variant }} > asdf_elixir_install.log 2>&1; then 
-        asdf global elixir ${{ inputs.elixir-version }}${{ inputs.elixir-variant }} 
-        echo "Elixir installation succeeded" 
-      else 
-        echo "Elixir installation failed" 
-        cat asdf_elixir_install.log
-        exit 1 
-      fi
+      asdf install erlang > asdf_erlang_install.log 2>&1 || (cat asdf_erlang_install.log && cat /root/.asdf/plugins/erlang/kerl-home/builds/asdf_${OTP_VERSION}/otp_build_git.log && exit 1)
+      asdf install elixir > asdf_elixir_install.log 2>&1 || (cat asdf_elixir_install.log && exit 1)
 
       asdf install nodejs 18.7.0
       asdf global nodejs 18.7.0
