@@ -244,9 +244,9 @@ jobs:
         path: |
           /Users/runner/projects/wxWidgets
           /usr/local/wxWidgets
-        key: macos-wxwidgets-${{ env.WXWIDGETS_VERSION }}-otp-${{ env.OTP_VERSION }}
+        key: macos-wxwidgets-${{ env.WXWIDGETS_VERSION }}
         restore-keys: |
-          macos-wxwidgets-${{ env.WXWIDGETS_VERSION }}-otp-${{ env.OTP_VERSION }}
+          macos-wxwidgets-${{ env.WXWIDGETS_VERSION }}
   
     - name: "Installing wxWidgets"
       id: wxwidgets
@@ -267,7 +267,7 @@ jobs:
         path: |
           /Users/runner/projects/wxWidgets
           /usr/local/wxWidgets
-        key:  macos-wxwidgets-${{ env.WXWIDGETS_VERSION }}-otp-${{ env.OTP_VERSION }}
+        key:  macos-wxwidgets-${{ env.WXWIDGETS_VERSION }}
 
     - name: "Installing Erlang"
       id: erlang
