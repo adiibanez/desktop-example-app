@@ -166,20 +166,31 @@ jobs:
   macos:
     runs-on: macos-latest
     steps:
-    - name: macOS Cache
+    - name: Asdf Cache
       uses: actions/cache@v3
-      id: macos-cache
+      id: asdf-cache
       with:
         path: /Users/runner/.asdf
-        key: macos-wxwidgets-${{ env.WXWIDGETS_VERSION }}-otp-${{ env.OTP_VERSION }}
+        key: macos-asdf-${{ env.WXWIDGETS_VERSION }}-otp-${{ env.OTP_VERSION }}
       
     - name: "Install brew deps"
-      if: steps.macos-cache.outputs.cache-hit != 'true'
       run: |
             brew install binutils coreutils wget automake autoconf libtool
+
+    - name: wxWidgets cache
+      id: wxwidgets-cache
+      uses: actions/cache@v3
+      with:
+        path: |
+          /Users/runner/projects/wxWidgets
+          /usr/local/wxWidgets
+        key: macos-wxwidgets-${{ env.WXWIDGETS_VERSION }}-otp-${{ env.OTP_VERSION }}
+        restore-keys: |
+          macos-wxwidgets-${{ env.WXWIDGETS_VERSION }}-otp-${{ env.OTP_VERSION }}
   
     - name: "Installing wxWidgets"
-      if: steps.macos-cache.outputs.cache-hit != 'true'
+      id: wxwidgets
+      if: steps.wxwidgets-cache.outputs.cache-hit != 'true'
       run: |
         mkdir ~/projects && cd ~/projects
         git clone ${{ env.WXWIDGETS_REPO }}
@@ -189,8 +200,18 @@ jobs:
         ./configure --prefix=/usr/local/wxWidgets --enable-webview --enable-compat30 --disable-shared
         make -j8
 
+    - name: Save wxWidgets Cache
+      if: steps.wxwidgets.outcome == 'success' && steps.wxwidgets-cache.outputs.cache-hit != 'true'
+      uses: actions/cache/save@v3
+      with:
+        path: |
+          /Users/runner/projects/wxWidgets
+          /usr/local/wxWidgets
+        key:  macos-wxwidgets-${{ env.WXWIDGETS_VERSION }}-otp-${{ env.OTP_VERSION }}
+
     - name: "Installing Erlang"
-      if: steps.macos-cache.outputs.cache-hit != 'true'
+      id: erlang
+      if: steps.asdf-cache.outputs.cache-hit != 'true'
       run: |
         git clone https://github.com/asdf-vm/asdf.git ~/.asdf
         . $HOME/.asdf/asdf.sh
@@ -202,6 +223,15 @@ jobs:
         echo "nodejs v18.7.0" >> .tool-versions
         export KERL_CONFIGURE_OPTIONS="--enable-parallel-configure --with-wxdir=`echo ~/projects/wxWidgets` --disable-jit --without-javac --disable-debug CXX='gcc -std=c++11'"
         asdf install
+
+    - name: Save asdf Cache
+      if: steps.erlang.outcome == 'success' && steps.asdf-cache.outputs.cache-hit != 'true'
+      uses: actions/cache/save@v3
+      with:
+        path: |
+          /Users/runner/projects/wxWidgets
+          /usr/local/wxWidgets
+        key:  macos-asdf-${{ env.WXWIDGETS_VERSION }}-otp-${{ env.OTP_VERSION }}
 
     - uses: actions/checkout@v1
     - name: "Compile and Lint"
@@ -221,11 +251,12 @@ jobs:
         MACOS_PEM: ${{ secrets.MACOS_PEM }}
       run: |
         . $HOME/.asdf/asdf.sh
-        mix desktop.create_keychain maybe
-        export MACOS_KEYCHAIN="$HOME/Library/Keychains/macos-build.keychain"
         export LD_LIBRARY_PATH="$HOME/projects/wxWidgets/lib/"
         mix assets.deploy
         mix desktop.installer
+    #  mix desktop.create_keychain maybe
+      #  export MACOS_KEYCHAIN="$HOME/Library/Keychains/macos-build.keychain"
+      
 
     - name: Archive MacOS Installer
       uses: actions/upload-artifact@v4
@@ -255,7 +286,7 @@ jobs:
             --build-arg=BASE_IMAGE=ubuntu:18.04
             --platform=linux/amd64
             --build-arg=PLATFORM=amd64
-            #       --build-arg=WXWIDGETS_REPO=${{ env.WXWIDGETS_REPO }}
+            --build-arg=WXWIDGETS_REPO=${{ env.WXWIDGETS_REPO }}
             --build-arg=WXWIDGETS_VERSION=${{ env.WXWIDGETS_VERSION }}
             --build-arg=OTP_VERSION=${{ env.OTP_VERSION }}
             --build-arg=OTP_GITHUB_URL=${{ env.OTP_GITHUB_URL }}
