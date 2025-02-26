@@ -55,16 +55,16 @@ ENV ELIXIR_VARIANT=${ELIXIR_VARIANT:-"-otp-26"}
 # aib
 RUN apt-get install -y xsltproc fop libxml2-utils
 
-# ENV ASDF_DIR=/root/.asdf
-# RUN git clone https://github.com/asdf-vm/asdf.git ${ASDF_DIR} && \
-#     . ${ASDF_DIR}/asdf.sh && \
-#     asdf plugin add elixir && \
-#     echo "elixir ${ELIXIR_VERSION}${ELIXIR_VARIANT}" >> .tool-versions && \
-#     asdf plugin add erlang && \
-#     echo "erlang ref:${OTP_VERSION}" >> .tool-versions && \
-#     asdf plugin add nodejs && \
-#     echo "nodejs v18.7.0" >> .tool-versions && \
-#     asdf install
+ENV ASDF_DIR=/root/.asdf
+RUN git clone https://github.com/asdf-vm/asdf.git ${ASDF_DIR} && \
+    . ${ASDF_DIR}/asdf.sh && \
+    asdf plugin add elixir && \
+    echo "elixir ${ELIXIR_VERSION}${ELIXIR_VARIANT}" >> .tool-versions && \
+    asdf plugin add erlang && \
+    echo "erlang ref:${OTP_VERSION}" >> .tool-versions && \
+    asdf plugin add nodejs && \
+    echo "nodejs v18.7.0" >> .tool-versions && \
+    asdf install
 
 # Compile and lint
 # COPY mix.exs mix.lock .formatter.exs /app/

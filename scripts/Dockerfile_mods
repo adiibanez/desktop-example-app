@@ -1,0 +1,140 @@
+FROM ubuntu:20.04
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Install dependencies
+RUN apt-get update && apt-get install -y \
+    libssl-dev \
+    libjpeg-dev \
+    libpng-dev \
+    libtiff-dev \
+    zlib1g-dev \
+    libncurses5-dev \
+    libssh-dev \
+    unixodbc-dev \
+    libgmp3-dev \
+    libsctp-dev \
+    libgtk-3-dev \
+    libnotify-dev \
+    libsecret-1-dev \
+    catch \
+    mesa-common-dev \
+    libglu1-mesa-dev \
+    freeglut3-dev \
+    git \
+    xxd \
+    curl \
+    g++ \
+    make \
+    libwebkit2gtk-4.0-dev \
+    unzip \
+    procps \
+    inotify-tools \
+    openjdk-11-jdk \
+    xsltproc \
+    fop \
+    libxml2-utils \
+    libgl1-mesa-dev
+    
+
+# Set wxWidgets repository URL
+ARG WXWIDGETS_REPO
+ENV WXWIDGETS_REPO=${WXWIDGETS_REPO:-https://github.com/wxWidgets/wxWidgets.git}
+
+# Set CMake version
+ARG CMAKE_VERSION
+ENV CMAKE_VERSION=${CMAKE_VERSION:-3.27.4}
+
+# Set wxWidgets version
+ARG WXWIDGETS_VERSION
+ENV WXWIDGETS_VERSION=${WXWIDGETS_VERSION:-master}
+
+# Set wxWidgets debug option
+ARG WXWIDGETS_DEBUG
+ENV WXWIDGETS_DEBUG=${WXWIDGETS_DEBUG:-}
+
+# Install CMake
+RUN curl -sSL https://github.com/Kitware/CMake/releases/download/v${CMAKE_VERSION}/cmake-${CMAKE_VERSION}-linux-x86_64.sh > cmake.sh && \
+    sh cmake.sh --skip-license --prefix=/usr/local
+
+# Clone and configure wxWidgets
+RUN mkdir ~/projects && cd ~/projects && \
+    git clone ${WXWIDGETS_REPO} && \
+    cd wxWidgets && \
+    git fetch origin && \
+    git reset --hard origin/${WXWIDGETS_VERSION} && \
+    git submodule update --init && \
+    ./configure --prefix=/usr/local \
+    --enable-webview \
+    --enable-compat30 \
+    --disable-shared \
+    --with-opengl \ # Enable OpenGL support
+${WXWIDGETS_DEBUG}
+
+# Build wxWidgets
+RUN cd ~/projects/wxWidgets && make -j16
+
+# Set environment variables for Erlang and Elixir
+ARG OTP_VERSION
+ENV OTP_VERSION=${OTP_VERSION:-master}
+
+ARG OTP_GITHUB_URL
+ENV OTP_GITHUB_URL=${OTP_GITHUB_URL:-https://github.com/erlang/otp.git}
+
+ARG ELIXIR_VERSION
+ENV ELIXIR_VERSION=${ELIXIR_VERSION:-1.13.4}
+
+ARG ELIXIR_VARIANT
+ENV ELIXIR_VARIANT=${ELIXIR_VARIANT:-"-otp-26"}
+
+ENV ASDF_DIR=/root/.asdf
+
+# Install ASDF and language runtimes
+RUN git clone https://github.com/asdf-vm/asdf.git ${ASDF_DIR} && \
+    . ${ASDF_DIR}/asdf.sh && \
+    asdf plugin add elixir && \
+    echo "elixir ${ELIXIR_VERSION}${ELIXIR_VARIANT}" >> .tool-versions && \
+    asdf plugin add erlang && \
+    echo "erlang ref:${OTP_VERSION}" >> .tool-versions && \
+    asdf plugin add nodejs && \
+    echo "nodejs v18.7.0" >> .tool-versions && \
+    asdf install
+
+# Copy application files
+COPY mix.exs mix.lock .formatter.exs /app/
+
+# Configure and compile dependencies
+RUN . ${ASDF_DIR}/asdf.sh && \
+    cd /app && \
+    cp /.tool-versions .tool-versions && \
+    mix local.hex --force && \
+    mix local.rebar --force && \
+    mix deps.get && \
+    mix deps.compile
+
+# Copy asset files and install Node.js dependencies
+COPY assets/package.json assets/package-lock.json /app/assets/
+
+# Install Node.js dependencies
+RUN . ${ASDF_DIR}/asdf.sh && \
+    cd /app/assets && \
+    asdf install && \
+    npm install
+
+# Set library path and copy application files
+ENV LD_LIBRARY_PATH=/root/projects/wxWidgets/lib/:$LD_LIBRARY_PATH
+
+COPY . /app/
+
+# Compile application
+RUN . ${ASDF_DIR}/asdf.sh && \
+    cd /app && \
+    cp /.tool-versions .tool-versions && \
+    MIX_ENV=prod mix compile
+
+# Build installer
+RUN . ${ASDF_DIR}/asdf.sh  && \
+    cd /app && \
+    mix deps.update desktop && \
+    mix deps.update desktop_deployment  && \
+    mix assets.deploy && \
+    mix desktop.installer

@@ -39,13 +39,18 @@ jobs:
         key: win32-wxwidgets-${{ env.WXWIDGETS_VERSION }}-otp-${{ env.OTP_VERSION }}
   
     - uses: Vampire/setup-wsl@v2
-      if: steps.win32-cache.outputs.cache-hit != 'true'
       with:
+        use-cache: 'true'
         distribution: Ubuntu-18.04
+        additional-packages:
+          g++-mingw-w64
+          gcc-mingw-w64
+          make
+          autoconf
+          unzip
 
-    - name: Install WSL dependencies
-      if: steps.win32-cache.outputs.cache-hit != 'true'
-      run: apt update && apt install -y g++-mingw-w64 gcc-mingw-w64 make autoconf unzip
+    # - name: Install WSL dependencies
+    #   run: apt update && apt install -y g++-mingw-w64 gcc-mingw-w64 make autoconf unzip    
 
     - name: Install openssl
       if: steps.win32-cache.outputs.cache-hit != 'true'
@@ -281,6 +286,26 @@ jobs:
         mix local.rebar --force
         mix deps.get
         cd assets && npm install
+
+    - name: "Build Release"
+      shell: bash
+      env:
+        # MACOS_PEM: ${{ inputs.macos-pem }}
+        MAKE: make
+      run: |
+        . $HOME/.asdf/asdf.sh
+        # echo "$MACOS_PEM" | base64 --decode > certificate.p12
+        #mix desktop.create_keychain maybe
+        #export MACOS_KEYCHAIN="$HOME/Library/Keychains/macos-build.keychain"
+        export LD_LIBRARY_PATH="$HOME/projects/wxWidgets/lib/"
+        #security list-keychains -s $HOME/Library/Keychains/macos-build.keychain
+        #security unlock-keychain -p actions actions $HOME/Library/Keychains/macos-build.keychain
+        #security set-keychain-settings -t 3600 -u $HOME/Library/Keychains/macos-build.keychain
+        #security import certificate.p12 -k "$MACOS_KEYCHAIN" -P "" -T /usr/bin/codesign
+        #security find-identity -v -p codesigning
+        mix assets.deploy
+        mix desktop.installer
+
 
     # - name: "Build Release"
     #   env:
