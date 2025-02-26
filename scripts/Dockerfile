@@ -29,12 +29,15 @@ RUN cd ~/projects/wxWidgets && \
     git reset --hard origin/${WXWIDGETS_VERSION} && \
     git submodule update --init
 
+RUN apt search libwebkit2gtk
+
 # ENV WXWIDGETS_DEBUG=--enable-debug
 ARG WXWIDGETS_DEBUG
 ENV WXWIDGETS_DEBUG=${WXWIDGETS_DEBUG:-}
 RUN cd ~/projects/wxWidgets && \
-    ./configure --prefix=/usr/local/wxWidgets ${WXWIDGETS_DEBUG} --enable-webview --enable-compat30 --disable-shared && \
-    make -j16
+    ./configure --prefix=/usr/local/wxWidgets ${WXWIDGETS_DEBUG} --enable-webview --enable-compat30 --disable-shared > ~/configure_wxwidgets.log
+RUN make -j16
+RUN cat ~/configure_wxwidgets.log
 
 # Installing Erlang
 

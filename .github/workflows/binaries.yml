@@ -362,7 +362,7 @@ jobs:
           image_tag: "${{env.OTP_VERSION }}_wx-${{ env.WXWIDGETS_VERSION }}_elixir-${{ env.ELIXIR_VERSION }}-${{github.sha}},${{env.OTP_VERSION }}_wx-${{ env.WXWIDGETS_VERSION }}_elixir-${{ env.ELIXIR_VERSION }}"
           dockerfile: scripts/Dockerfile
           build_extra_args: |
-            --build-arg=BASE_IMAGE=ubuntu:18.04
+            --build-arg=BASE_IMAGE=ubuntu:20.04
             --platform=linux/amd64
             --build-arg=PLATFORM=amd64
             --build-arg=WXWIDGETS_REPO=${{ env.WXWIDGETS_REPO }}

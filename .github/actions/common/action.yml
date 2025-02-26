@@ -1,0 +1,9 @@
+name: "Common Build Steps"
+description: "Common steps to all platforms"
+runs:
+  using: "composite"
+  steps:
+  - name: "Hello commons"
+    shell: bash
+    if: ${{ inputs.cache-hit != 'true' }}
+    run: echo "Cache miss"

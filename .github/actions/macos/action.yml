@@ -1,0 +1,200 @@
+name: "macOS Build Steps"
+description: "Build steps specific to macOS"
+inputs:
+  cache-hit:
+    description: "Was the cache hit?"
+    required: true
+  otp-version:
+    description: "OTP Version"
+    required: true
+  wxwidgets-version:
+    description: "wxWidgets Version"
+    required: true
+  wxwidgets-repo:
+    description: "wxWidgets Repo"
+    required: true
+  elixir-version:
+    description: "Elixir Version"
+    required: true
+  elixir-variant:
+    description: "Elixir Variant"
+    required: true
+  macos-pem:
+    description: "MACOS PEM"
+    required: true
+  cache-name:
+    description: "Base cache name from matrix"
+    required: true
+  asdf-cache-key:
+    description: ""
+    required: true
+runs:
+  using: "composite"
+  steps:
+  # - name: brew cache
+  #   id: brew-cache
+  #   uses: actions/cache@v3
+  #   with:
+  #     path: |
+  #       /opt/homebrew/Cellar
+  #       /usr/local/Cellar
+  #     key: ${{ inputs.cache-name }}-brew
+  #     restore-keys: |
+  #       ${{ inputs.cache-name }}-brew
+
+  - name: "Install brew deps (macOS)"
+    shell: bash
+    id: brew-deps
+    if: ${{ steps.brew-cache.outputs.cache-hit != 'true' }}
+    run: |
+      brew install binutils coreutils automake autoconf libtool libtiff
+      find $(brew --prefix openssl) -name libcrypto.a
+      # echo 'export PATH="/opt/homebrew/opt/binutils/bin:/opt/homebrew/opt/libtool/libexec/gnubin:$PATH"' >> /Users/runner/.bash_profile
+
+      export CFLAGS="-I$(brew --prefix libtiff)/include -I$(brew --prefix openssl)/include $CFLAGS" 
+      export CPPFLAGS="-I$(brew --prefix libtiff)/include -I$(brew --prefix openssl)/include $CPPFLAGS" 
+      export LDFLAGS="-L$(brew --prefix openssl)/lib -lssl -lcrypto -L$(brew --prefix libtiff)/lib $LDFLAGS"
+
+      export LDFLAGS="-L$(brew --prefix binutils)/lib $LDFLAGS" 
+      export CPPFLAGS="-I$(brew --prefix binutils)/include $CPPFLAGS" 
+      export PATH="$(brew --prefix libtool)/libexec/gnubin:$PATH"
+    # wget libtiff
+    # - name: Save Brew Cache
+    #   if: steps.brew-deps.outcome == 'success' && steps.brew-cache.outputs.cache-hit != 'true'
+    #   uses: actions/cache/save@v3
+    #   with:
+    #     path: |
+    #       /opt/homebrew/Cellar
+    #       /usr/local/Cellar
+    #     key: ${{ inputs.cache-name }}-brew
+
+
+  - name: "Install asdf binary"
+    shell: bash
+    id: asdf-binary
+    run: |
+      curl -O -L https://github.com/asdf-vm/asdf/releases/download/v0.16.4/asdf-v0.16.4-darwin-amd64.tar.gz
+      tar -xzf asdf-v0.16.4-darwin-amd64.tar.gz
+      mv asdf /usr/local/bin
+      rm asdf-v0.16.4-darwin-amd64.tar.gz
+      echo export PATH="/usr/local/bin:$PATH" >> ~/.zshrc
+      echo export ASDF_DATA_DIR="$HOME/.asdf" >> ~/.zshrc
+      . ~/.zshrc
+      asdf --version
+      asdf plugin list
+
+  - name: wxWidgets cache
+    id: wxWidgets-cache
+    uses: actions/cache@v3
+    with:
+      path: |
+        /Users/runner/projects/wxWidgets
+        /usr/local/wxWidgets
+      key: ${{ inputs.cache-name }}-wxwidgets-${{ inputs.wxwidgets-version }}-
+      restore-keys: |
+        ${{ inputs.cache-name }}-wxWidgets-
+
+  - name: "Installing wxWidgets (macOS)"
+    shell: bash
+    id: wxwidgets
+    if: ${{ steps.wxWidgets-cache.outputs.cache-hit != 'true' }}
+    run: |
+      mkdir ~/projects && cd ~/projects
+      git clone ${{ inputs.wxwidgets-repo }}
+      cd wxWidgets;
+      git checkout ${{ inputs.wxwidgets-version }}
+      git submodule update --init
+      ./configure --prefix=/usr/local/wxWidgets --enable-webview --enable-compat30 --disable-shared --disable-tiff
+      make -j8
+
+  - name: Save wxWidgets Cache
+    if: steps.wxwidgets.outcome == 'success' && steps.wxWidgets-cache.outputs.cache-hit != 'true'
+    uses: actions/cache/save@v3
+    with:
+      path: |
+        /Users/runner/projects/wxWidgets
+        /usr/local/wxWidgets
+      key: ${{ inputs.cache-name }}-wxwidgets-${{ inputs.wxwidgets-version }}-
+
+  - name: erlangelixir cache
+    id: erlang-cache
+    uses: actions/cache@v3
+    with:
+      path: |
+        /Users/runner/.asdf
+      key: ${{ inputs.cache-name }}-asdf
+      restore-keys: |
+        ${{ inputs.cache-name }}-asdf
+
+  - name: "Prepare Erlang (macOS)"
+    shell: bash
+    id: erlang-prep
+    if: steps.erlang-cache.outputs.cache-hit != 'true'
+    run: |
+      echo "Setting KERL_CONFIGURE_OPTIONS"
+      # disable ssl and crypto  for now, macos is acting up
+      #export KERL_CONFIGURE_OPTIONS="--enable-parallel-configure --with-wxdir=`echo ~/projects/wxWidgets` --disable-jit --without-javac --disable-debug CXX='gcc -std=c++11' --with-tiff=$(brew --prefix libtiff) --disable-dynamic-ssl-lib --without-ssl --without-crypto '"
+
+      export EGREP=egrep
+      export CC=clang
+      export CPP="clang -E"
+      # export KERL_USE_AUTOCONF=0
+      export KERL_CONFIGURE_OPTIONS="--enable-parallel-configure --with-wxdir=`echo ~/projects/wxWidgets` --disable-jit --without-javac --disable-debug CXX='gcc -std=c++11' --without-tiff --disable-dynamic-ssl-lib --without-ssl"
+
+      echo "KERL_CONFIGURE_OPTIONS is now $KERL_CONFIGURE_OPTIONS"
+
+  - name: "Install erlang elixir and plugins"
+    shell: bash
+    id: erlang-elixir-install
+    if: steps.erlang-cache.outputs.cache-hit != 'true'
+    env:
+      KERL_CONFIGURE_OPTIONS: ${{ steps.erlang-prep.outputs.KERL_CONFIGURE_OPTIONS }}
+    run: |
+      cat .tool-versions
+      asdf plugin add nodejs
+      asdf plugin add erlang
+      asdf plugin add elixir
+
+      asdf install erlang > asdf_erlang_install.log 2>&1 || (cat asdf_erlang_install.log && cat /root/.asdf/plugins/erlang/kerl-home/builds/asdf_${OTP_VERSION}/otp_build_git.log && exit 1)
+      asdf install elixir > asdf_elixir_install.log 2>&1 || (cat asdf_elixir_install.log && exit 1)
+
+      asdf install nodejs 18.7.0
+      asdf global nodejs 18.7.0
+
+  - name: Save asdf erlang cache
+    if: steps.erlang-elixir-install.outcome == 'success' && steps.erlang-cache.outputs.cache-hit != 'true'
+    uses: actions/cache/save@v3
+    with:
+      path: |
+        /Users/runner/.asdf
+      key: ${{ inputs.cache-name }}-asdf
+
+  - name: "Compile and lint"
+    shell: bash
+    run: |
+      ls -lah ~/.asdf/
+      asdf plugin list
+      asdf install
+      mix local.hex --force
+      mix local.rebar --force
+      mix deps.get
+      cd assets && npm install
+
+  - name: "Build Release"
+    shell: bash
+    env:
+      # MACOS_PEM: ${{ inputs.macos-pem }}
+      MAKE: make
+    run: |
+      # echo "$MACOS_PEM" | base64 --decode > certificate.p12
+      #mix desktop.create_keychain maybe
+      #export MACOS_KEYCHAIN="$HOME/Library/Keychains/macos-build.keychain"
+      export LD_LIBRARY_PATH="$HOME/projects/wxWidgets/lib/"
+      #security list-keychains -s $HOME/Library/Keychains/macos-build.keychain
+      #security unlock-keychain -p actions actions $HOME/Library/Keychains/macos-build.keychain
+      #security set-keychain-settings -t 3600 -u $HOME/Library/Keychains/macos-build.keychain
+      #security import certificate.p12 -k "$MACOS_KEYCHAIN" -P "" -T /usr/bin/codesign
+      #security find-identity -v -p codesigning
+
+      mix assets.deploy
+      mix desktop.installer
