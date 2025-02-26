@@ -1,5 +1,24 @@
 name: "Build binaries"
-on: ["push", "pull_request"]
+
+on:
+  push:
+    branches: 
+      - windows
+    paths:
+    # Just run on main branch if "native" path changed.
+    #- "native/**"
+    - "**"
+    # Also run if this file changes.
+    #- ".github/workflows/release.yml"
+    #- ".github/workflows/**"
+    tags:
+    # Tags will always run.
+    - "*"
+  pull_request:
+    paths:
+      # In PRs we only run if this file changes.
+      - ".github/workflows/**"
+
 env:
   OTP_GITHUB_URL: https://github.com/erlang/otp.git
   OTP_VERSION: OTP-24.3.4.15
@@ -12,7 +31,7 @@ env:
 jobs:
   windows:
     runs-on: windows-latest
-    if: false
+    if: true
     timeout-minutes: 90
     defaults:
       run:
@@ -68,140 +87,140 @@ jobs:
           "c:\\OpenSSL-Win64"
         key: win32-${{ env.WXWIDGETS_VERSION }}-otp-${{ env.OTP_VERSION }}
   
-    - name: Download wxWidgets
-      if: steps.wxwidgets-cache.outputs.cache-hit != 'true'
-      run: |
-        git clone ${{ env.WXWIDGETS_REPO }} --branch v3.2.4-with-msvs2012-fix
-        cd wxWidgets
-        # git checkout ${{ env.WXWIDGETS_VERSION }}
-        git submodule update --init
-        sed -i -r -e 's/wxUSE_POSTSCRIPT +0/wxUSE_POSTSCRIPT 1/' include/wx/msw/setup.h
-        sed -i -r -e 's/wxUSE_WEBVIEW_EDGE +0/wxUSE_WEBVIEW_EDGE 1/' include/wx/msw/setup.h        
-        sed -i -r -e 's/WXWIN_COMPATIBILITY_3_0 +0/WXWIN_COMPATIBILITY_3_0 1/' include/wx/msw/setup.h        
+    # - name: Download wxWidgets
+    #   if: steps.wxwidgets-cache.outputs.cache-hit != 'true'
+    #   run: |
+    #     git clone ${{ env.WXWIDGETS_REPO }} --branch v3.2.4-with-msvs2012-fix
+    #     cd wxWidgets
+    #     # git checkout ${{ env.WXWIDGETS_VERSION }}
+    #     git submodule update --init
+    #     sed -i -r -e 's/wxUSE_POSTSCRIPT +0/wxUSE_POSTSCRIPT 1/' include/wx/msw/setup.h
+    #     sed -i -r -e 's/wxUSE_WEBVIEW_EDGE +0/wxUSE_WEBVIEW_EDGE 1/' include/wx/msw/setup.h        
+    #     sed -i -r -e 's/WXWIN_COMPATIBILITY_3_0 +0/WXWIN_COMPATIBILITY_3_0 1/' include/wx/msw/setup.h        
 
-    - name: Install WebView2
-      if: steps.wxwidgets-cache.outputs.cache-hit != 'true'
-      shell: cmd
-      run: |
-        cd wxWidgets\\3rdparty
-        nuget install Microsoft.Web.WebView2 -Version 1.0.864.35 -Source https://api.nuget.org/v3/index.json
-        rename Microsoft.Web.WebView2.1.0.864.35 webview2
+    # - name: Install WebView2
+    #   if: steps.wxwidgets-cache.outputs.cache-hit != 'true'
+    #   shell: cmd
+    #   run: |
+    #     cd wxWidgets\\3rdparty
+    #     nuget install Microsoft.Web.WebView2 -Version 1.0.864.35 -Source https://api.nuget.org/v3/index.json
+    #     rename Microsoft.Web.WebView2.1.0.864.35 webview2
 
-    - name: Build wxWidgets
-      if: steps.wxwidgets-cache.outputs.cache-hit != 'true'
-      shell: cmd
-      run: |
-        cd wxWidgets\\build\\msw
-        call "C:\\Program Files\\Microsoft Visual Studio\\2022\\Enterprise\\VC\Auxiliary\\Build\\vcvars64.bat"
-        nmake TARGET_CPU=amd64 BUILD=release SHARED=0 DIR_SUFFIX_CPU= -f makefile.vc
+    # - name: Build wxWidgets
+    #   if: steps.wxwidgets-cache.outputs.cache-hit != 'true'
+    #   shell: cmd
+    #   run: |
+    #     cd wxWidgets\\build\\msw
+    #     call "C:\\Program Files\\Microsoft Visual Studio\\2022\\Enterprise\\VC\Auxiliary\\Build\\vcvars64.bat"
+    #     nmake TARGET_CPU=amd64 BUILD=release SHARED=0 DIR_SUFFIX_CPU= -f makefile.vc
 
-    - name: Copy wxWidgets
-      if: steps.wxwidgets-cache.outputs.cache-hit != 'true'
-      run: |
-        mkdir -p /mnt/c/opt/local64/pgm/
-        cp -R wxWidgets /mnt/c/opt/local64/pgm/wxWidgets-3.x.x
+    # - name: Copy wxWidgets
+    #   if: steps.wxwidgets-cache.outputs.cache-hit != 'true'
+    #   run: |
+    #     mkdir -p /mnt/c/opt/local64/pgm/
+    #     cp -R wxWidgets /mnt/c/opt/local64/pgm/wxWidgets-3.x.x
 
-    - name: Compile Erlang
-      if: ${{steps.win32-cache.outputs.cache-hit != 'true' || steps.wxwidgets-cache.outputs.cache-hit != 'true'}}
-      run: |
-        git clone ${{ env.OTP_GITHUB_URL }}
-        cd otp
-        git checkout ${{ env.OTP_VERSION }}
-        export ERL_TOP=`pwd`
-        export MAKEFLAGS=-j$(($(nproc) + 2))
-        export ERLC_USE_SERVER=true
-        export ERTS_SKIP_DEPEND=true
-        eval `./otp_build env_win32 x64`
-        ./otp_build all -a 
-        cp /mnt/c/opt/local64/pgm/wxWidgets-3.x.x/3rdparty/webview2/runtimes/win-x64/native/WebView2Loader.dll $ERL_TOP/release/win32/erts-*/bin/
-        ./otp_build installer_win32
-        export NAME=`ls release/win32/otp*.exe`
-        cp $NAME /mnt/c/opt/otp.exe
+    # - name: Compile Erlang
+    #   if: ${{steps.win32-cache.outputs.cache-hit != 'true' || steps.wxwidgets-cache.outputs.cache-hit != 'true'}}
+    #   run: |
+    #     git clone ${{ env.OTP_GITHUB_URL }}
+    #     cd otp
+    #     git checkout ${{ env.OTP_VERSION }}
+    #     export ERL_TOP=`pwd`
+    #     export MAKEFLAGS=-j$(($(nproc) + 2))
+    #     export ERLC_USE_SERVER=true
+    #     export ERTS_SKIP_DEPEND=true
+    #     eval `./otp_build env_win32 x64`
+    #     ./otp_build all -a 
+    #     cp /mnt/c/opt/local64/pgm/wxWidgets-3.x.x/3rdparty/webview2/runtimes/win-x64/native/WebView2Loader.dll $ERL_TOP/release/win32/erts-*/bin/
+    #     ./otp_build installer_win32
+    #     export NAME=`ls release/win32/otp*.exe`
+    #     cp $NAME /mnt/c/opt/otp.exe
 
-    - name: Save Windows Cache
-      # if: steps.win32-cache.outputs.cache-hit != 'true'
-      uses: actions/cache/save@v3
-      with:
-        path: |
-          "c:\\opt\\otp.exe"
-          "c:\\OpenSSL-Win64"
-        key: win32-${{ env.WXWIDGETS_VERSION }}-otp-${{ env.OTP_VERSION }}
+    # - name: Save Windows Cache
+    #   # if: steps.win32-cache.outputs.cache-hit != 'true'
+    #   uses: actions/cache/save@v3
+    #   with:
+    #     path: |
+    #       "c:\\opt\\otp.exe"
+    #       "c:\\OpenSSL-Win64"
+    #     key: win32-${{ env.WXWIDGETS_VERSION }}-otp-${{ env.OTP_VERSION }}
   
-    - name: Run Erlang installer
-      shell: cmd
-      run: C:\\opt\\otp.exe /S
+    # - name: Run Erlang installer
+    #   shell: cmd
+    #   run: C:\\opt\\otp.exe /S
 
-    - name: "Install msys2"
-      uses: msys2/setup-msys2@v2
-      with:
-          install: pacman-mirrors pkg-config base-devel mingw-w64-x86_64-toolchain mingw-w64-x86_64-go upx mingw-w64-x86_64-dlfcn unzip git tar mingw-w64-x86_64-nodejs mingw-w64-x86_64-imagemagick mingw-w64-x86_64-osslsigncode autoconf automake libtool gettext-devel gettext
-          update: false
-          release: false
+    # - name: "Install msys2"
+    #   uses: msys2/setup-msys2@v2
+    #   with:
+    #       install: pacman-mirrors pkg-config base-devel mingw-w64-x86_64-toolchain mingw-w64-x86_64-go upx mingw-w64-x86_64-dlfcn unzip git tar mingw-w64-x86_64-nodejs mingw-w64-x86_64-imagemagick mingw-w64-x86_64-osslsigncode autoconf automake libtool gettext-devel gettext
+    #       update: false
+    #       release: false
 
-    - name: Locate Erlang
-      shell: msys2 {0}
-      run: |
-        ERTS=`find /c/Program\ Files/[Ee]rl* -type d -name "erts-*" -not -path "*lib*"`
-        echo $ERTS
-        echo export PATH=\"\$PATH:$ERTS/bin\" > $HOME/.bashrc
+    # - name: Locate Erlang
+    #   shell: msys2 {0}
+    #   run: |
+    #     ERTS=`find /c/Program\ Files/[Ee]rl* -type d -name "erts-*" -not -path "*lib*"`
+    #     echo $ERTS
+    #     echo export PATH=\"\$PATH:$ERTS/bin\" > $HOME/.bashrc
 
-    - name: Locate NSIS
-      shell: msys2 {0}
-      run: |
-        echo export PATH=\"\$PATH:/c/Program\ Files\ \(x86\)/NSIS\" >> $HOME/.bashrc
+    # - name: Locate NSIS
+    #   shell: msys2 {0}
+    #   run: |
+    #     echo export PATH=\"\$PATH:/c/Program\ Files\ \(x86\)/NSIS\" >> $HOME/.bashrc
     
-    - name: Install Elixir
-      shell: msys2 {0}
-      run: |
-        cd $HOME
-        git clone https://github.com/elixir-lang/elixir.git
-        cd elixir
-        git checkout v${{ env.ELIXIR_VERSION }}
-        make 
-        echo export PATH=\"\$PATH:$HOME/elixir/bin\" >> $HOME/.bashrc
+    # - name: Install Elixir
+    #   shell: msys2 {0}
+    #   run: |
+    #     cd $HOME
+    #     git clone https://github.com/elixir-lang/elixir.git
+    #     cd elixir
+    #     git checkout v${{ env.ELIXIR_VERSION }}
+    #     make 
+    #     echo export PATH=\"\$PATH:$HOME/elixir/bin\" >> $HOME/.bashrc
 
-    - name: Save Windows Cache
-      # if: steps.win32-cache.outputs.cache-hit != 'true'
-      uses: actions/cache/save@v3
-      with:
-        path: |
-          "c:\\opt\\otp.exe"
-           "c:\\OpenSSL-Win64"
-           /c/Users/runneradmin/.asdf
-           /c/Users/runneradmin/elixir
-        key: win32-${{ env.WXWIDGETS_VERSION }}-otp-${{ env.OTP_VERSION }}
+    # - name: Save Windows Cache
+    #   # if: steps.win32-cache.outputs.cache-hit != 'true'
+    #   uses: actions/cache/save@v3
+    #   with:
+    #     path: |
+    #       "c:\\opt\\otp.exe"
+    #        "c:\\OpenSSL-Win64"
+    #        /c/Users/runneradmin/.asdf
+    #        /c/Users/runneradmin/elixir
+    #     key: win32-${{ env.WXWIDGETS_VERSION }}-otp-${{ env.OTP_VERSION }}
   
-    - uses: actions/checkout@v1
+    # - uses: actions/checkout@v1
 
-    - name: "Get dependencies"
-      shell: msys2 {0}
-      run: |
-        mix local.hex --force
-        mix local.rebar --force
-        mix deps.get
+    # - name: "Get dependencies"
+    #   shell: msys2 {0}
+    #   run: |
+    #     mix local.hex --force
+    #     mix local.rebar --force
+    #     mix deps.get
 
-    - name: "npm install"
-      shell: msys2 {0}
-      run: |
-        cd assets && npm install
+    # - name: "npm install"
+    #   shell: msys2 {0}
+    #   run: |
+    #     cd assets && npm install
 
-    - name: "Build Release"
-      env:
-        MAKE: make
-        REBAR_TARGET_ARCH_WORDSIZE: 64 
-        REBAR_TARGET_ARCH: x86_64-w64-mingw32
-        WIN32_KEY_PASS: ${{ secrets.WIN32_KEY_PASS }}
-      shell: msys2 {0}
-      run: |
-        mix assets.deploy
-        mix desktop.installer
+    # - name: "Build Release"
+    #   env:
+    #     MAKE: make
+    #     REBAR_TARGET_ARCH_WORDSIZE: 64 
+    #     REBAR_TARGET_ARCH: x86_64-w64-mingw32
+    #     WIN32_KEY_PASS: ${{ secrets.WIN32_KEY_PASS }}
+    #   shell: msys2 {0}
+    #   run: |
+    #     mix assets.deploy
+    #     mix desktop.installer
 
-    - name: Archive Installer
-      uses: actions/upload-artifact@v4
-      with:
-        name: Windows-Installer
-        path: |
-          _build/prod/*.exe
+    # - name: Archive Installer
+    #   uses: actions/upload-artifact@v4
+    #   with:
+    #     name: Windows-Installer
+    #     path: |
+    #       _build/prod/*.exe
 
   macos:
     runs-on: macos-latest
@@ -326,7 +345,8 @@ jobs:
           _build/prod/*.dmg
 
   linux-x86:
-    permissions: write-all    
+    permissions: write-all
+    if: false
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
