@@ -48,7 +48,7 @@ ENV OTP_VERSION=${OTP_VERSION:-master}
 ARG OTP_GITHUB_URL
 ENV OTP_GITHUB_URL=${OTP_GITHUB_URL:-https://github.com/erlang/otp.git}
 
-ENV KERL_CONFIGURE_OPTIONS="--with-wxdir=/root/projects/wxWidgets --disable-javac --without-javac --disable-debug"
+ENV KERL_CONFIGURE_OPTIONS="--with-wxdir=/root/projects/wxWidgets --without-odbc --without-javac --disable-debug"
 ARG ELIXIR_VERSION
 ENV ELIXIR_VERSION=${ELIXIR_VERSION:-1.13.4}
 ARG ELIXIR_VARIANT
@@ -75,12 +75,59 @@ RUN asdf plugin list && \
     echo "nodejs v18.7.0" >> .tool-versions && \
     asdf plugin list
 
-RUN asdf install erlang ref:${OTP_VERSION} && \
-    asdf global erlang ref:${OTP_VERSION}
-RUN asdf install elixir ${ELIXIR_VERSION}${ELIXIR_VARIANT} && \
-    asdf global elixir ${ELIXIR_VERSION}${ELIXIR_VARIANT}
-RUN asdf install nodejs v18.7.0 && \
-    asdf global nodejs v18.7.0
+# RUN KERL_CONFIGURE_OPTIONS="$KERL_CONFIGURE_OPTIONS" asdf install erlang ref:${OTP_VERSION} && \
+#     asdf global erlang ref:${OTP_VERSION}
+# RUN asdf install elixir ${ELIXIR_VERSION}${ELIXIR_VARIANT} && \
+#     asdf global elixir ${ELIXIR_VERSION}${ELIXIR_VARIANT}
+# RUN asdf install nodejs v18.7.0 && \
+#     asdf global nodejs v18.7.0
+
+
+# Ensure that this file is sourced
+SHELL ["/bin/bash", "-c"]
+
+# Ensure the profile is sourced
+RUN echo "source /etc/profile" >> /root/.bashrc
+
+# Install Erlang with logging and error handling
+RUN asdf plugin add erlang
+RUN source /etc/profile && \
+    if KERL_CONFIGURE_OPTIONS="$KERL_CONFIGURE_OPTIONS" asdf install erlang ref:${OTP_VERSION} > /tmp/asdf_erlang_install.log 2>&1; then \
+        source /etc/profile && asdf global erlang ref:${OTP_VERSION}; \
+        echo "Erlang installation succeeded"; \
+    else \
+        echo "Erlang installation failed"; \
+        exit_code=$?;  # Capture exit code \
+        cat /tmp/asdf_erlang_install.log; \
+        exit $exit_code; # Propagate error to Docker build. \
+    fi
+
+# Install Elixir with logging and error handling
+RUN asdf plugin add elixir
+RUN source /etc/profile && \
+    if asdf install elixir ${ELIXIR_VERSION}${ELIXIR_VARIANT} > /tmp/asdf_elixir_install.log 2>&1; then \
+        source /etc/profile && asdf global elixir ${ELIXIR_VERSION}${ELIXIR_VARIANT}; \
+        echo "Elixir installation succeeded"; \
+    else \
+        echo "Elixir installation failed"; \
+        exit_code=$?;  # Capture exit code \
+        cat /tmp/asdf_elixir_install.log; \
+        exit $exit_code; # Propagate error to Docker build. \
+    fi
+
+# Install Node.js with logging and error handling
+RUN asdf plugin add nodejs
+RUN source /etc/profile && \
+    if asdf install nodejs v18.7.0 > /tmp/asdf_nodejs_install.log 2>&1; then \
+        source /etc/profile && asdf global nodejs v18.7.0; \
+        echo "Node.js installation succeeded"; \
+    else \
+        echo "Node.js installation failed"; \
+        exit_code=$?;  # Capture exit code \
+    cat /tmp/asdf_nodejs_install.log; \
+        exit $exit_code; # Propagate error to Docker build. \
+    fi
+
 
 # # Compile and lint
 # COPY mix.exs mix.lock .formatter.exs /app/
