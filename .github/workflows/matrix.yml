@@ -1,0 +1,164 @@
+name: "Build binaries matrix"
+
+on: [ "push", "pull_request" ]
+
+env:
+  OTP_GITHUB_URL: https://github.com/erlang/otp.git
+  WXWIDGETS_REPO: https://github.com/wxWidgets/wxWidgets.git
+  WXWIDGETS_VERSION: master
+  DOCKER_BUILDKIT: 0
+  ACTIONS_STEP_DEBUG: true
+
+jobs:
+  build:
+    runs-on: ${{ matrix.platform }}
+    # runs-on: self-hosted
+    timeout-minutes: 90
+    
+    strategy:
+      fail-fast: false
+      matrix:
+        
+        erlixir:
+          # - { otp_version: OTP-24.3.4.14, wxwidgets_version: master, elixir_version: 1.16.3, elixir_variant: "-otp-24" }
+          #- { otp_version: OTP-27.2.4, wxwidgets_version: WX_3_0_BRANCH, elixir_version: 1.18.1, elixir_variant: "-otp-27" }
+          - { otp_version: OTP-27.2.4, wxwidgets_version: v3.2.6, elixir_version: 1.18.1, elixir_variant: "-otp-27" }
+          - { otp_version: OTP-27.2.4, wxwidgets_version: master, elixir_version: 1.18.1, elixir_variant: "-otp-27" }
+        
+          # https://github.com/actions/runner-images
+        platform: [ macos-latest, ubuntu-latest, windows-2022 ] # ubuntu-latest,macos-14,
+        # , ubuntu-latest
+        #platform: [ macos-latest ] # ubuntu-latest,macos-14,
+        #, macos-latest
+        #windows-2022
+
+    name: "${{ matrix.platform }} ${{ matrix.erlixir.otp_version }}, wx: ${{ matrix.erlixir.wxwidgets_version }}, exs: ${{ matrix.erlixir.elixir_version }}"
+    env:
+      OTP_VERSION: ${{ matrix.erlixir.otp_version }}
+      ELIXIR_VERSION: ${{ matrix.erlixir.elixir_version }}
+      ELIXIR_VARIANT: ${{ matrix.erlixir.elixir_variant }}
+      WXWIDGETS_VERSION: ${{ matrix.erlixir.wxwidgets_version }}
+    steps:
+      - uses: actions/checkout@v4 # MUST be before ANY local actions and cache restores
+
+      - name: Determine cache name
+        id: cache-name
+        run: |
+          echo "::set-output name=cache_name::${{ matrix.platform }}-deps-${{ env.WXWIDGETS_VERSION }}-otp-${{ env.OTP_VERSION }}"
+      
+      - name: Print Build Cache Key
+        run: |
+          echo "Build Cache Key: ${{ steps.cache-name.outputs.cache_name }}"
+
+      - name: Restore Build Cache
+        uses: actions/cache/restore@v3
+        id: deps-cache
+        with:
+          path: |
+            ${{ startsWith(matrix.platform, 'ubuntu-') && '/tmp/.buildx-cache' || '' }}
+            ${{ startsWith(matrix.platform, 'ubuntu-') && '/home/runner/.asdf' || '' }}
+            ${{ startsWith(matrix.platform, 'windows-') && 'c:\\opt\\otp.exe' || '' }}
+            ${{ startsWith(matrix.platform, 'windows-') && 'c:\\opt\\local64\\pgm\\wxWidgets-3.x.x' || '' }}
+            ${{ startsWith(matrix.platform, 'windows-') && 'c:\\Program Files\\OpenSSL-Win64' || '' }}
+            ${{ startsWith(matrix.platform, 'windows-') && 'c:\\OpenSSL-Win64' || '' }}
+            ${{ startsWith(matrix.platform, 'windows-') && '/c/Users/runneradmin/.asdf' || '' }}
+            ${{ startsWith(matrix.platform, 'windows-') && '/c/Users/runneradmin/elixir' || '' }}
+            ${{ startsWith(matrix.platform, 'macos-') && '/Users/runner/.asdf' || '' }}
+            ${{ startsWith(matrix.platform, 'macos-') && '/Users/runner/projects/wxWidgets' || '' }}
+            ${{ startsWith(matrix.platform, 'macos-') && '/usr/local/wxWidgets' || '' }}
+            ${{ startsWith(matrix.platform, 'macos-') && '/usr/local/Cellar' || '' }}
+            ${{ startsWith(matrix.platform, 'macos-') && '/opt/homebrew/' || '' }}
+          key: ${{ steps.cache-name.outputs.cache_name }}
+          restore-keys: |
+            ${{ matrix.platform }}-deps-otp-${{ env.OTP_VERSION }}-${{ env.WXWIDGETS_VERSION }}-      
+            ${{ matrix.platform }}-deps-otp-${{ env.OTP_VERSION }}-
+            ${{ matrix.platform }}-deps-
+
+      - name: "Prepare asdf .tool-versions"
+        shell: bash
+        run: |
+          echo "erlang ref:${{ env.OTP_VERSION }}" > .tool-versions
+          echo "elixir ${{ env.ELIXIR_VERSION }}${{ env.ELIXIR_VARIANT }}" >> .tool-versions
+          echo "nodejs v18.7.0" >> .tool-versions
+          cat .tool-versions
+
+      - name: Print HOME directory
+        shell: bash
+        run: echo "HOME directory $HOME"
+    
+      - name: Windows Build Steps
+        if: startsWith(matrix.platform, 'windows-')
+        uses: ./.github/actions/windows
+        with:
+          cache-hit: ${{ steps.deps-cache.outputs.cache-hit }}
+          cache-name: ${{ steps.cache-name.outputs.cache_name }}
+          otp-version: ${{ env.OTP_VERSION }}
+          wxwidgets-version: ${{ env.WXWIDGETS_VERSION }}
+          wxwidgets-repo: ${{ env.WXWIDGETS_REPO }}
+          elixir-version: ${{ env.ELIXIR_VERSION }}
+          elixir-variant: ${{ env.ELIXIR_VARIANT }}
+          win32-key-pass: ${{ secrets.WIN32_KEY_PASS }}
+
+      - name: macOS Build Steps
+        if: startsWith(matrix.platform, 'macos-')
+        uses: ./.github/actions/macos
+        with:
+          cache-hit: ${{ steps.deps-cache.outputs.cache-hit }}
+          cache-name: ${{ steps.cache-name.outputs.cache_name }}
+          otp-version: ${{ env.OTP_VERSION }}
+          wxwidgets-version: ${{ env.WXWIDGETS_VERSION }}
+          wxwidgets-repo: ${{ env.WXWIDGETS_REPO }}
+          elixir-version: ${{ env.ELIXIR_VERSION }}
+          elixir-variant: ${{ env.ELIXIR_VARIANT }}
+          macos-pem: ${{ secrets.MACOS_PEM }}
+
+      - name: Linux Build Steps
+        if: startsWith(matrix.platform, 'ubuntu-')
+        uses: ./.github/actions/linux
+        with:
+          cache-hit: ${{ steps.deps-cache.outputs.cache-hit }}
+          cache-name: ${{ steps.cache-name.outputs.cache_name }}
+          otp-version: ${{ env.OTP_VERSION }}
+          wxwidgets-version: ${{ env.WXWIDGETS_VERSION }}
+          wxwidgets-repo: ${{ env.WXWIDGETS_REPO }}
+          elixir-version: ${{ env.ELIXIR_VERSION }}
+          elixir-variant: ${{ env.ELIXIR_VARIANT }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          ghcr-pat-token: ${{ secrets.GHCR_PAT }}
+          github-actor: ${{ github.actor }}
+      
+      - name: Archive Installer
+        if: ${{ !startsWith(matrix.platform, 'macos-') }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.platform }}-${{ env.OTP_VERSION }}-${{ env.ELIXIR_VERSION }}-Installer
+          path: |
+            _build/prod/*.${{ matrix.platform == 'windows' && 'exe' || 'dmg' }}
+
+      - name: Archive Installer Linux
+        if: startsWith(matrix.platform, 'ubuntu-')
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.platform }}-${{ env.OTP_VERSION }}-${{ env.ELIXIR_VERSION }}-Installer
+          path: |
+            ./*.run
+
+      # - name: Save Build Cache
+      #   if: steps.deps-cache.outputs.cache-hit != 'true'
+      #   uses: actions/cache/save@v3
+      #   with:
+      #     path: |
+      #       ${{ startsWith(matrix.platform, 'ubuntu-') && '/tmp/.buildx-cache' || '' }}
+      #       ${{ startsWith(matrix.platform, 'ubuntu-') && '/home/runner/.asdf' || '' }}
+      #       ${{ startsWith(matrix.platform, 'windows-') && 'c:\\opt\\otp.exe' || '' }}
+      #       ${{ startsWith(matrix.platform, 'windows-') && 'c:\\opt\\local64\\pgm\\wxWidgets-3.x.x' || '' }}
+      #       ${{ startsWith(matrix.platform, 'windows-') && 'c:\\Program Files\\OpenSSL-Win64' || '' }}
+      #       ${{ startsWith(matrix.platform, 'windows-') && 'c:\\OpenSSL-Win64' || '' }}
+      #       ${{ startsWith(matrix.platform, 'windows-') && '/c/Users/runneradmin/.asdf' || '' }}
+      #       ${{ startsWith(matrix.platform, 'windows-') && '/c/Users/runneradmin/elixir' || '' }}
+      #       ${{ startsWith(matrix.platform, 'macos-') && '/Users/runner/.asdf' || '' }}
+      #       ${{ startsWith(matrix.platform, 'macos-') && '/Users/runner/projects/wxWidgets' || '' }}
+      #       ${{ startsWith(matrix.platform, 'macos-') && '/usr/local/wxWidgets' || '' }}
+      #       ${{ startsWith(matrix.platform, 'macos-') && '/usr/local/Cellar' || '' }}
+      #       ${{ startsWith(matrix.platform, 'macos-') && '/opt/homebrew/' || '' }}
+      #     key: ${{ steps.cache-name.outputs.cache_name }}

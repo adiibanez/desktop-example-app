@@ -238,38 +238,43 @@ jobs:
     permissions: write-all    
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v1
-    - uses: whoan/docker-build-with-cache-action@master
-      id: docker
-      with:
-        username: ${{ github.actor }}
-        password: "${{ secrets.GITHUB_TOKEN }}"  # you don't need to manually set this secret. GitHub does it on your behalf
-        registry: docker.pkg.github.com
-        image_name: linux_installer
-        dockerfile: scripts/Dockerfile
-        build_extra_args: |
-          --build-arg=BASE_IMAGE=ubuntu:18.04
-          --platform=linux/amd64
-          --build-arg=PLATFORM=amd64
-          --build-arg=WXWIDGETS_REPO=${{ env.WXWIDGETS_REPO }}
-          --build-arg=WXWIDGETS_VERSION=${{ env.WXWIDGETS_VERSION }}
-          --build-arg=OTP_VERSION=${{ env.OTP_VERSION }}
-          --build-arg=OTP_GITHUB_URL=${{ env.OTP_GITHUB_URL }}
-          --build-arg=ELIXIR_VERSION=${{ env.ELIXIR_VERSION }}
-          --build-arg=ELIXIR_VARIANT=${{ env.ELIXIR_VARIANT }}
+      - name: Checkout
+        uses: actions/checkout@v2
 
-    - name: Extract runfile
-      run: |
-        NAME=$(docker run --platform=linux/amd64 -i ${{steps.docker.outputs.FULL_IMAGE_NAME}} bash -c 'basename `ls /app/_build/prod/*.run`')
-        NAME=`echo $NAME | tr -d '\n\r'`
-        docker run --platform=linux/amd64 -i ${{steps.docker.outputs.FULL_IMAGE_NAME}} bash -c 'xxd /app/_build/prod/*.run' | xxd -r > $NAME
-        chmod +x $NAME
+      - name: Linux docker builder image
+        uses: whoan/docker-build-with-cache-action@v5
+        id: buildx
+        with:
+          username: ${{ github.actor }}
+          password: ${{secrets.GHCR_PAT}}
+          registry: ghcr.io
+          image_name: linux_installer_binaries_workflow
+          image_tag: "${{env.OTP_VERSION }}_wx-${{ env.WXWIDGETS_VERSION }}_elixir-${{ env.ELIXIR_VERSION }}-${{github.sha}},${{env.OTP_VERSION }}_wx-${{ env.WXWIDGETS_VERSION }}_elixir-${{ env.ELIXIR_VERSION }}"
+          dockerfile: scripts/Dockerfile
+          build_extra_args: |
+            --build-arg=BASE_IMAGE=ubuntu:18.04
+            --platform=linux/amd64
+            --build-arg=PLATFORM=amd64
+            #       --build-arg=WXWIDGETS_REPO=${{ env.WXWIDGETS_REPO }}
+            --build-arg=WXWIDGETS_VERSION=${{ env.WXWIDGETS_VERSION }}
+            --build-arg=OTP_VERSION=${{ env.OTP_VERSION }}
+            --build-arg=OTP_GITHUB_URL=${{ env.OTP_GITHUB_URL }}
+            --build-arg=ELIXIR_VERSION=${{ env.ELIXIR_VERSION }}
+            --build-arg=ELIXIR_VARIANT=${{ env.ELIXIR_VARIANT }}
 
-    - name: Archive Installer
-      uses: actions/upload-artifact@v4
-      with:
-        name: Linux-Installer
-        path: |
-          ./*.run
+      # - name: Extract runfile
+      #   shell: bash
+      #   run: |
+      #     NAME=$(docker run --platform=linux/amd64 -i ${{steps.docker.outputs.FULL_IMAGE_NAME}} bash -c 'basename `ls /app/_build/prod/*.run`')
+      #     NAME=`echo $NAME | tr -d '\n\r'`
+      #     docker run --platform=linux/amd64 -i ${{steps.docker.outputs.FULL_IMAGE_NAME}} bash -c 'xxd /app/_build/prod/*.run' | xxd -r > $NAME
+      #     chmod +x $NAME
+
+    # - name: Archive Installer
+    #   uses: actions/upload-artifact@v4
+    #   with:
+    #     name: Linux-Installer
+    #     path: |
+    #       ./*.run
 
   

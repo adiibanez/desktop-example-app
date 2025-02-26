@@ -63,34 +63,34 @@ RUN git clone https://github.com/asdf-vm/asdf.git ${ASDF_DIR} && \
     asdf install
 
 # Compile and lint
-COPY mix.exs mix.lock .formatter.exs /app/
-RUN . ${ASDF_DIR}/asdf.sh && \
-    cd /app && \
-    cp /.tool-versions .tool-versions && \
-    mix local.hex --force && \
-    mix local.rebar --force && \
-    mix deps.get && \
-    mix deps.compile
+# COPY mix.exs mix.lock .formatter.exs /app/
+# RUN . ${ASDF_DIR}/asdf.sh && \
+#     cd /app && \
+#     cp /.tool-versions .tool-versions && \
+#     mix local.hex --force && \
+#     mix local.rebar --force && \
+#     mix deps.get && \
+#     mix deps.compile
 
-# NPM
-COPY assets/package.json assets/package-lock.json /app/assets/
-RUN . ${ASDF_DIR}/asdf.sh && \
-    cd /app/assets && \
-    asdf install && \
-    npm install
+# # NPM
+# COPY assets/package.json assets/package-lock.json /app/assets/
+# RUN . ${ASDF_DIR}/asdf.sh && \
+#     cd /app/assets && \
+#     asdf install && \
+#     npm install
 
-# Build Release
-ENV LD_LIBRARY_PATH=/root/projects/wxWidgets/lib/
-COPY . /app/
-RUN . ${ASDF_DIR}/asdf.sh && \
-    cd /app && \
-    cp /.tool-versions .tool-versions && \
-    MIX_ENV=prod mix compile
+# # Build Release
+# ENV LD_LIBRARY_PATH=/root/projects/wxWidgets/lib/
+# COPY . /app/
+# RUN . ${ASDF_DIR}/asdf.sh && \
+#     cd /app && \
+#     cp /.tool-versions .tool-versions && \
+#     MIX_ENV=prod mix compile
 
-# Build Installer
-RUN . ${ASDF_DIR}/asdf.sh  && \
-    cd /app && \
-    mix deps.update desktop && \
-    mix deps.update desktop_deployment  && \
-    mix assets.deploy && \
-    mix desktop.installer
+# # Build Installer
+# RUN . ${ASDF_DIR}/asdf.sh  && \
+#     cd /app && \
+#     mix deps.update desktop && \
+#     mix deps.update desktop_deployment  && \
+#     mix assets.deploy && \
+#     mix desktop.installer
