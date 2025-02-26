@@ -60,11 +60,10 @@ jobs:
         IF EXIST "c:\\Program Files\\OpenSSL-Win64" (move "c:\\Program Files\\OpenSSL-Win64" "c:\\OpenSSL-Win64") ELSE (move "c:\\Program Files\\OpenSSL" "c:\\OpenSSL-Win64")
 
     - name: Save Windows Cache
-      # if: steps.win32-cache.outputs.cache-hit != 'true'
+      if: steps.win32-cache.outputs.cache-hit != 'true'
       uses: actions/cache/save@v3
       with:
         path: |
-          "c:\\opt\\otp.exe"
           "c:\\OpenSSL-Win64"
         key: win32-${{ env.WXWIDGETS_VERSION }}-otp-${{ env.OTP_VERSION }}
   
@@ -124,9 +123,7 @@ jobs:
       with:
         path: |
           "c:\\opt\\otp.exe"
-           "c:\\OpenSSL-Win64"
-           /c/Users/runneradmin/.asdf
-           /c/Users/runneradmin/elixir
+          "c:\\OpenSSL-Win64"
         key: win32-${{ env.WXWIDGETS_VERSION }}-otp-${{ env.OTP_VERSION }}
   
     - name: Run Erlang installer
