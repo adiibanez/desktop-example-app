@@ -2,7 +2,7 @@ name: "Build binaries"
 on:
   push:
     branches: 
-      - main
+      - rustler_btleplug
     paths:
     # Just run on main branch if "native" path changed.
     #- "native/**"
