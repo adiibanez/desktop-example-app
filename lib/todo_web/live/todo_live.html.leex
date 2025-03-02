@@ -1,5 +1,7 @@
 <div class="header">
   <h2><%= gettext "My Todo List" %></h2>
+  <button type="submit" phx-click="ble_test">BLE test</button>
+
   <form phx-submit="add">
     <input type="text" name="text" placeholder="<%= gettext "Add new todo item..." %>">
     <button type="submit">&#8617;</button>

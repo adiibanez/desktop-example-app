@@ -79,8 +79,8 @@ defmodule Todo.MixProject do
       {:exqlite, github: "elixir-desktop/exqlite", override: true},
       # {:desktop, path: "../desktop"},
       # {:desktop, "~> 1.5"},
-      {:desktop, github: "elixir-desktop/desktop"},
-      {:desktop_deployment, github: "elixir-desktop/deployment"},
+      {:desktop, github: "adiibanez/elixir-desktop"},
+      {:desktop_deployment, github: "adiibanez/elixir-desktop-deployment"},
       # {:desktop_deployment, path: "../deployment", runtime: false},
 
       # Phoenix
@@ -92,7 +92,6 @@ defmodule Todo.MixProject do
       {:gettext, "~> 0.23"},
       {:plug_cowboy, "~> 2.6"},
       {:jason, "~> 1.4"},
-
       {:rustler_precompiled, "~> 0.8"},
       {:rustler_btleplug, "~> 0.0.9-alpha"},
       # {:rustler_btleplug,

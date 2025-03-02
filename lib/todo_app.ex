@@ -33,19 +33,24 @@ defmodule TodoApp do
     {:ok, _} = Supervisor.start_child(sup, TodoWeb.Sup)
 
     {:ok, _} =
-      Supervisor.start_child(sup, {
-        Desktop.Window,
-        [
-          app: @app,
-          id: TodoWindow,
-          title: "TodoApp",
-          size: {600, 500},
-          icon: "icon.png",
-          menubar: TodoApp.MenuBar,
-          icon_menu: TodoApp.Menu,
-          url: &TodoWeb.Endpoint.url/0
-        ]
-      })
+      Supervisor.start_child(
+        sup,
+        {
+          Desktop.Window,
+          [
+            app: @app,
+            id: TodoWindow,
+            title: "TodoApp",
+            size: {600, 500},
+            icon: "icon.png",
+            menubar: TodoApp.MenuBar,
+            icon_menu: TodoApp.Menu,
+            url: &TodoWeb.Endpoint.url/0
+          ]
+        }
+      )
+
+    {:ok, _} = Supervisor.start_child(sup, RustlerBtleplug.Genserver)
   end
 
   def config_change(changed, _new, removed) do

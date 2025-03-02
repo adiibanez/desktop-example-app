@@ -1,4 +1,7 @@
 defmodule TodoWeb.TodoLive do
+  require Logger
+  alias RustlerBtleplug.Native
+
   @moduledoc """
     Main live view of our TodoApp. Just allows adding, removing and checking off
     todo items
@@ -10,13 +13,38 @@ defmodule TodoWeb.TodoLive do
   def mount(_args, _session, socket) do
     todos = TodoApp.Todo.all_todos()
     TodoApp.Todo.subscribe()
-    {:ok, assign(socket, todos: todos)}
+
+    central_ref = Native.create_central()
+    # |> Native.start_scan(2000)
+    # Process.sleep(2000)
+
+    {:ok,
+     assign(socket, %{
+       todos: todos,
+       central_ref: central_ref,
+       peripheral_ref: nil
+     })}
   end
 
   @impl true
   def handle_info(:changed, socket) do
     todos = TodoApp.Todo.all_todos()
     {:noreply, assign(socket, todos: todos)}
+  end
+
+  def handle_info(msg, socket) do
+    Logger.info("CATCHALL Generic message: #{inspect(msg)}")
+    {:noreply, socket}
+  end
+
+  @impl true
+  def handle_event("ble_test", params, socket) do
+    Logger.info("BLE Test #{inspect(params)}")
+    # central_ref = RustlerBtleplug.Genserver.create_central()
+    # RustlerBtleplug.Genserver.start_scan()
+
+    {central_ref, peripheral_ref} = {socket.assigns.central_ref, socket.assigns.peripheral_ref}
+    {:noreply, socket}
   end
 
   @impl true
