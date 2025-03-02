@@ -37,6 +37,8 @@ config :todo_app, TodoWeb.Endpoint,
 
 config :phoenix, :json_library, Jason
 
+config :desktop_deployment, strip: false
+
 config :todo_app,
   ecto_repos: [TodoApp.Repo]
 
