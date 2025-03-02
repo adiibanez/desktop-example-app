@@ -79,8 +79,10 @@ defmodule Todo.MixProject do
       {:exqlite, github: "elixir-desktop/exqlite", override: true},
       # {:desktop, path: "../desktop"},
       # {:desktop, "~> 1.5"},
-      {:desktop, github: "elixir-desktop/desktop"},
-      {:desktop_deployment, github: "elixir-desktop/deployment"},
+      #{:desktop, github: "elixir-desktop/desktop"},
+      #{:desktop_deployment, github: "elixir-desktop/deployment"},
+      {:desktop, github: "adiibanez/elixir-desktop"},
+      {:desktop_deployment, github: "adiibanez/elixir-desktop-deployment"},
       # {:desktop_deployment, path: "../deployment", runtime: false},
 
       # Phoenix
