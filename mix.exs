@@ -82,8 +82,9 @@ defmodule Todo.MixProject do
       #{:desktop, github: "elixir-desktop/desktop"},
       #{:desktop_deployment, github: "elixir-desktop/deployment"},
       {:desktop, github: "adiibanez/elixir-desktop"},
+      #{:desktop, path: "../elixir-desktop", only: :dev},
       {:desktop_deployment, github: "adiibanez/elixir-desktop-deployment"},
-      # {:desktop_deployment, path: "../deployment", runtime: false},
+      #{:desktop_deployment, path: "/Users/adrianibanez/Documents/projects/2024_sensor-platform/checkouts/elixir-desktop-deployment", only: :dev},
 
       # Phoenix
       {:phoenix, "~> 1.7"},
