@@ -87,8 +87,9 @@ defmodule Todo.MixProject do
       #, ref: "8b6e441694289599e224256ea17ccf1ff1ffb414"
       {:desktop_deployment, github: "adiibanez/elixir-desktop-deployment", override: true, runtime: false},
       #{:desktop_deployment, path: "/Users/adrianibanez/Documents/projects/2024_sensor-platform/checkouts/elixir-desktop-deployment", only: :dev},
-      
-      {:plug_crypto, github: "diodechain/plug_crypto", override: true},
+
+      {:plug_crypto, github: "thehaigo/plug_crypto", override: true},
+      #{:plug_crypto, github: "diodechain/plug_crypto", override: true},
 
       # Phoenix
       {:phoenix, "~> 1.7"},
